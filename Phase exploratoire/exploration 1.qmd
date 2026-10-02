@@ -1,0 +1,1142 @@
+---
+title: "Exploration données"
+format: html
+---
+
+```{r, echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      warning = FALSE,
+                      message = FALSE,
+                      comment = FALSE)
+knitr::opts_chunk$set(fig.align = 'center')
+```
+
+# Importation Packages
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(kableExtra)
+library(ggplot2)
+library(plotly)
+library(readxl)
+library(sf)
+```
+
+# Importation données
+
+```{r}
+sante <-read.csv("~/projects/Odisse_Challenge26/data/raw/sante_generale_indicateurs_barometre_2024.csv",
+                 header = TRUE,
+                 sep = ",")
+diabete <- read.csv("~/projects/Odisse_Challenge26/data/raw/diabete-indicateurs-du-barometre-2024.csv",
+                 header = TRUE,
+                 sep = ",")
+view(diabete)
+view(sante)
+
+# sas <- read.csv(
+#  "couverture-sas-infra-annuelle.csv",
+#  header = TRUE,
+#  sep = ";"
+#)
+#view(sas)
+
+apl <- read_excel(
+  "~/projects/Odisse_Challenge26/data/raw/apl.xlsx",
+  sheet = "Data",
+  skip = 4
+)
+
+apl <- apl %>%
+  rename(
+    code_commune = codgeo,
+    commune = libgeo,
+    annee = an,
+    apl = apl_mg_hmep
+  ) %>%
+  mutate(
+    code_commune = as.character(code_commune),
+    commune = as.character(commune),
+    annee = as.integer(annee),
+    apl = as.numeric(apl)
+  ) %>%
+  filter(!is.na(apl))
+
+view(apl)
+```
+
+```{r}
+population_2023 <-read.csv("~/projects/Odisse_Challenge26/data/raw/donnees_communes.csv",
+                 header = TRUE,
+                 sep = ";")
+
+population_2023 <- population_2023 %>%
+  rename(
+    code_commune = COM,
+    commune = Commune,
+    population_totale = PTOT
+  ) %>%
+  mutate(
+    code_commune = as.character(code_commune),
+    commune = as.character(commune),
+    population_totale = as.numeric(population_totale)
+  )
+
+view(population_2023)
+```
+
+# Explorations
+
+```{r}
+# Dimensions
+dim(sante)
+dim(diabete)
+
+# Structure
+glimpse(sante)
+glimpse(diabete)
+
+# Noms des variables
+names(sante)
+names(diabete)
+```
+
+```{r}
+# Valeurs manquantes
+colSums(is.na(sante))
+colSums(is.na(diabete))
+colSums(is.na(apl))
+```
+
+```{r}
+lapply(sante, unique)
+```
+
+```{r}
+lapply(diabete, unique)
+```
+
+## Focus diabète
+
+### Distribution du diabète selon l'âge
+
+```{r}
+diabete_age <- diabete %>%
+  filter(
+    Indicateur == "Diabète déclaré",
+    Classe.d.âge != "Tous",
+    Sexe == "Tous",
+    Diplôme == "Tous",
+    PCS == "Tous",
+    Situation.financière.perçue == "Tous",
+    Nouvelles.régions == "Tous"
+  )
+
+ggplot(diabete_age, 
+       aes(x = Classe.d.âge, y = Estimation)) +
+  geom_col() +
+  geom_errorbar(
+    aes(ymin = ic_inf, ymax = ic_sup),
+    width = 0.2
+  ) +
+  labs(
+    title = "Prévalence déclarée du diabète selon l'âge",
+    x = "Classe d'âge",
+    y = "Estimation (%)"
+  ) +
+  theme_minimal()
+```
+### Distribution du diabète selon le sexe
+
+```{r}
+diabete_sexe <- diabete %>%
+  filter(
+    Indicateur == "Diabète déclaré",
+    Sexe != "Tous",
+    Classe.d.âge == "Tous",
+    Diplôme == "Tous",
+    PCS == "Tous",
+    Situation.financière.perçue == "Tous",
+    Nouvelles.régions == "Tous"
+  )
+
+diabete_sexe
+
+ggplot(diabete_sexe,
+       aes(x = Sexe, y = Estimation)) +
+  geom_col() +
+  geom_errorbar(
+    aes(ymin = ic_inf, ymax = ic_sup),
+    width = 0.2
+  ) +
+  labs(
+    title = "Diabète déclaré selon le sexe",
+    x = "Sexe",
+    y = "Estimation (%)"
+  ) +
+  theme_minimal()
+```
+
+### Distribution du diabète selon le diplôme
+
+```{r}
+diabete_diplome <- diabete %>%
+  filter(
+    Indicateur == "Diabète déclaré",
+    Diplôme != "Tous",
+    Classe.d.âge == "Tous",
+    Sexe == "Tous",
+    PCS == "Tous",
+    Situation.financière.perçue == "Tous",
+    Nouvelles.régions == "Tous"
+  )
+
+ggplot(diabete_diplome,
+       aes(x = Diplôme, y = Estimation)) +
+  geom_col() +
+  geom_errorbar(
+    aes(ymin = ic_inf, ymax = ic_sup),
+    width = 0.2
+  ) +
+  labs(
+    title = "Diabète déclaré selon le niveau de diplôme",
+    x = "Diplôme",
+    y = "Estimation (%)"
+  ) +
+  theme_minimal()
+```
+
+### Distribution du diabète selon la situation financière
+
+```{r}
+diabete_finances <- diabete %>%
+  filter(
+    Indicateur == "Diabète déclaré",
+    Situation.financière.perçue != "Tous",
+    Classe.d.âge == "Tous",
+    Sexe == "Tous",
+    Diplôme == "Tous",
+    PCS == "Tous",
+    Nouvelles.régions == "Tous"
+  )
+
+ggplot(diabete_finances,
+       aes(x = Situation.financière.perçue, y = Estimation)) +
+  geom_col() +
+  geom_errorbar(
+    aes(ymin = ic_inf, ymax = ic_sup),
+    width = 0.2
+  ) +
+  labs(
+    title = "Diabète déclaré selon la situation financière perçue",
+    x = "Situation financière perçue",
+    y = "Estimation (%)"
+  ) +
+  coord_flip() +
+  theme_minimal()
+```
+
+### Distribution du diabète selon la csp
+
+```{r}
+diabete_pcs <- diabete %>%
+  filter(
+    Indicateur == "Diabète déclaré",
+    PCS != "Tous",
+    Classe.d.âge == "Tous",
+    Sexe == "Tous",
+    Diplôme == "Tous",
+    Situation.financière.perçue == "Tous",
+    Nouvelles.régions == "Tous"
+  )
+
+ggplot(diabete_pcs,
+       aes(x = PCS, y = Estimation)) +
+  geom_col() +
+  geom_errorbar(
+    aes(ymin = ic_inf, ymax = ic_sup),
+    width = 0.2
+  ) +
+  labs(
+    title = "Diabète déclaré selon la catégorie socioprofessionnelle",
+    x = "PCS",
+    y = "Estimation (%)"
+  ) +
+  coord_flip() +
+  theme_minimal()
+```
+
+## Focus APL
+
+```{r}
+tail(apl)
+```
+
+
+```{r}
+summary(apl$apl)
+```
+
+### Communes avec les plus faibles niveaux d'accessibilité
+
+```{r}
+# Communes avec les plus faibles niveaux d'accessibilité
+apl %>%
+  arrange(apl) %>%
+  select(code_commune, commune, annee, apl) %>%
+  slice_head(n = 20)
+```
+
+### Communes avec les plus hauts niveaux d'accessibilité
+
+```{r}
+# Communes avec les plus hauts niveaux d'accessibilité
+apl %>%
+  arrange(desc(apl)) %>%
+  select(code_commune, commune, annee, apl) %>%
+  slice_head(n = 20)
+```
+
+### Distribution de l'APL
+
+```{r}
+# Distribution de l'APL
+ggplot(apl, aes(x = apl)) +
+  geom_histogram(bins = 40) +
+  labs(
+    title = "Distribution de l'accessibilité aux médecins généralistes",
+    subtitle = "Accessibilité potentielle localisée (APL)",
+    x = "APL — consultations ou visites par habitant et par an",
+    y = "Nombre de communes"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+ggplot(apl, aes(x = apl)) +
+  geom_histogram(bins = 50) +
+  geom_vline(
+    xintercept = median(apl$apl, na.rm = TRUE),
+    linetype = "dashed"
+  ) +
+  labs(
+    title = "Distribution de l'accessibilité aux médecins généralistes",
+    subtitle = "Accessibilité potentielle localisée (APL)",
+    x = "APL — consultations ou visites par habitant et par an",
+    y = "Nombre de communes"
+  ) +
+  theme_minimal()
+```
+```{r}
+quantile(
+  apl$apl,
+  probs = seq(0, 1, 0.05),
+  na.rm = TRUE
+)
+```
+
+### Identifier les communes avec une faible accessibilité
+
+```{r}
+apl <- apl %>%
+  mutate(
+    niveau_acces = case_when(
+      apl < 2 ~ "Faible",
+      apl < 3 ~ "Intermédiaire",
+      TRUE ~ "Élevé"
+    )
+  )
+```
+
+```{r}
+table(apl$niveau_acces)
+```
+
+```{r}
+prop.table(table(apl$niveau_acces)) * 100
+```
+
+```{r}
+apl %>%
+  filter(niveau_acces == "Faible") %>%
+  arrange(apl) %>%
+  select(code_commune, commune, annee, apl) %>%
+  slice_head(n = 30)
+```
+
+```{r}
+apl <- apl %>%
+  select(-niveau_acces)
+```
+
+```{r}
+apl %>%
+  filter(apl >= 5) %>%
+  summarise(
+    nombre_communes = n(),
+    apl_min = min(apl),
+    apl_moyenne = mean(apl),
+    apl_max = max(apl)
+  )
+```
+
+### Qui sont les territoires les moins accessibles ?
+
+```{r}
+apl %>%
+  arrange(apl) %>%
+  select(code_commune, commune, annee, apl) %>%
+  slice_head(n = 50)
+```
+
+# Jointure APL + Population
+
+```{r}
+apl_population <- apl %>%
+  left_join(
+    population_2023,
+    by = "code_commune"
+  )
+
+view(apl_population)
+```
+
+## Vérifications
+
+```{r}
+glimpse(apl_population)
+```
+
+```{r}
+summary(apl_population$population_totale)
+```
+
+```{r}
+sum(is.na(apl_population$population_totale))
+```
+
+```{r}
+apl_population %>%
+  summarise(
+    communes = n(),
+    population_totale = sum(population_totale, na.rm = TRUE),
+    apl_mediane = median(apl, na.rm = TRUE),
+    apl_moyenne = mean(apl, na.rm = TRUE)
+  )
+```
+
+### Communes avec les APL les plus élevées :
+
+```{r}
+apl_population |>
+  arrange(desc(apl)) |>
+  select(code_commune, commune.x, apl, population_totale) |>
+  head(20)
+```
+
+### Communes avec les APL les plus faibles :
+
+```{r}
+apl_population %>%
+  arrange(apl) %>%
+  select(code_commune, commune.x, commune.y, apl, population_totale) %>%
+  head(30)
+```
+
+# Analyse APL + POPULATION
+
+```{r}
+plot(
+  apl_population$population_totale,
+  apl_population$apl,
+  xlab = "Population totale",
+  ylab = "APL",
+  main = "APL selon la population des communes"
+)
+```
+
+```{r}
+# Création de classes de pop
+
+apl_population <- apl_population |>
+  mutate(
+    classe_population = case_when(
+      population_totale < 500 ~ "Moins de 500",
+      population_totale < 1000 ~ "500 à 999",
+      population_totale < 5000 ~ "1 000 à 4 999",
+      population_totale < 10000 ~ "5 000 à 9 999",
+      population_totale < 50000 ~ "10 000 à 49 999",
+      TRUE ~ "50 000 et plus"
+    )
+  )
+```
+
+```{r}
+apl_population |>
+  group_by(classe_population) |>
+  summarise(
+    nb_communes = n(),
+    apl_moyen = mean(apl),
+    apl_median = median(apl),
+    population_moyenne = mean(population_totale)
+  )
+```
+
+## Correction des 3 grandes villes NA (Lyon, Paris, Marseille)
+
+```{r}
+apl_population |>
+  filter(classe_population == "50 000 et plus") |>
+  summarise(
+    nb = n(),
+    nb_na_population = sum(is.na(population_totale)),
+    min_population = min(population_totale, na.rm = TRUE),
+    max_population = max(population_totale, na.rm = TRUE)
+  )
+```
+
+```{r}
+apl_population |>
+  filter(is.na(population_totale)) |>
+  select(code_commune, commune.x, apl, population_totale)
+```
+
+```{r}
+population_2023 |>
+  filter(is.na(population_totale)) |>
+  select(code_commune, commune, population_totale)
+```
+
+```{r}
+population_2023 |>
+  filter(
+    grepl("Paris", commune) |
+    grepl("Marseille", commune) |
+    grepl("Lyon", commune)
+  ) |>
+  select(code_commune, commune, population_totale)
+```
+
+## Construction des 3 populations
+
+```{r}
+grandes_villes <- population_2023 |>
+  filter(
+    code_commune %in% c(
+      sprintf("751%02d", 1:20),  # Paris
+      sprintf("693%02d", 81:89),  # Lyon
+      sprintf("132%02d", 1:16)    # Marseille
+    )
+  ) |>
+  mutate(
+    ville = case_when(
+      grepl("^751", code_commune) ~ "Paris",
+      grepl("^693", code_commune) ~ "Lyon",
+      grepl("^132", code_commune) ~ "Marseille"
+    )
+  ) |>
+  group_by(ville) |>
+  summarise(
+    population_totale = sum(population_totale, na.rm = TRUE)
+  )
+```
+
+```{r}
+grandes_villes
+```
+
+```{r}
+grandes_villes <- grandes_villes |>
+  mutate(
+    code_commune = case_when(
+      ville == "Marseille" ~ "13055",
+      ville == "Lyon" ~ "69123",
+      ville == "Paris" ~ "75056"
+    )
+  )
+```
+
+```{r}
+apl_population <- apl_population |>
+  left_join(
+    grandes_villes |>
+      select(code_commune, population_grande_ville = population_totale),
+    by = "code_commune"
+  ) |>
+  mutate(
+    population_totale = coalesce(
+      population_totale,
+      population_grande_ville
+    )
+  ) |>
+  select(-population_grande_ville)
+```
+
+```{r}
+sum(is.na(apl_population$population_totale))
+```
+
+```{r}
+apl_population |>
+  filter(code_commune %in% c("13055", "69123", "75056")) |>
+  select(code_commune, commune.x, apl, population_totale)
+```
+
+```{r}
+apl_population |>
+  group_by(classe_population) |>
+  summarise(
+    nb_communes = n(),
+    apl_moyen = mean(apl),
+    apl_median = median(apl),
+    population_moyenne = mean(population_totale)
+  )
+```
+
+```{r}
+apl_population <- apl_population |>
+  mutate(
+    classe_population = factor(
+      classe_population,
+      levels = c(
+        "Moins de 500",
+        "500 à 999",
+        "1 000 à 4 999",
+        "5 000 à 9 999",
+        "10 000 à 49 999",
+        "50 000 et plus"
+      )
+    )
+  )
+```
+
+```{r}
+library(ggplot2)
+
+apl_population |>
+  group_by(classe_population) |>
+  summarise(
+    apl_median = median(apl)
+  ) |>
+  ggplot(aes(x = classe_population, y = apl_median)) +
+  geom_col() +
+  labs(
+    title = "L'accessibilité aux médecins varie selon la taille des communes",
+    x = "Population de la commune",
+    y = "APL médian"
+  ) +
+  theme_minimal()
+```
+
+# Récupération du contour carte
+
+```{r}
+url <- "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson"
+
+download.file(
+  url,
+  destfile = "~/projects/Odisse_Challenge26/data/raw/communes.geojson",
+  mode = "wb"
+)
+```
+
+```{r}
+communes <- st_read("~/projects/Odisse_Challenge26/data/raw/communes.geojson")
+```
+
+```{r}
+glimpse(communes)
+```
+
+# Création carte
+
+```{r}
+carte_apl <- communes |>
+  left_join(
+    apl_population,
+    by = c("code" = "code_commune")
+  )
+```
+
+```{r}
+glimpse(carte_apl)
+```
+
+```{r}
+sum(!is.na(carte_apl$apl))
+```
+
+```{r}
+sum(is.na(carte_apl$apl))
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(carte_apl) +
+  geom_sf(aes(fill = apl), color = NA) +
+  scale_fill_viridis_c(
+    option = "C",
+    na.value = "grey90"
+  ) +
+  labs(
+    title = "Accessibilité potentielle localisée aux médecins généralistes",
+    subtitle = "APL en 2023",
+    fill = "APL"
+  ) +
+  theme_void()
+```
+
+```{r}
+summary(carte_apl)
+```
+
+```{r}
+quantile(
+  carte_apl$apl,
+  probs = c(0, 0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 1),
+  na.rm = TRUE
+)
+```
+
+```{r}
+quantile(
+  carte_apl$apl,
+  probs = seq(0, 1, length.out = 7),
+  na.rm = TRUE
+)
+```
+
+```{r}
+sf_use_s2(FALSE)
+carte_apl |>
+  mutate(
+    classe_apl = cut(
+      apl,
+      breaks = c(-Inf, 1.5, 2, 2.5, 3, 4, 6, Inf),
+      labels = c(
+        "≤ 1,5",
+        "1,5 – 2",
+        "2 – 2,5",
+        "2,5 – 3",
+        "3 – 4",
+        "4 – 6",
+        "> 6"
+      )
+    )
+  ) |>
+  count(classe_apl)
+```
+
+```{r}
+sum(!st_is_valid(carte_apl))
+```
+
+```{r}
+which(!st_is_valid(carte_apl))[1:10]
+```
+
+```{r}
+carte_apl[6601, ] |>
+  st_drop_geometry() |>
+  select(code, nom, commune.x, apl, population_totale)
+```
+
+```{r}
+carte_apl <- carte_apl |>
+  st_make_valid()
+```
+
+```{r}
+carte_apl |>
+  mutate(
+    classe_apl = cut(
+      apl,
+      breaks = c(-Inf, 1.5, 2, 2.5, 3, 4, 6, Inf),
+      labels = c(
+        "≤ 1,5",
+        "1,5 – 2",
+        "2 – 2,5",
+        "2,5 – 3",
+        "3 – 4",
+        "4 – 6",
+        "> 6"
+      )
+    )
+  ) |>
+  count(classe_apl)
+```
+
+```{r}
+carte_apl <- carte_apl |>
+  mutate(
+    classe_apl = cut(
+      apl,
+      breaks = c(-Inf, 1.5, 2, 2.5, 3, 4, 6, Inf),
+      labels = c(
+        "≤ 1,5",
+        "1,5 – 2",
+        "2 – 2,5",
+        "2,5 – 3",
+        "3 – 4",
+        "4 – 6",
+        "> 6"
+      )
+    )
+  )
+
+ggplot(carte_apl) +
+  geom_sf(aes(fill = classe_apl), color = NA) +
+  scale_fill_viridis_d(
+    option = "C",
+    na.value = "grey90",
+    drop = FALSE
+  ) +
+  labs(
+    title = "Accessibilité potentielle localisée aux médecins généralistes",
+    subtitle = "APL en 2023 par commune",
+    fill = "APL"
+  ) +
+  theme_void()
+```
+
+# Création tableau régional
+
+```{r}
+apl_region <- apl_population |>
+  group_by(REG, Région) |>
+  summarise(
+    nb_communes = n(),
+    population_region = sum(population_totale, na.rm = TRUE),
+    apl_moyenne = mean(apl, na.rm = TRUE),
+    apl_mediane = median(apl, na.rm = TRUE),
+    apl_ponderee = weighted.mean(
+      apl,
+      w = population_totale,
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  )
+```
+
+```{r}
+apl_population |>
+  filter(is.na(Région)) |>
+  select(
+    code_commune,
+    commune.x,
+    REG,
+    Région,
+    apl,
+    population_totale
+  )
+```
+
+```{r}
+apl_population <- apl_population |>
+  mutate(
+    Région = case_when(
+      code_commune == "75056" ~ "Île-de-France",
+      code_commune == "69123" ~ "Auvergne-Rhône-Alpes",
+      code_commune == "13055" ~ "Provence-Alpes-Côte d'Azur",
+      TRUE ~ Région
+    )
+  )
+```
+
+```{r}
+apl_population |>
+  filter(code_commune %in% c("75056", "69123", "13055")) |>
+  select(code_commune, commune.x, REG, Région, apl, population_totale)
+```
+
+```{r}
+apl_region <- apl_population |>
+  group_by(Région) |>
+  summarise(
+    nb_communes = n(),
+    population_region = sum(population_totale, na.rm = TRUE),
+    apl_moyenne = mean(apl, na.rm = TRUE),
+    apl_mediane = median(apl, na.rm = TRUE),
+    apl_ponderee = weighted.mean(
+      apl,
+      w = population_totale,
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  )
+
+apl_region
+```
+La moyenne simple répond à :
+« Quelle est l'APL de la commune moyenne de cette région ? »
+**Pondérée avec la population c'est mieux**
+La moyenne pondérée répond plutôt à :
+« Quelle est l'APL moyenne en donnant davantage de poids aux communes où vivent davantage d'habitants ? »
+
+```{r}
+sante_region <- sante |>
+  filter(
+    Sexe == "Tous",
+    Classe.d.âge == "Tous",
+    Diplôme == "Tous",
+    PCS == "Tous",
+    Situation.financière.perçue == "Tous",
+    `Nouvelles.régions` != "Tous"
+  ) |>
+  select(
+    Région = `Nouvelles.régions`,
+    Indicateur,
+    Estimation,
+    ic_inf,
+    ic_sup
+  )
+```
+
+## Normaliser les noms 
+
+```{r}
+# santé et région
+sante_region <- sante_region |>
+  mutate(
+    Région = case_when(
+      Région == "Ile-de-France" ~ "Île-de-France",
+      Région == "Réunion" ~ "La Réunion",
+      TRUE ~ Région
+    )
+  )
+```
+
+## Créer analyse région 
+
+```{r}
+analyse_region <- apl_region |>
+  select(
+    Région,
+    population_region,
+    apl_ponderee,
+    apl_moyenne,
+    apl_mediane
+  ) |>
+  left_join(
+    sante_region |>
+      mutate(
+        variable = case_when(
+          Indicateur == "Santé perçue bonne ou très bonne" ~ "sante_percue",
+          Indicateur == "Limitation d'activité" ~ "limitation_activite"
+        )
+      ) |>
+      select(Région, variable, Estimation) |>
+      pivot_wider(
+        names_from = variable,
+        values_from = Estimation
+      ),
+    by = "Région"
+  )
+```
+
+```{r}
+analyse_region |>
+  mutate(
+    ecart_pond_moy = apl_ponderee - apl_moyenne
+  ) |>
+  select(
+    Région,
+    apl_moyenne,
+    apl_ponderee,
+    ecart_pond_moy
+  ) |>
+  arrange(desc(ecart_pond_moy))
+```
+
+APL moyenne → « Quelle est l'accessibilité moyenne des communes de la région ? »
+APL pondérée → « Quelle est l'accessibilité moyenne à laquelle est exposée la population de la région ? »
+
+# On veut savoir s'il existe une association visible entre APL régionale et santé perçue.
+
+```{r}
+ggplot(analyse_region, aes(
+  x = apl_ponderee,
+  y = sante_percue
+)) +
+  geom_point(size = 3) +
+  geom_text(
+    aes(label = Région),
+    vjust = -0.7,
+    size = 3
+  ) +
+  labs(
+    title = "Accessibilité aux médecins et santé perçue",
+    subtitle = "Comparaison entre les régions",
+    x = "APL pondérée par la population",
+    y = "Santé perçue bonne ou très bonne (%)"
+  ) +
+  theme_minimal()
+```
+
+un niveau d'accessibilité comparable ne s'accompagne pas nécessairement du même niveau de santé perçue.
+La Réunion est un cas particulièrement intéressant
+Elle combine :
+APL très élevée : 5,46
+Santé perçue relativement faible : 56,2 %
+
+La Guyane constitue un autre profil
+Avec :
+APL : 1,91
+Santé perçue : 61,8 %
+elle est effectivement isolée sur l'axe de l'APL, mais son niveau de santé perçue n'est pas aussi bas que celui des Antilles ou de La Réunion.
+
+Tes données d'APL sont de 2023, tandis que les indicateurs de santé sont de 2024. Il faudra donc présenter ça comme une mise en regard exploratoire de données régionales sur deux années, et non comme une relation causale ou temporelle.
+
+```{r}
+ggplot(analyse_region, aes(
+  x = apl_ponderee,
+  y = limitation_activite
+)) +
+  geom_point(size = 3) +
+  geom_text(
+    aes(label = Région),
+    vjust = -0.7,
+    size = 3
+  ) +
+  labs(
+    title = "Accessibilité aux médecins et limitations d'activité",
+    subtitle = "Comparaison entre les régions",
+    x = "APL pondérée par la population",
+    y = "Population déclarant une limitation d'activité (%)"
+  ) +
+  theme_minimal()
+```
+il n'y a pas de relation visuelle évidente entre l'APL et les limitations d'activité.
+
+Quelques profils ressortent :
+Corse, Martinique et Guadeloupe sont parmi les régions avec les niveaux les plus élevés de limitations d'activité, autour de 30 %.
+Île-de-France est à l'extrémité basse, avec environ 22 %.
+Bretagne et Pays de la Loire sont également relativement bas, autour de 24 %.
+Nouvelle-Aquitaine, Occitanie et PACA sont plutôt autour de 28 %.
+Guyane et La Réunion ont des niveaux proches, autour de 26–27 %, mais avec des niveaux d'APL très différents : environ 1,9 pour la Guyane contre 5,5 pour La Réunion.
+
+Et ce dernier exemple est particulièrement parlant : deux territoires peuvent avoir une proportion assez similaire de personnes déclarant une limitation d'activité tout en ayant des niveaux d'accessibilité médicale très différents.
+
+**l'APL ne suffit pas à expliquer les disparités régionales de santé.**
+
+**L'accessibilité aux médecins généralistes constitue une dimension des inégalités territoriales de santé, mais elle ne semble pas suffire à elle seule à rendre compte des différences observées entre les régions.**
+
+# On cherche à savoir si le diabète apporte une troisième dimension régionale à notre analyse.
+
+Quel est le taux de diabète déclaré dans chaque région, sans sélectionner un groupe particulier de population ?
+```{r}
+#On va isoler le diabète déclaré pour l'ensemble de la population
+diabete_region <- diabete |>
+  filter(
+    Indicateur == "Diabète déclaré",
+    Ancienneté.du.diabète == "Tous",
+    Sexe == "Tous",
+    Classe.d.âge == "Tous",
+    PCS == "Tous",
+    Diplôme == "Tous",
+    Situation.professionnelle == "Tous",
+    Situation.financière.perçue == "Tous",
+    `Nouvelles.régions` != "Tous"
+  ) |>
+  select(
+    Région = `Nouvelles.régions`,
+    Estimation,
+    ic_inf,
+    ic_sup
+  )
+```
+
+La Réunion possède l'APL régionale la plus élevée (5,46) mais présente simultanément :
+seulement 56,2 % de santé perçue bonne ou très bonne ;
+27,0 % de limitation d'activité ;
+12,6 % de diabète déclaré.
+Cela montre bien pourquoi il serait réducteur de faire de l'APL le seul facteur explicatif.
+
+```{r}
+#Harmoniser les noms
+diabete_region <- diabete_region |>
+  mutate(
+    Région = case_when(
+      Région == "Ile-de-France" ~ "Île-de-France",
+      Région == "Réunion" ~ "La Réunion",
+      TRUE ~ Région
+    )
+  )
+setdiff(analyse_region$Région, diabete_region$Région)
+```
+
+```{r}
+# Ajout de diabete dans analyse_région
+analyse_region <- analyse_region |>
+  left_join(
+    diabete_region |>
+      select(
+        Région,
+        diabete = Estimation
+      ),
+    by = "Région"
+  )
+```
+
+Bretagne / Pays de la Loire / Île-de-France : santé perçue autour de 71 %, limitations relativement faibles et diabète autour de 5–7 %.
+Guadeloupe / Martinique : APL autour de 3,5, mais santé perçue autour de 52–53 %, limitations autour de 30 % et diabète 12–13,5 %.
+La Réunion : APL 5,46, donc très élevée, mais santé perçue 56,2 %, limitations 27 % et diabète 12,6 %.
+Guyane : APL très faible (1,91), mais profil de santé différent : santé perçue 61,8 %, limitations 26,4 %, diabète 6,9 %.
+
+**Les différences régionales de santé ne semblent pas se résumer au seul niveau d'accessibilité aux médecins généralistes.**
+
+# Tester les relations : corrélations
+
+```{r}
+cor(
+  analyse_region$apl_ponderee,
+  analyse_region$sante_percue
+)
+```
+Pour la santé perçue, la corrélation est quasiment nulle.
+Donc, dans ces données, les régions avec une APL plus élevée n'ont pas systématiquement une meilleure perception de leur santé.
+
+```{r}
+cor(
+  analyse_region$apl_ponderee,
+  analyse_region$limitation_activite
+)
+```
+
+Pour les limitations d'activité, on obtient une association linéaire faible.
+
+```{r}
+cor(
+  analyse_region$apl_ponderee,
+  analyse_region$diabete
+)
+```
+
+pour le diabète :
+C'est la relation la plus élevée des trois, mais elle reste modérée/faible et surtout ne permet absolument pas de conclure que l'APL augmente le diabète.
+
+**APL élevée ≠ systématiquement meilleure santé.**
+La Réunion est probablement l'exemple le plus parlant : elle possède l'APL la plus élevée (5,46) mais une santé perçue basse (56,2 %) et un diabète déclaré élevé (12,6 %).
+À l'inverse, l'Île-de-France a une APL de 3,26, mais une santé perçue de 71 % et un diabète de 6 %.
+
+**Mais attention à un point méthodologique important**
+Nous n'avons que **17 observations**.
+Donc je ne présenterais surtout pas ces corrélations comme des résultats statistiques définitifs. Elles sont utiles pour explorer les données et guider la dataviz, mais l'échantillon régional est petit et les territoires sont très différents les uns des autres.
+Et surtout, il y a une **différence de temporalité** :
+APL → 2023
+santé/diabète → 2024
+**Donc notre analyse est une mise en regard exploratoire de données régionales, pas une étude causale.**
+
+on peut poser :
+« Dans quelle mesure les disparités territoriales d'accès aux médecins généralistes se retrouvent-elles dans les disparités régionales de santé ? »
+Et notre résultat exploratoire serait :
+Les données montrent des profils territoriaux contrastés et aucune relation linéaire forte entre l'APL et les indicateurs de santé étudiés. Certains territoires présentent notamment des niveaux d'APL élevés tout en affichant des indicateurs de santé moins favorables.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+**Comment les inégalités sociales de santé varient-elles selon les territoires, dans des contextes d'accessibilité aux soins différents ?**
+
+

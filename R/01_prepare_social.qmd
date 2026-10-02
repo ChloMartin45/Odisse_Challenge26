@@ -1,0 +1,221 @@
+---
+title: "Préparation des indicateurs sociaux et de santé"
+format: html
+---
+
+# Packages
+
+```{r}
+library(tidyverse)
+```
+
+# Importation des données
+
+## Santé générale
+
+```{r}
+sante <- read_csv(
+  "~/projects/Odisse_Challenge26/data/raw/sante_generale_indicateurs_barometre_2024.csv",
+  show_col_types = FALSE
+)
+```
+
+## Diabète déclaré
+
+```{r}
+diabete <- read_csv(
+  "~/projects/Odisse_Challenge26/data/raw/diabete-indicateurs-du-barometre-2024.csv",
+  show_col_types = FALSE
+)
+```
+
+# Préparation de la base Santé générale
+
+```{r}
+sante <- sante |>
+  mutate(
+    Estimation = as.numeric(Estimation),
+    ic_inf = as.numeric(ic_inf),
+    ic_sup = as.numeric(ic_sup),
+    Effectif.Brut = as.numeric(`Effectif Brut`),
+    Année = as.integer(Année)
+  )
+```
+
+# Préparation de la base Diabète
+
+```{r}
+diabete <- diabete |>
+  mutate(
+    Estimation = as.numeric(Estimation),
+    ic_inf = as.numeric(ic_inf),
+    ic_sup = as.numeric(ic_sup),
+    Effectif.Brut = as.numeric(`Effectif Brut`),
+    Année = as.integer(Année)
+  )
+```
+
+# Contrôle des données
+
+## Santé générale
+
+```{r}
+sante |>
+  summarise(
+    nb_observations = n(),
+    nb_indicateurs = n_distinct(Indicateur),
+    nb_regions = n_distinct(`Nouvelles régions`),
+    nb_annees = n_distinct(Année),
+    nb_estimation_manquante = sum(is.na(Estimation))
+  )
+```
+
+## Diabète
+
+```{r}
+diabete |>
+  summarise(
+    nb_observations = n(),
+    nb_indicateurs = n_distinct(Indicateur),
+    nb_regions = n_distinct(`Nouvelles régions`),
+    nb_annees = n_distinct(Année),
+    nb_estimation_manquante = sum(is.na(Estimation))
+  )
+```
+
+# Identification des indicateurs
+
+## Indicateurs de santé générale
+
+```{r}
+sante |>
+  distinct(Indicateur) |>
+  arrange(Indicateur)
+```
+
+```{r}
+sante_indicateurs <- sante |> 
+  filter(
+    Indicateur %in% c(
+      "Limitation d'activité",
+      "Santé perçue bonne ou très bonne"
+      )
+    )
+```
+
+## Indicateur de diabète
+
+```{r}
+diabete |>
+  distinct(Indicateur) |>
+  arrange(Indicateur)
+```
+
+```{r}
+diabete_declare <- diabete |> 
+  filter(
+    Indicateur == "Diabète déclaré"
+    )
+```
+
+# Préparation des indicateurs régionaux
+
+Pour les analyses territoriales, on conserve uniquement les observations correspondant à l'ensemble des régions disponibles dans les données (Hors Mayotte) et à la population générale, sans ventilation par sexe, âge, diplôme, PCS ou situation financière.
+
+```{r}
+sante_regions <- sante_indicateurs |>
+  filter(
+    Sexe == "Tous",
+    `Classe d'âge` == "Tous",
+    Diplôme == "Tous",
+    PCS == "Tous",
+    `Situation financière perçue` == "Tous",
+    `Nouvelles régions` != "Tous"
+  )
+```
+
+```{r}
+diabete_regions <- diabete_declare |>
+  filter(
+    Sexe == "Tous",
+    `Classe d'âge` == "Tous",
+    Diplôme == "Tous",
+    PCS == "Tous",
+    `Situation financière perçue` == "Tous",
+    `Nouvelles régions` != "Tous"
+  )
+```
+
+# Contrôle
+
+```{r}
+sante_regions |>
+  count(Indicateur, `Nouvelles régions`)
+
+diabete_regions |>
+  count(Indicateur, `Nouvelles régions`)
+```
+```{r}
+# Contrôle de la couverture régionale
+sante_regions |>
+  distinct(`Nouvelles régions`) |>
+  arrange(`Nouvelles régions`)
+
+diabete_regions |>
+  distinct(`Nouvelles régions`) |>
+  arrange(`Nouvelles régions`)
+```
+
+```{r}
+# Contrôle final des bases régionales
+
+sante_regions |>
+  summarise(
+    nb_observations = n(),
+    nb_regions = n_distinct(`Nouvelles régions`),
+    nb_indicateurs = n_distinct(Indicateur)
+  )
+
+diabete_regions |>
+  summarise(
+    nb_observations = n(),
+    nb_regions = n_distinct(`Nouvelles régions`),
+    nb_indicateurs = n_distinct(Indicateur)
+  )
+```
+
+# Export
+
+```{r}
+# Export des bases préparées
+
+write_csv(
+  sante,
+  "~/projects/Odisse_Challenge26/data/processed/sante_preparee.csv"
+)
+
+write_csv(
+  diabete,
+  "~/projects/Odisse_Challenge26/data/processed/diabete_prepare.csv"
+)
+
+write_csv(
+  sante_indicateurs,
+  "~/projects/Odisse_Challenge26/data/processed/sante_indicateurs.csv"
+)
+
+write_csv(
+  diabete_declare,
+  "~/projects/Odisse_Challenge26/data/processed/diabete_declare.csv"
+)
+
+write_csv(
+  sante_regions,
+  "~/projects/Odisse_Challenge26/data/processed/sante_regions.csv"
+)
+
+write_csv(
+  diabete_regions,
+  "~/projects/Odisse_Challenge26/data/processed/diabete_regions.csv"
+)
+```

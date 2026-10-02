@@ -1,0 +1,120 @@
+---
+title: "Agrégation des données territoriales à l'échelle régionale"
+format: html
+---
+
+# Packages
+
+```{r}
+library(tidyverse)
+```
+
+# Importation des données
+
+```{r}
+territoires <- read_csv(
+  "~/projects/Odisse_Challenge26/data/processed/territoires_communes.csv",
+  show_col_types = FALSE
+)
+```
+
+# Préparation des variables
+
+```{r}
+territoires <- territoires |>
+  mutate(
+    population_totale = as.numeric(population_totale),
+    apl = as.numeric(apl),
+    EDI = as.numeric(EDI),
+    fdep = as.numeric(fdep)
+  )
+```
+
+# Agrégation régionale
+
+```{r}
+territoires_regions <- territoires |>
+  group_by(
+    code_region,
+    region
+  ) |>
+  summarise(
+
+    # Nombre de communes
+    nb_communes = n_distinct(code_commune),
+
+    # Population disponible dans la base (113 communes manquantes)
+    population = sum(
+      population_totale,
+      na.rm = TRUE
+    ),
+
+    # FDep20 pondéré par la population
+    fdep_pondere = sum(
+      fdep * population_totale,
+      na.rm = TRUE
+    ) /
+      sum(
+        population_totale[!is.na(fdep)],
+        na.rm = TRUE
+      ),
+
+    # F-EDI pondéré par la population
+    fedi_pondere = sum(
+      EDI * population_totale,
+      na.rm = TRUE
+    ) /
+      sum(
+        population_totale[!is.na(EDI)],
+        na.rm = TRUE
+      ),
+
+    # APL pondéré par la population
+    apl_pondere = sum(
+      apl * population_totale,
+      na.rm = TRUE
+    ) /
+      sum(
+        population_totale[!is.na(apl)],
+        na.rm = TRUE
+      ),
+
+    # Contrôles
+    nb_apl_manquante = sum(is.na(apl)),
+
+    nb_population_manquante =
+      sum(is.na(population_totale)),
+
+    nb_fdep_manquant =
+      sum(is.na(fdep)),
+
+    nb_fedi_manquant =
+      sum(is.na(EDI)),
+
+    .groups = "drop"
+  )
+```
+
+# Contrôle
+
+```{r}
+print(territoires_regions)
+
+territoires_regions |>
+  summarise(
+    nb_regions = n(),
+    population_totale = sum(population),
+    apl_manquante = sum(is.na(apl_pondere)),
+    fdep_manquant = sum(is.na(fdep_pondere)),
+    fedi_manquant = sum(is.na(fedi_pondere))
+  )
+```
+
+# Export
+
+```{r}
+write_csv(
+  territoires_regions,
+  "~/projects/Odisse_Challenge26/data/processed/territoires_regions.csv"
+)
+```

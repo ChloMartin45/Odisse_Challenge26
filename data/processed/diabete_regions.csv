@@ -1,0 +1,18 @@
+Indicateur,Ancienneté du diabète,Sexe,Classe d'âge,Nouvelles régions,PCS,Diplôme,Situation professionnelle,Situation financière perçue,Estimation,IC 95%,Effectif Brut,Différence avec les autres régions,Année,ic_inf,ic_sup,Chapitre,Effectif.Brut
+Diabète déclaré,Tous,Tous,Tous,Bourgogne-Franche-Comté,Tous,Tous,Tous,Tous,7.7,"[ 6,1 - 9,6 ]",1554,Pas de différence significative,2024,6.1,9.6,Diabète,1554
+Diabète déclaré,Tous,Tous,Tous,Bretagne,Tous,Tous,Tous,Tous,5,"[ 4,0 - 6,3 ]",1856,Inférieure,2024,4,6.3,Diabète,1856
+Diabète déclaré,Tous,Tous,Tous,Centre-Val de Loire,Tous,Tous,Tous,Tous,8.2,"[ 6,6 - 10,1 ]",1482,Pas de différence significative,2024,6.6,10.1,Diabète,1482
+Diabète déclaré,Tous,Tous,Tous,Grand Est,Tous,Tous,Tous,Tous,7.8,"[ 6,6 - 9,1 ]",2401,Pas de différence significative,2024,6.6,9.1,Diabète,2401
+Diabète déclaré,Tous,Tous,Tous,Hauts-de-France,Tous,Tous,Tous,Tous,8.9,"[ 7,6 - 10,4 ]",2538,Supérieure,2024,7.6,10.4,Diabète,2538
+Diabète déclaré,Tous,Tous,Tous,Ile-de-France,Tous,Tous,Tous,Tous,6,"[ 5,1 - 7,1 ]",3884,Pas de différence significative,2024,5.1,7.1,Diabète,3884
+Diabète déclaré,Tous,Tous,Tous,Martinique,Tous,Tous,Tous,Tous,12,"[ 9,5 - 14,8 ]",1364,Supérieure,2024,9.5,14.8,Diabète,1364
+Diabète déclaré,Tous,Tous,Tous,Nouvelle-Aquitaine,Tous,Tous,Tous,Tous,6.7,"[ 5,6 - 8,0 ]",2577,Pas de différence significative,2024,5.6,8,Diabète,2577
+Diabète déclaré,Tous,Tous,Tous,Occitanie,Tous,Tous,Tous,Tous,7.2,"[ 6,0 - 8,6 ]",2575,Pas de différence significative,2024,6,8.6,Diabète,2575
+Diabète déclaré,Tous,Tous,Tous,Provence-Alpes-Côte d'Azur,Tous,Tous,Tous,Tous,7,"[ 5,8 - 8,4 ]",2149,Pas de différence significative,2024,5.8,8.4,Diabète,2149
+Diabète déclaré,Tous,Tous,Tous,Réunion,Tous,Tous,Tous,Tous,12.6,"[ 10,3 - 15,3 ]",1568,Supérieure,2024,10.3,15.3,Diabète,1568
+Diabète déclaré,Tous,Tous,Tous,Corse,Tous,Tous,Tous,Tous,8.4,"[ 6,1 - 11,2 ]",1460,Pas de différence significative,2024,6.1,11.2,Diabète,1460
+Diabète déclaré,Tous,Tous,Tous,Guyane,Tous,Tous,Tous,Tous,6.9,"[ 4,9 - 9,4 ]",1298,Pas de différence significative,2024,4.9,9.4,Diabète,1298
+Diabète déclaré,Tous,Tous,Tous,Normandie,Tous,Tous,Tous,Tous,7.8,"[ 6,4 - 9,4 ]",1672,Pas de différence significative,2024,6.4,9.4,Diabète,1672
+Diabète déclaré,Tous,Tous,Tous,Auvergne-Rhône-Alpes,Tous,Tous,Tous,Tous,6.6,"[ 5,5 - 7,7 ]",3044,Pas de différence significative,2024,5.5,7.7,Diabète,3044
+Diabète déclaré,Tous,Tous,Tous,Guadeloupe,Tous,Tous,Tous,Tous,13.5,"[ 10,9 - 16,5 ]",1491,Supérieure,2024,10.9,16.5,Diabète,1491
+Diabète déclaré,Tous,Tous,Tous,Pays de la Loire,Tous,Tous,Tous,Tous,6.9,"[ 5,6 - 8,3 ]",2027,Pas de différence significative,2024,5.6,8.3,Diabète,2027

@@ -1,0 +1,1240 @@
+---
+title: "exploration 3"
+format: html
+---
+1. La défavorisation sociale : probablement la prochaine donnée à récupérer
+
+Le FDep/F-EDI permet de caractériser la défavorisation d'un territoire à partir de plusieurs dimensions socio-économiques. Santé publique France le propose explicitement comme donnée pertinente pour ce défi.
+
+--> Les territoires les plus défavorisés sont-ils également ceux où certains indicateurs de santé sont les plus dégradés ?
+
+2. La fragilité territoriale
+
+Santé publique France met à disposition des prévalences de fragilité par département et région.
+
+--> Les territoires présentant davantage de fragilité cumulent-ils également d'autres indicateurs défavorables de santé ?
+
+Par exemple, pour chaque territoire :
+- défavorisation sociale ;
+- fragilité ;
+- accès aux soins (APL) ;
+- diabète ;
+- santé perçue ;
+- limitation d'activité.
+
+Ça permettrait éventuellement de repérer des territoires qui cumulent plusieurs dimensions défavorables.
+Attention cependant : il faudra vérifier les niveaux géographiques et les années avant de fusionner les données.
+
+3. Les déterminants de santé territorialisés
+
+Le challenge indique que le Baromètre contient notamment des indicateurs d'activité physique, disponibles au niveau national et régional.
+erritoire → comportements / conditions de vie → état de santé
+Par exemple :
+activité physique ↔ diabète à l'échelle régionale.
+Ce ne serait toujours pas causal, mais ça raconterait davantage quelque chose sur les déterminants.
+
+
+| Territoire | Défavo. | APL | Fragilité | Diabète | Santé perçue |
+| ---------- | ------: | --: | --------: | ------: | -----------: |
+| Région A   |     ... | ... |       ... |     ... |          ... |
+| Région B   |     ... | ... |       ... |     ... |          ... |
+| ...        |     ... | ... |       ... |     ... |          ... |
+
+--> rechercher des profils territoriaux.
+
+une classification :
+- territoires à forte défavorisation ;
+- territoires à faible accès aux soins ;
+- territoires cumulant défavorisation + fragilité ;
+- territoires où les indicateurs de santé sont particulièrement élevés/faibles malgré un accès aux soins relativement favorable.
+
+--> **Les inégalités territoriales de santé résultent-elles d'une seule dimension ou d'un cumul de vulnérabilités territoriales ?**
+
+```{r, echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      warning = FALSE,
+                      message = FALSE,
+                      comment = FALSE)
+knitr::opts_chunk$set(fig.align = 'center')
+```
+
+# Importation Packages
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(factoextra)
+library(FactoMineR)
+library(explor)
+library(kableExtra)
+library(ggplot2)
+library(plotly)
+library(readxl)
+library(sf)
+```
+
+# Importation données
+
+```{r}
+fdep <-read.csv("~/projects/Odisse_Challenge26/data/raw/indice-de-defavorisation-sociale-fdep-par-commune.csv",
+                 header = TRUE,
+                 sep = ",")
+fedi <- read.csv("~/projects/Odisse_Challenge26/data/raw/french-european-deprivation-index-f-edi-2021-par-commune.csv",
+                 header = TRUE,
+                 sep = ",")
+view(fdep)
+view(fedi)
+```
+
+L'idée : 
+**Question 1 — Défavorisation ↔ accès aux soins**
+Les communes les plus défavorisées ont-elles une accessibilité différente aux médecins généralistes ?
+On pourrait faire :
+FDep quintile → APL
+      et
+F-EDI quintile → APL
+Ça nous permettrait déjà de voir si l'APL raconte réellement quelque chose lorsqu'on la replace dans le contexte socio-économique.
+
+**Question 2 — FDep ↔ F-EDI**
+Ça peut sembler secondaire, mais je pense qu'il faut le faire.
+On pourra vérifier :
+Est-ce que les deux indices identifient les mêmes territoires comme défavorisés ?
+Avec par exemple un nuage de points :
+FDep20 → F-EDI
+et calculer leur corrélation.
+Si elle est forte, cela nous donne deux mesures cohérentes d'un même phénomène.
+Si elle est moins forte, c'est encore plus intéressant, parce que les deux indices capturent des dimensions différentes de la défavorisation.
+
+**Question 3 — Le fameux cumul des vulnérabilités**
+Et là, on commence à avoir le vrai sujet.
+Pour chaque commune, on pourrait regarder :
+défavorisation élevée ;
+APL faible ;
+éventuellement population ;
+puis, si on trouve des indicateurs de santé à cette échelle, état de santé.
+On pourrait alors identifier des profils du type :
+forte défavorisation + faible accessibilité aux médecins
+versus
+forte défavorisation + accessibilité relativement élevée
+Et cette comparaison est beaucoup plus informative que :
+« telle région a une APL de X ».
+
+```{r}
+summary(fdep)
+summary(fedi)
+```
+
+```{r}
+colSums(is.na(fdep))
+colSums(is.na(fedi))
+```
+
+```{r}
+# communes dupliquées ?
+fdep |>
+  count(Code.commune) |>
+  filter(n > 1)
+
+fedi |>
+  count(Commune.Code) |>
+  filter(n > 1)
+```
+
+```{r}
+# distributions
+fdep |>
+  count(`Quintile.avec.pondération.sur.le.nombre.d.habitants.de.la.commune`)
+
+fedi |>
+  count(Quintile.natonal)
+#Pour le F-EDI, les quintiles sont construits pour avoir 20 % des communes (=6969) dans chaque groupe, pas 20 % de la population.
+```
+
+# relations code-commune
+
+```{r}
+fdep |>
+  select(Code.commune) |>
+  inner_join(
+    fedi |> select(Commune.Code),
+    by = c("Code.commune" = "Commune.Code")
+  ) |>
+  nrow()
+```
+
+```{r}
+fdep_fedi <- fdep |>
+  inner_join(
+    fedi,
+    by = c("Code.commune" = "Commune.Code")
+  )
+```
+
+```{r}
+nrow(fdep_fedi)
+```
+
+# Corrélation
+
+```{r}
+cor(
+  fdep_fedi$`Indice.de.défavorisation.en.quintiles`,
+  fdep_fedi$EDI,
+  use = "complete.obs"
+)
+```
+relation positive assez nette, mais loin d'être parfaite.
+
+Autrement dit : Les communes identifiées comme plus défavorisées par le FDep20 ont globalement tendance à l'être également selon le F-EDI, mais les deux indices ne donnent pas exactement le même diagnostic.
+
+```{r}
+ggplot(
+  fdep_fedi,
+  aes(
+    x = `Indice.de.défavorisation.en.quintiles`,
+    y = EDI
+  )
+) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Relation entre deux indices de défavorisation",
+    x = "FDep20",
+    y = "F-EDI 2021"
+  ) +
+  theme_minimal()
+```
+Les deux indices :
+- FDep20 repose sur 4 dimensions : revenu, diplôme, emploi et chômage.
+- F-EDI repose sur 10 variables davantage liées aux conditions de vie et à la structure sociale : voiture, surpeuplement, monoparentalité, statut d'occupation, chômage, nationalité étrangère, profession, diplôme, etc.
+
+Donc ils ont un socle commun, notamment autour de l'emploi, du revenu/diplôme et de la position sociale, mais le F-EDI intègre des dimensions supplémentaires.
+
+La forme du graphique traduit donc probablement quelque chose comme :
+« Les deux indices captent une dimension commune de défavorisation, mais avec des nuances territoriales. »
+Et ça, c'est beaucoup plus intéressant qu'un simple « FDep20 mesure la pauvreté ».
+
+# Création d'un indicateur d'écart :
+
+```{r}
+fdep_fedi <- fdep_fedi |>
+  mutate(
+    z_fdep = as.numeric(scale(`Indice.de.défavorisation.en.quintiles`)),
+    z_fedi = as.numeric(scale(EDI)),
+    ecart_indices = z_fedi - z_fdep
+  )
+```
+
+Ici :
+z_fdep = position de la commune relativement aux autres selon FDep20
+z_fedi = position relative selon F-EDI
+ecart_indices = différence entre les deux diagnostics
+
+Interprétation : 
+écart positif → F-EDI considère relativement plus la commune comme défavorisée
+écart négatif → FDep20 la considère relativement plus défavorisée
+
+////
+
+je ne chercherais pas encore à expliquer pourquoi chaque commune est différente.
+On veut d'abord voir si les écarts sont :
+concentrés dans certaines régions ;
+liés à la taille des communes ;
+particulièrement présents dans les DOM ;
+ou simplement liés à quelques communes atypiques.
+Et ensuite, ça peut devenir une vraie question de dataviz :
+Deux indices de défavorisation convergent-ils pour identifier les mêmes territoires ?
+Puis éventuellement :
+Quels territoires présentent des profils de défavorisation différents selon l'indice utilisé ?
+Ça commence à donner une vraie profondeur à ton projet, parce qu'on ne fait plus seulement une carte de l'APL : on questionne la manière dont on mesure les inégalités territoriales.
+
+```{r}
+# Communes avec les plus grands écarts 
+fdep_fedi |>
+  select(
+    Code.commune,
+    Commune,
+    `Indice.de.défavorisation.en.quintiles`,
+    EDI,
+    z_fdep,
+    z_fedi,
+    ecart_indices
+  ) |>
+  arrange(desc(ecart_indices)) |>
+  slice_head(n = 10)
+```
+
+Le cas Paris est particulièrement intéressant.
+Le FDep20 classe les arrondissements centraux de Paris parmi les territoires très favorisés, ce qui est cohérent avec ses variables de revenu, diplôme, emploi, etc.
+Mais le F-EDI leur attribue des valeurs positives, parfois assez élevées.
+Ça ne signifie évidemment pas que « Paris 1er est défavorisé ». Ça signifie que les deux indices ne construisent pas la notion de défavorisation de la même manière.
+Les arrondissements centraux de Paris présentent des valeurs très faibles du FDep20, tandis que leurs valeurs de F-EDI sont relativement plus élevées. Les deux indices aboutissent donc à des diagnostics différents pour certains territoires.
+
+Et c'est précisément ce qu'il faut comprendre avant d'aller plus loin.
+
+```{r}
+# Communes avec les plus faibles écarts 
+fdep_fedi |>
+  select(
+    Code.commune,
+    Commune,
+    `Indice.de.défavorisation.en.quintiles`,
+    EDI,
+    z_fdep,
+    z_fedi,
+    ecart_indices
+  ) |>
+  arrange(ecart_indices) |>
+  slice_head(n = 10)
+```
+Et là, la taille des communes me saute aux yeux.
+Le FDep20 est explicitement construit avec une pondération par population lors de son élaboration. Le F-EDI, lui, a une construction différente. Donc il est possible que certains écarts soient fortement liés aux territoires ruraux de très petite taille et aux différences de construction statistique.
+Mais plutôt que de supposer, on va le vérifier.
+
+# Ajout apl_population 
+
+```{r}
+apl <- read_excel(
+  "~/projects/Odisse_Challenge26/data/raw/apl.xlsx",
+  sheet = "Data",
+  skip = 4
+)
+
+apl <- apl %>%
+  rename(
+    code_commune = codgeo,
+    commune = libgeo,
+    annee = an,
+    apl = apl_mg_hmep
+  ) %>%
+  mutate(
+    code_commune = as.character(code_commune),
+    commune = as.character(commune),
+    annee = as.integer(annee),
+    apl = as.numeric(apl)
+  ) %>%
+  filter(!is.na(apl))
+```
+
+```{r}
+population_2023 <-read.csv("~/projects/Odisse_Challenge26/data/raw/donnees_communes.csv",
+                 header = TRUE,
+                 sep = ";")
+
+population_2023 <- population_2023 %>%
+  rename(
+    code_commune = COM,
+    commune = Commune,
+    population_totale = PTOT
+  ) %>%
+  mutate(
+    code_commune = as.character(code_commune),
+    commune = as.character(commune),
+    population_totale = as.numeric(population_totale)
+  )
+```
+
+```{r}
+apl_population <- apl %>%
+  left_join(
+    population_2023,
+    by = "code_commune"
+  )
+```
+
+```{r}
+# Correction grandes villes
+grandes_villes <- population_2023 |>
+  filter(
+    code_commune %in% c(
+      sprintf("751%02d", 1:20),  # Paris
+      sprintf("693%02d", 81:89),  # Lyon
+      sprintf("132%02d", 1:16)    # Marseille
+    )
+  ) |>
+  mutate(
+    ville = case_when(
+      grepl("^751", code_commune) ~ "Paris",
+      grepl("^693", code_commune) ~ "Lyon",
+      grepl("^132", code_commune) ~ "Marseille"
+    )
+  ) |>
+  group_by(ville) |>
+  summarise(
+    population_totale = sum(population_totale, na.rm = TRUE)
+  )
+
+grandes_villes <- grandes_villes |>
+  mutate(
+    code_commune = case_when(
+      ville == "Marseille" ~ "13055",
+      ville == "Lyon" ~ "69123",
+      ville == "Paris" ~ "75056"
+    )
+  )
+
+apl_population <- apl_population |>
+  left_join(
+    grandes_villes |>
+      select(code_commune, population_grande_ville = population_totale),
+    by = "code_commune"
+  ) |>
+  mutate(
+    population_totale = coalesce(
+      population_totale,
+      population_grande_ville
+    )
+  ) |>
+  select(-population_grande_ville)
+
+apl_population <- apl_population |>
+  mutate(
+    Région = case_when(
+      code_commune == "75056" ~ "Île-de-France",
+      code_commune == "69123" ~ "Auvergne-Rhône-Alpes",
+      code_commune == "13055" ~ "Provence-Alpes-Côte d'Azur",
+      TRUE ~ Région
+    )
+  )
+
+# Création de classes de pop
+
+apl_population <- apl_population |>
+  mutate(
+    classe_population = case_when(
+      population_totale < 500 ~ "Moins de 500",
+      population_totale < 1000 ~ "500 à 999",
+      population_totale < 5000 ~ "1 000 à 4 999",
+      population_totale < 10000 ~ "5 000 à 9 999",
+      population_totale < 50000 ~ "10 000 à 49 999",
+      TRUE ~ "50 000 et plus"
+    )
+  )
+# Les fichiers utilisent deux géographies différentes :
+# les données de population détaillent les arrondissements de Paris,
+# Lyon et Marseille, tandis que l'APL utilise les communes regroupées.
+# On agrège donc les populations des arrondissements pour retrouver
+# la population de la commune correspondante.
+
+apl_population <- apl_population |>
+  mutate(
+    classe_population = factor(
+      classe_population,
+      levels = c(
+        "Moins de 500",
+        "500 à 999",
+        "1 000 à 4 999",
+        "5 000 à 9 999",
+        "10 000 à 49 999",
+        "50 000 et plus"
+      )
+    )
+  )
+```
+
+# création territoires
+
+```{r}
+territoires <- fdep_fedi |>
+  select(
+    Code.commune,
+    Commune,
+    Région = `Région.x`,
+    `Indice.de.défavorisation.en.quintiles`,
+    EDI,
+    `Quintile.sans.pondération.sur.le.nombre.d.habitants.de.la.commune`,
+    `Quintile.avec.pondération.sur.le.nombre.d.habitants.de.la.commune`,
+    Quintile.natonal,
+    ecart_indices
+  ) |>
+  left_join(
+    apl_population |>
+      select(
+        code_commune,
+        population_totale,
+        apl
+      ),
+    by = c("Code.commune" = "code_commune")
+  )
+```
+territoires couvre exactement les 13 régions métropolitaines + Corse présentes dans FDep20 :
+Auvergne-Rhône-Alpes
+Bourgogne-Franche-Comté
+Bretagne
+Centre-Val de Loire
+Corse
+Grand Est
+Hauts-de-France
+Île-de-France
+Normandie
+Nouvelle-Aquitaine
+Occitanie
+Pays de la Loire
+Provence-Alpes-Côte d'Azur
+
+Les données actuellement utilisées dans territoires ne couvrent que les 13 régions métropolitaines et la Corse. Les DROM présents dans les données de santé ne peuvent donc pas être intégrés à cette analyse communale sur cette base.
+
+Ce n'est pas un problème de jointure : c'est une différence de périmètre des données.
+
+Et ça nous donne une décision méthodologique importante
+Je pense qu'il faut séparer deux niveaux d'analyse plutôt que de chercher à tout mettre dans une seule table :
+1. Analyse nationale / régionale de santé
+On peut utiliser les 17 régions disponibles dans sante et diabete pour montrer les différences territoriales, y compris les DROM.
+2. Analyse communale métropolitaine
+On utilise territoires pour étudier :
+défavorisation sociale (FDep/F-EDI) ↔ accès aux soins (APL)
+Puis éventuellement relier cela à la santé à l'échelle régionale, puisque les indicateurs de santé sociale du Baromètre ne sont pas disponibles au niveau communal.
+Ça évite de faire semblant d'avoir une donnée de santé communale alors qu'on ne l'a pas.
+
+```{r}
+territoires |>
+  summarise(
+    nb_communes = n(),
+    apl_manquant = sum(is.na(apl)),
+    part_apl_manquante = mean(is.na(apl)) * 100,
+    population_manquante = sum(is.na(population_totale)),
+    part_population_manquante = mean(is.na(population_totale)) * 100
+  )
+# 113 communes ne disposent pas de correspondance dans les données APL
+# et/ou population. Elles sont conservées dans la table et ne sont pas
+# assimilées à une APL nulle.
+```
+## F-EDI beaucoup plus élevé
+
+```{r}
+territoires |>
+  arrange(desc(ecart_indices)) |>
+  select(
+    Code.commune,
+    Commune,
+    population_totale,
+    Région,
+    `Indice.de.défavorisation.en.quintiles`,
+    EDI,
+    ecart_indices
+  ) |>
+  slice_head(n = 20)
+```
+
+```{r}
+territoires |>
+  arrange(ecart_indices) |>
+  select(
+    Code.commune,
+    Commune,
+    population_totale,
+    Région,
+    `Indice.de.défavorisation.en.quintiles`,
+    EDI,
+    ecart_indices
+  ) |>
+  slice_head(n = 20)
+```
+
+# Création territoire_région
+
+```{r}
+territoires_region <- territoires |>
+  group_by(Région) |>
+  summarise(
+    nb_communes = n(),
+
+    fdep_moyen = mean(
+      `Indice.de.défavorisation.en.quintiles`,
+      na.rm = TRUE
+    ),
+
+    fdep_pondere = weighted.mean(
+      `Indice.de.défavorisation.en.quintiles`[!is.na(population_totale)],
+      w = population_totale[!is.na(population_totale)]
+    ),
+
+    fedi_moyen = mean(
+      EDI,
+      na.rm = TRUE
+    ),
+
+    fedi_pondere = weighted.mean(
+      EDI[!is.na(population_totale)],
+      w = population_totale[!is.na(population_totale)]
+    ),
+
+    apl_moyen = mean(
+      apl,
+      na.rm = TRUE
+    ),
+
+    apl_pondere = weighted.mean(
+      apl[!is.na(apl) & !is.na(population_totale)],
+      w = population_totale[!is.na(apl) & !is.na(population_totale)]
+    ),
+
+    .groups = "drop"
+  )
+```
+
+```{r}
+# Harmonisation noms
+territoires_region <- territoires_region |>
+  mutate(
+    Région = case_when(
+      Région == "Auvergne et Rhône-Alpes" ~ "Auvergne-Rhône-Alpes",
+      Région == "Bourgogne et Franche-Comté" ~ "Bourgogne-Franche-Comté",
+      Région == "Nouvelle Aquitaine" ~ "Nouvelle-Aquitaine",
+      TRUE ~ Région
+    )
+  )
+```
+
+Les différents indicateurs de défavorisation décrivent-ils les mêmes territoires ?
+
+# corrélation entre les deux indices 
+
+```{r}
+cor(
+  territoires_region$fdep_pondere,
+  territoires_region$fedi_pondere,
+  use = "complete.obs"
+)
+```
+
+La corrélation entre les deux indices, une fois agrégés au niveau régional et pondérés par la population, est : r = -0,12
+
+Donc, sur ces 13 régions, il n'y a pratiquement pas de relation linéaire entre le FDep et le F-EDI.
+
+Mais attention : ce n'est pas contradictoire avec le 0,63 obtenu au niveau communal
+On avait :
+- Communes : r ≈ 0,63 → relation positive assez nette entre les deux indices.
+- Régions : r ≈ -0,12 → relation linéaire quasiment inexistante après agrégation et pondération.
+
+C'est justement le genre de résultat qui mérite qu'on s'arrête dessus.
+Pourquoi ? Parce qu'en passant de 34 839 communes à seulement 13 régions, on change complètement l'échelle d'analyse. Les différences entre communes sont fortement écrasées par l'agrégation régionale, et la pondération par population donne beaucoup plus de poids aux zones les plus peuplées.
+Donc on ne peut pas conclure que FDep et F-EDI sont globalement incohérents. On peut seulement dire que leur relation observée à l'échelle communale ne se retrouve pas de la même manière à l'échelle régionale.
+
+Et ça nous donne une bonne piste pour ton projet : je pense qu'il serait intéressant de ne pas choisir arbitrairement l'un des deux indices.
+
+On peut plutôt les utiliser pour construire une lecture en deux niveaux :
+  1. Niveau communal → caractériser les territoires
+      
+      FDep + F-EDI permettent d'identifier les communes selon différentes dimensions de la défavorisation.
+      
+  2. Niveau régional → mettre en regard défavorisation, accès aux soins et santé
+
+On ajoute :
+- FDep pondéré
+- F-EDI pondéré
+- APL pondéré
+- Santé perçue
+- Limitation d'activité
+- Diabète
+
+Et là, on pourra regarder quels indicateurs évoluent ensemble et lesquels ne semblent pas suivre la même géographie.
+C'est beaucoup plus intéressant pour ton défi que de chercher absolument une corrélation forte.
+
+Mais avant ça, je voudrais vérifier une dernière chose
+Le -0,12 est calculé sur seulement 13 observations. Une corrélation sur 13 régions est très fragile et ne doit surtout pas être présentée comme une relation générale.
+Je te propose donc qu'on fasse maintenant un petit tableau des corrélations entre les 5 variables régionales, plutôt que de les tester une par une :
+- FDep pondéré
+- F-EDI pondéré
+- APL pondéré
+- santé perçue
+- limitation d'activité
+- diabète
+
+On pourra alors voir immédiatement quelles associations méritent réellement d'être explorées.
+
+# Import sante-region
+
+```{r}
+sante <-read.csv("~/projects/Odisse_Challenge26/data/raw/sante_generale_indicateurs_barometre_2024.csv",
+                 header = TRUE,
+                 sep = ",")
+
+sante_region <- sante |>
+  filter(
+    Sexe == "Tous",
+    Classe.d.âge == "Tous",
+    Diplôme == "Tous",
+    PCS == "Tous",
+    Situation.financière.perçue == "Tous",
+    `Nouvelles.régions` != "Tous"
+  ) |>
+  select(
+    Région = `Nouvelles.régions`,
+    Indicateur,
+    Estimation,
+    ic_inf,
+    ic_sup
+  )
+
+# Normaliser les noms 
+sante_region <- sante_region |>
+  mutate(
+    Région = case_when(
+      Région == "Ile-de-France" ~ "Île-de-France",
+      Région == "Réunion" ~ "La Réunion",
+      TRUE ~ Région
+    )
+  )
+```
+
+# Import diabete_région
+
+```{r}
+diabete <- read.csv("~/projects/Odisse_Challenge26/data/raw/diabete-indicateurs-du-barometre-2024.csv",
+                 header = TRUE,
+                 sep = ",")
+
+diabete_region <- diabete |>
+  filter(
+    Indicateur == "Diabète déclaré",
+    Ancienneté.du.diabète == "Tous",
+    Sexe == "Tous",
+    Classe.d.âge == "Tous",
+    PCS == "Tous",
+    Diplôme == "Tous",
+    Situation.professionnelle == "Tous",
+    Situation.financière.perçue == "Tous",
+    `Nouvelles.régions` != "Tous"
+  ) |>
+  select(
+    Région = `Nouvelles.régions`,
+    Estimation,
+    ic_inf,
+    ic_sup
+  )
+
+#Harmoniser les noms
+diabete_region <- diabete_region |>
+  mutate(
+    Région = case_when(
+      Région == "Ile-de-France" ~ "Île-de-France",
+      Région == "Réunion" ~ "La Réunion",
+      TRUE ~ Région
+    )
+  )
+```
+
+# Création territoire_analyse
+```{r}
+territoires_analyse <- territoires_region |>
+  left_join(
+    sante_region |>
+      mutate(
+        variable = case_when(
+          Indicateur == "Santé perçue bonne ou très bonne" ~ "sante_percue",
+          Indicateur == "Limitation d'activité" ~ "limitation_activite"
+        )
+      ) |>
+      select(Région, variable, Estimation) |>
+      tidyr::pivot_wider(
+        names_from = variable,
+        values_from = Estimation
+      ),
+    by = "Région"
+  ) |>
+  left_join(
+    diabete_region |>
+      select(Région, diabete = Estimation),
+    by = "Région"
+  )
+```
+
+**Les territoires caractérisés par davantage de défavorisation présentent-ils aussi des indicateurs de santé moins favorables ? Et quel rôle semble jouer l'APL dans cette géographie ?**
+
+# Corrélations entre indicateurs 
+
+## défavorisation ↔ santé
+
+```{r}
+cor(
+  territoires_analyse$fdep_pondere,
+  territoires_analyse$sante_percue
+)
+```
+
+À l'échelle de tes 13 régions, les régions ayant un FDep pondéré plus élevé ont tendance à présenter une proportion plus faible de personnes déclarant une bonne ou très bonne santé.
+
+À l'échelle régionale, le FDep pondéré est fortement associé à la santé perçue : les régions présentant des niveaux de défavorisation plus élevés tendent à avoir une proportion plus faible de personnes déclarant une bonne ou très bonne santé.
+
+```{r}
+cor(
+  territoires_analyse$fdep_pondere,
+  territoires_analyse$limitation_activite
+)
+```
+
+```{r}
+cor(
+  territoires_analyse$fdep_pondere,
+  territoires_analyse$diabete
+)
+```
+
+Donc les régions avec un FDep plus élevé ont également tendance à avoir davantage de diabète déclaré.
+
+--> C'est intéressant parce que cela donne deux indicateurs de santé différents qui vont dans une direction similaire :
+défavorisation ↑ → santé perçue ↓
+      et
+défavorisation ↑ → diabète déclaré ↑
+toujours avec la réserve essentielle : association écologique, pas causalité individuelle.
+
+## F-edi ↔ santé
+
+```{r}
+cor(
+  territoires_analyse$fedi_pondere,
+  territoires_analyse$sante_percue
+)
+```
+
+```{r}
+cor(
+  territoires_analyse$fedi_pondere,
+  territoires_analyse$limitation_activite
+)
+```
+
+```{r}
+cor(
+  territoires_analyse$fedi_pondere,
+  territoires_analyse$diabete
+)
+```
+
+--> Le signe est cohérent avec la construction des variables : un FDep plus élevé correspond à davantage de défavorisation, tandis qu'une santé perçue plus élevée est favorable. On observe donc une association négative entre FDep et santé perçue.
+
+## apl ↔ santé
+
+```{r}
+cor(
+  territoires_analyse$apl_pondere,
+  territoires_analyse$sante_percue
+)
+```
+
+Il existe une association négative faible à modérée :
+Quand l’APL pondérée augmente, la santé perçue tend à être moins élevée.
+Mais -0,30 reste assez modéré, et surtout ce n’est pas forcément ce qu’on attendrait intuitivement si l’on interprétait l’APL comme un simple indicateur de « bon accès aux soins ».
+
+```{r}
+cor(
+  territoires_analyse$apl_pondere,
+  territoires_analyse$limitation_activite
+)
+```
+
+Les régions ayant une APL pondérée plus élevée ont aussi tendance à présenter davantage de limitations d’activité.
+Ça peut sembler paradoxal au premier abord, mais il ne faut surtout pas en déduire que davantage de médecins entraîne davantage de limitations d'activité.
+
+L'APL mesure l'adéquation entre offre et demande de soins. Elle ne mesure pas l'état de santé de la population. Une région peut avoir davantage de besoins de santé et simultanément davantage de professionnels de santé.
+
+C'est justement une limite intéressante à mettre en avant : l'accès aux soins et l'état de santé sont deux dimensions différentes des inégalités territoriales.
+
+```{r}
+cor(
+  territoires_analyse$apl_pondere,
+  territoires_analyse$diabete
+)
+```
+
+absence de relation linéaire observable à l'échelle régionale.
+
+C'est également utile, car cela montre que les trois indicateurs de santé ne réagissent pas de la même manière aux caractéristiques territoriales.
+
+Résumé :
+
+| Indicateur territorial | Santé perçue | Limitation d'activité |   Diabète |
+| ---------------------- | -----------: | --------------------: | --------: |
+| **FDep20**             |    **-0,73** |                 +0,41 | **+0,66** |
+| **F-EDI**              |        -0,30 |                 +0,25 |     +0,50 |
+| **APL**                |        -0,30 |             **+0,60** |     +0,04 |
+
+## apl ↔ indices
+
+```{r}
+cor(
+  territoires_analyse$fdep_pondere,
+  territoires_analyse$apl_pondere
+)
+
+cor(
+  territoires_analyse$fedi_pondere,
+  territoires_analyse$apl_pondere
+)
+```
+
+Donc :
+- FDep20 et APL évoluent légèrement dans le même sens à l'échelle régionale.
+- F-EDI et APL sont pratiquement indépendants dans ces données.
+
+Et surtout, les deux indices de défavorisation eux-mêmes avaient une corrélation régionale de seulement -0,12 après pondération.
+
+Synthèse :
+|            | Santé perçue | Limitation |   Diabète |   APL |
+| ---------- | -----------: | ---------: | --------: | ----: |
+| **FDep20** |    **-0,73** |      +0,41 | **+0,66** | +0,29 |
+| **F-EDI**  |        -0,30 |      +0,25 |     +0,50 | -0,11 |
+| **APL**    |        -0,30 |  **+0,60** |     +0,04 |     — |
+
+On ne raconte plus simplement « les territoires défavorisés ont moins de médecins ». Les données suggèrent quelque chose de plus nuancé :
+
+Les différentes dimensions des inégalités territoriales ne se superposent pas. Les caractéristiques sociales des territoires sont davantage associées à certains indicateurs de santé, tandis que l'APL présente une relation différente selon l'indicateur de santé considéré.
+
+# 1. Graphique - FDep20 ↔ santé perçue
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+
+ggplot(
+  territoires_analyse,
+  aes(
+    x = fdep_pondere,
+    y = sante_percue
+  )
+) +
+  geom_point(size = 3) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE
+  ) +
+  geom_text_repel(
+    aes(label = Région)
+  ) +
+  labs(
+    title = "Défavorisation territoriale et santé perçue",
+    subtitle = "Moyennes régionales pondérées par la population",
+    x = "Indice de défavorisation FDep20",
+    y = "Part déclarant une bonne ou très bonne santé (%)"
+  ) +
+  theme_minimal()
+```
+Plus le FDep20 pondéré est élevé, plus la part de personnes déclarant une bonne ou très bonne santé tend à être faible.
+
+- Hauts-de-France : FDep relativement élevé et santé perçue relativement faible → assez proche de la tendance.
+- Bourgogne-Franche-Comté / Grand Est : même logique, avec une santé perçue autour de 65–66 %.
+- Bretagne / Pays de la Loire : FDep proche de la moyenne mais santé perçue autour de 71 % → elles se situent au-dessus de ce que suggérerait leur seul niveau de défavorisation.
+- Île-de-France : FDep très faible et santé perçue élevée.
+- Nouvelle-Aquitaine : cas intéressant, avec une santé perçue relativement basse compte tenu de son FDep.
+
+**Donc le FDep20 est associé à la santé perçue, mais il n'explique évidemment pas à lui seul les différences régionales.**
+
+# 2. Graphique - FDep20 ↔ diabète déclaré
+
+```{r}
+ggplot(
+  territoires_analyse,
+  aes(
+    x = fdep_pondere,
+    y = diabete
+  )
+) +
+  geom_point(size = 3) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE
+  ) +
+  geom_text_repel(
+    aes(label = Région)
+  ) +
+  labs(
+    title = "Défavorisation territoriale et diabète",
+    subtitle = "Moyennes régionales pondérées par la population",
+    x = "Indice de défavorisation FDep20",
+    y = "Part déclarant un diabète (%)"
+  ) +
+  theme_minimal()
+```
+Donc, à l'échelle des 13 régions, les territoires présentant un niveau de défavorisation plus élevé tendent aussi à présenter une proportion plus importante de personnes déclarant un diabète.
+
+Quelques situations particulièrement intéressantes
+- Île-de-France : faible niveau de défavorisation et faible prévalence déclarée du diabète.
+- Hauts-de-France : à l'autre extrémité, niveau de défavorisation élevé et prévalence du diabète élevée.
+- Centre-Val de Loire, Grand Est, Normandie, Bourgogne-Franche-Comté : elles suivent assez bien la tendance générale.
+- Bretagne est particulièrement intéressante : son FDep est proche de la moyenne, mais son taux de diabète est nettement inférieur à ce que suggère la droite.
+- Corse est dans la situation inverse : taux de diabète relativement élevé pour un niveau de FDep assez proche de la moyenne.
+
+# Conclusion des deux graphiques 
+
+Les deux graphiques racontent finalement deux aspects complémentaires :
+
+FDep20 → santé perçue
+  davantage de défavorisation ↔ moins de personnes déclarant une bonne santé
+  r = -0,73
+
+FDep20 → diabète
+  davantage de défavorisation ↔ davantage de personnes déclarant un diabète
+  r = +0,66
+
+--> Et surtout, les deux indicateurs de santé vont dans une direction cohérente : le gradient territorial associé au FDep20 apparaît sur deux dimensions différentes de la santé.
+
+**À l'échelle régionale, le niveau de défavorisation est associé à des écarts importants de santé perçue et de prévalence déclarée du diabète.**
+**l'analyse est écologique, porte sur seulement 13 régions et ne permet pas d'établir une relation causale individuelle.**
+
+# 3. Graphique - FDep20 ↔ limitation d'activités
+
+```{r}
+ggplot(
+  territoires_analyse,
+  aes(
+    x = fdep_pondere,
+    y = limitation_activite
+  )
+) +
+  geom_point(size = 3) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE
+  ) +
+  geom_text_repel(
+    aes(label = Région)
+  ) +
+  labs(
+    title = "Défavorisation territoriale et limitation d'activité",
+    subtitle = "Moyennes régionales pondérées par la population",
+    x = "Indice de défavorisation FDep20",
+    y = "Part déclarant une limitation d'activité (%)"
+  ) +
+  theme_minimal()
+```
+Donc les régions présentant davantage de défavorisation tendent à avoir davantage de personnes déclarant une limitation d'activité. Mais la relation est nettement plus dispersée que pour la santé perçue ou le diabète.
+
+Quelques cas illustrent bien cette dispersion :
+- Hauts-de-France : défavorisation élevée et limitation élevée → cohérent avec la tendance.
+- Île-de-France : faible défavorisation et faible limitation → cohérent également.
+- Corse : limitation très élevée alors que son FDep est proche de la moyenne → écart important à la tendance.
+- Bretagne : limitation relativement faible compte tenu de son niveau de FDep.
+- Nouvelle-Aquitaine : limitation élevée malgré un FDep seulement modéré.
+
+La limitation d'activité, comme le diabète, est très fortement liée à l'âge. Or nos indicateurs régionaux sont ici des estimations générales, sans standardisation par âge.
+
+Donc une partie des différences régionales peut être liée à la structure démographique des régions, et pas uniquement à leur niveau de défavorisation.
+C'est particulièrement important pour :
+- le diabète ;
+- la limitation d'activité ;
+- dans une moindre mesure, la santé perçue.
+
+Ça ne rend pas notre analyse fausse. Ça signifie simplement qu'on devra écrire quelque chose comme : « **Ces associations régionales sont descriptives et peuvent notamment refléter des différences de structure démographique entre territoires.** »
+
+# 4. Graphique - APL ↔ limitation d'activités
+
+```{r}
+ggplot(
+  territoires_analyse,
+  aes(
+    x = apl_pondere,
+    y = limitation_activite
+  )
+) +
+  geom_point(size = 3) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE
+  ) +
+  geom_text_repel(
+    aes(label = Région)
+  ) +
+  labs(
+    title = "Adéquation de l'offre de soins et limitation d'activité",
+    subtitle = "Moyennes régionales pondérées par la population",
+    x = "APL moyen pondéré",
+    y = "Part déclarant une limitation d'activité (%)"
+  ) +
+  theme_minimal()
+```
+
+On retrouve visuellement la corrélation : APL ↔ limitation d'activité : r = +0,60
+**Les régions avec une APL plus élevée ont, dans ces données, tendance à avoir davantage de personnes déclarant une limitation d'activité.**
+Mais attention à l'interprétation : cela ne signifie absolument pas que « davantage de médecins provoque davantage de limitations ».
+
+L'APL est un indicateur d'adéquation entre l'offre de médecins généralistes et les besoins de la population. Il est donc tout à fait possible que les territoires présentant davantage de besoins de santé aient aussi une offre de soins plus importante, sans que cette offre soit la cause des problèmes de santé.
+
+Le graphique montre aussi quelque chose d'intéressant
+On distingue assez bien plusieurs situations :
+- Île-de-France : APL faible et limitation faible.
+- Corse : APL élevée et limitation très élevée.
+- Nouvelle-Aquitaine, Occitanie, Grand Est, Hauts-de-France : APL élevée et limitation également élevée.
+- Bretagne et Pays de la Loire : APL élevée mais limitation relativement faible.
+- Centre-Val de Loire : APL relativement faible mais limitation assez élevée.
+
+**Donc l'APL seule ne permet pas de rendre compte des différences de santé entre régions**
+Et ça rejoint parfaitement ce qu'on cherchait au départ : **l'accès aux soins n'est qu'une dimension parmi d'autres des inégalités territoriales de santé.**
+
+# Conclu :
+
+| Dimension territoriale | Santé perçue | Limitation |   Diabète |
+| ---------------------- | -----------: | ---------: | --------: |
+| **FDep20**             |    **-0,73** |      +0,41 | **+0,66** |
+| **F-EDI**              |        -0,30 |      +0,25 |     +0,50 |
+| **APL**                |        -0,30 |  **+0,60** |     +0,04 |
+
+
+Les inégalités territoriales de santé résultent de plusieurs dimensions qui ne se superposent pas :
+Conditions sociales du territoire
+  → FDep20 / F-EDI
+État de santé
+  → santé perçue / limitation / diabète
+Accès aux soins
+  → APL
+
+--> Et nos résultats montrent que les relations entre ces dimensions sont différenciées selon l'indicateur considéré.
+
+
+# Test exploratoire : Est-ce que la relation APL ↔ limitation reste présente lorsqu'on tient compte du FDep20 ?
+
+## Étape 1 — calculer la corrélation partielle
+
+```{r}
+# Retirer l'effet du FDep20 de l'APL
+modele_apl <- lm(
+  apl_pondere ~ fdep_pondere,
+  data = territoires_analyse
+)
+
+# Retirer l'effet du FDep20 de la limitation d'activité
+modele_limitation <- lm(
+  limitation_activite ~ fdep_pondere,
+  data = territoires_analyse
+)
+
+# Récupérer les résidus
+residus_apl <- resid(modele_apl)
+residus_limitation <- resid(modele_limitation)
+
+# Corrélation entre les deux résidus
+cor(
+  residus_apl,
+  residus_limitation
+)
+```
+
+**Ce que ce calcul signifie**
+On ne demande plus : « APL et limitation d'activité évoluent-elles ensemble ? »
+mais plutôt :
+« Une fois la relation avec le FDep20 retirée des deux variables, reste-t-il une association entre APL et limitation d'activité ? »
+
+**Ce que ça suggère**
+
+La relation diminue un peu, de +0,60 à +0,55, mais elle reste assez importante.
+
+Donc, dans notre petit échantillon régional, la relation entre APL et limitation d'activité ne semble pas disparaître simplement lorsqu'on tient compte du FDep20.
+
+C'est intéressant parce que ça renforce l'idée que :
+  **l'accès/adéquation de l'offre de soins et l'état de santé constituent des dimensions distinctes des inégalités territoriales.**
+Mais attention à ne pas aller jusqu'à :
+« L'APL explique la limitation d'activité. »
+
+On ne peut pas le conclure. Il existe énormément de facteurs non pris en compte : âge, structure sociale, environnement, comportements de santé, etc. Et surtout, n = 13.
+
+# 5. Graphique de Synthèse
+
+## Étape 1 : graphique des profils régionaux
+
+**Pourquoi les lignes médianes ?**
+
+Elles vont simplement séparer le graphique en quatre zones :
+- FDep faible / APL faible
+- FDep faible / APL élevée
+- FDep élevé / APL faible
+- FDep élevé / APL élevée
+Ce ne sont pas des catégories officielles, simplement un moyen de repérer visuellement les profils.
+```{r}
+ggplot(
+  territoires_analyse,
+  aes(
+    x = fdep_pondere,
+    y = apl_pondere,
+    color = sante_percue
+  )
+) +
+  geom_point(size = 4) +
+  geom_text_repel(
+    aes(label = Région),
+    show.legend = FALSE
+  ) +
+  geom_vline(
+    xintercept = median(territoires_analyse$fdep_pondere),
+    linetype = "dashed",
+    color = "grey60"
+  ) +
+  geom_hline(
+    yintercept = median(territoires_analyse$apl_pondere),
+    linetype = "dashed",
+    color = "grey60"
+  ) +
+  scale_color_viridis_c(
+    option = "C",
+    name = "Santé perçue (%)"
+  ) +
+  labs(
+    title = "Des inégalités de santé qui ne se résument pas à l'accès aux soins",
+    subtitle = "Position des régions selon la défavorisation territoriale, l'APL et la santé perçue",
+    x = "Indice de défavorisation FDep20",
+    y = "APL moyen pondéré"
+  ) +
+  theme_minimal()
+```
+
+Ce graphique apporte quelque chose que les simples corrélations ne montraient pas : les régions peuvent présenter des combinaisons très différentes de défavorisation, d'APL et de santé perçue.
+
+- Île-de-France
+    FDep20 nettement faible
+    APL relativement faible
+    santé perçue élevée
+C'est un cas particulièrement intéressant : une APL faible ne signifie pas automatiquement une mauvaise santé territoriale.
+
+- Hauts-de-France
+    FDep20 élevé
+    APL élevée
+    santé perçue faible
+C'est probablement le profil le plus parlant pour notre question : une offre de soins relativement élevée ne s'accompagne pas ici d'un niveau de santé perçue particulièrement élevé.
+
+Et ça illustre parfaitement pourquoi on ne doit pas réduire les inégalités de santé à l'accès aux soins.
+
+- Bretagne / Pays de la Loire
+    défavorisation relativement faible
+    santé perçue élevée
+    APL plutôt élevée pour la Bretagne
+Elles constituent un autre profil, avec une situation sociale territoriale et sanitaire différente.
+
+- Centre-Val de Loire
+    FDep20 plutôt élevé
+    APL relativement faible
+    santé perçue intermédiaire/basse
+Elle se distingue donc du profil Hauts-de-France : défavorisation élevée mais APL faible, contrairement à une région où l'APL est élevée.
+
+Les points jaunes/verts — santé perçue élevée — sont plutôt situés vers la gauche du graphique, tandis que les points violets — santé perçue plus faible — sont davantage à droite.
+Donc notre r = -0,73 entre FDep20 et santé perçue est parfaitement visible.
+En revanche, il n'y a pas de gradient aussi évident verticalement.
+
+Autrement dit :
+**La position horizontale semble beaucoup plus structurante pour la santé perçue que la position verticale. C'est une façon visuelle assez forte de montrer que, dans nos données, la dimension sociale du territoire semble davantage associée à la santé perçue que l'APL prise isolément.**
+
+# Conclusion définitive :
+
+Notre récit potentiel devient assez clair :
+
+1. Les inégalités sociales de santé sont fortes
+Avec le Baromètre :
+  Situation financière → santé perçue
+
+On avait notamment 32,1 points d'écart entre les personnes déclarant des difficultés financières et celles se déclarant à l'aise.
+
+2. Ces inégalités existent aussi territorialement
+  FDep20 ↔ santé perçue : r = -0,73
+          et 
+  FDep20 ↔ diabète : r = +0,66
+
+3. Mais les territoires ne se résument pas à leur niveau de défavorisation
+  FDep20 ↔ APL seulement : r = +0,29
+
+Et les profils du graphique montrent des combinaisons très différentes.
+
+4. L'accès aux soins constitue donc une dimension complémentaire
+  APL ↔ limitation : r = +0,60
+        mais 
+  APL ↔ diabète : r = +0,04
+
+Ce contraste est justement très intéressant : la relation entre accès aux soins et santé varie selon l'indicateur de santé considéré.
