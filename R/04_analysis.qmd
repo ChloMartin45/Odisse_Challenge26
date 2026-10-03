@@ -3,17 +3,17 @@ title: "Analyse des relations entre inégalités, accessibilité et santé"
 format: html
 ---
 
-# Packages
+# 1. PACKAGES
 
 ```{r}
 library(tidyverse)
 library(FactoMineR)
 library(factoextra)
 library(sf)
-library(giscoR) # permet de récupérer les géométries administratives européennes directement depuis les données GISCO d'Eurostat.
+library(giscoR)
 ```
 
-# Importation des données
+# 2. IMPORTATION DES DONNÉES
 
 ```{r}
 territoires <- read_csv(
@@ -32,34 +32,15 @@ diabete <- read_csv(
 )
 ```
 
-# Harmonisation des noms des régions
+# 3. CONSTRUCTION DE LA BASE ANALYTIQUE RÉGIONALE
+
+
+## 3.1 Harmonisation des noms des régions
 
 ```{r}
 sante <- sante |>
   mutate(
-    region = `Nouvelles régions`
-  )
-
-diabete <- diabete |>
-  mutate(
-    region = `Nouvelles régions`
-  )
-```
-
-```{r}
-sante <- sante |>
-  mutate(
-    region = recode(
-      region,
-      "Ile-de-France" = "Île-de-France",
-      "Bourgogne-Franche-Comté" = "Bourgogne et Franche-Comté",
-      "Nouvelle-Aquitaine" = "Nouvelle Aquitaine",
-      "Auvergne-Rhône-Alpes" = "Auvergne et Rhône-Alpes"
-    )
-  )
-
-diabete <- diabete |>
-  mutate(
+    region = `Nouvelles régions`,
     region = recode(
       region,
       "Ile-de-France" = "Île-de-France",
@@ -70,7 +51,21 @@ diabete <- diabete |>
   )
 ```
 
-# Sélection des indicateurs de santé
+```{r}
+diabete <- diabete |>
+  mutate(
+    region = `Nouvelles régions`,
+    region = recode(
+      region,
+      "Ile-de-France" = "Île-de-France",
+      "Bourgogne-Franche-Comté" = "Bourgogne et Franche-Comté",
+      "Nouvelle-Aquitaine" = "Nouvelle Aquitaine",
+      "Auvergne-Rhône-Alpes" = "Auvergne et Rhône-Alpes"
+    )
+  )
+```
+
+## 3.2 Préparation des indicateurs de santé
 
 ```{r}
 sante_analyse <- sante |>
@@ -89,8 +84,6 @@ sante_analyse <- sante |>
   )
 ```
 
-# Indicateur de diabète
-
 ```{r}
 diabete_analyse <- diabete |>
   select(
@@ -102,7 +95,7 @@ diabete_analyse <- diabete |>
   )
 ```
 
-# Contruction de la base analytique
+## 3.3 Jointure des données territoriales et sanitaires
 
 ```{r}
 analyse_regions <- territoires |>
@@ -113,66 +106,7 @@ analyse_regions <- territoires |>
   inner_join(
     diabete_analyse,
     by = "region"
-  )
-```
-
-# Contrôle de la base finale
-
-```{r}
-analyse_regions |>
-  summarise(
-    nb_regions = n(),
-    nb_valeurs_manquantes = sum(
-      is.na(
-        sante_percue
-      ) |
-      is.na(
-        limitation_activite
-      ) |
-      is.na(
-        diabete_declare
-      ) |
-      is.na(
-        fdep_pondere
-      ) |
-      is.na(
-        fedi_pondere
-      ) |
-      is.na(
-        apl_pondere
-      )
-    )
-  )
-```
-
-```{r}
-analyse_regions |>
-  select(
-    region,
-    population,
-    fdep_pondere,
-    fedi_pondere,
-    apl_pondere,
-    sante_percue,
-    limitation_activite,
-    diabete_declare
   ) |>
-  arrange(region)
-```
-
-# Export 
-
-```{r}
-write_csv(
-  analyse_regions,
-  "~/projects/Odisse_Challenge26/data/processed/analyse_regions.csv"
-)
-```
-
-# Exploration des premiers résultats
-## 1. Sélection des variables d'analyse
-```{r}
-analyse_regions <- analyse_regions |>
   select(
     code_region,
     region,
@@ -186,305 +120,301 @@ analyse_regions <- analyse_regions |>
   )
 ```
 
-## 2. Préparer les variables pour comparer les dimensions
 
-Indicateurs de santé (à l'échelle régionale)
-Pondération par la population (indicateur à l'échelle communale)
-
-- Pour fdep_pondere, une valeur élevée correspond à davantage de défavorisation.
-- Pour fedi_pondere, même chose dans notre utilisation.
-- Pour apl_pondere, une valeur élevée correspond à une meilleure accessibilité aux soins
-
-Pour les indicateurs de santé :
-- santé perçue élevée = situation plus favorable ;
-- limitation élevée = situation moins favorable ;
-- diabète déclaré élevé = situation moins favorable.
-
-Pour avoir **un indicateur synthétique où une valeur positive signifie systématiquement une situation plus défavorable**, on peut inverser les indicateurs favorables.
+## 3.4 Contrôle de la base analytique
 
 ```{r}
-# valeur élevée = davantage défavorable
+analyse_regions |>
+  summarise(
+    nb_regions = n(),
+    nb_valeurs_manquantes = sum(
+      is.na(fdep_pondere) |
+        is.na(fedi_pondere) |
+        is.na(apl_pondere) |
+        is.na(sante_percue) |
+        is.na(limitation_activite) |
+        is.na(diabete_declare)
+    )
+  )
+```
+
+```{r}
+analyse_regions |>
+  arrange(region)
+```
+
+# 4. ANALYSE DES RELATIONS TERRITORIALES
+
+Les analyses suivantes sont exploratoires.
+Elles portent sur les 13 régions métropolitaines disponibles dans la base territoriale.
+
+```{r}
+# Fonction pour calculer corrélation de Pearson et p-value
+
+calcul_correlation <- function(x, y) {
+
+  test <- cor.test(
+    x,
+    y,
+    method = "pearson"
+  )
+
+  tibble(
+    correlation = unname(test$estimate),
+    p_value = test$p.value
+  )
+}
+```
+
+## 4.1 Défavorisation territoriale et santé
+```{r}
+## 4.1 Défavorisation territoriale et santé
+
+correlations_fdep <- bind_rows(
+  calcul_correlation(
+    analyse_regions$fdep_pondere,
+    analyse_regions$sante_percue
+  ) |>
+    mutate(
+      indicateur = "Santé perçue bonne ou très bonne"
+    ),
+
+  calcul_correlation(
+    analyse_regions$fdep_pondere,
+    analyse_regions$limitation_activite
+  ) |>
+    mutate(
+      indicateur = "Limitation d'activité"
+    ),
+
+  calcul_correlation(
+    analyse_regions$fdep_pondere,
+    analyse_regions$diabete_declare
+  ) |>
+    mutate(
+      indicateur = "Diabète déclaré"
+    )
+) |>
+  select(
+    indicateur,
+    correlation,
+    p_value
+  )
+
+correlations_fdep
+```
+
+## 4.2 Accessibilité aux soins et santé
+
+```{r}
+## 4.2 Accessibilité aux soins et santé
+
+correlations_apl <- bind_rows(
+  calcul_correlation(
+    analyse_regions$apl_pondere,
+    analyse_regions$sante_percue
+  ) |>
+    mutate(
+      indicateur = "Santé perçue bonne ou très bonne"
+    ),
+
+  calcul_correlation(
+    analyse_regions$apl_pondere,
+    analyse_regions$limitation_activite
+  ) |>
+    mutate(
+      indicateur = "Limitation d'activité"
+    ),
+
+  calcul_correlation(
+    analyse_regions$apl_pondere,
+    analyse_regions$diabete_declare
+  ) |>
+    mutate(
+      indicateur = "Diabète déclaré"
+    )
+) |>
+  select(
+    indicateur,
+    correlation,
+    p_value
+  )
+
+correlations_apl
+```
+
+## 4.3 Accessibilité aux soins au-delà de la défavorisation
+
+**Objectif :** examiner l'association entre l'APL et les indicateurs de santé une fois prise en compte leur relation linéaire avec le FDep.
+
+Deux informations sont conservées :
+- la corrélation entre les résidus ;
+- la p-value associée au coefficient de l'APL dans une régression multiple : santé ~ FDep + APL.
+
+Analyse exploratoire sur 13 régions métropolitaines.
+
+### 4.3.1 Relation entre APL et FDep
+```{r}
+modele_apl <- lm(
+  apl_pondere ~ fdep_pondere,
+  data = analyse_regions
+)
+```
+
+### 4.3.2 Santé perçue
+
+```{r}
+modele_sante <- lm(
+  sante_percue ~ fdep_pondere,
+  data = analyse_regions
+)
+
+cor_residuelle_sante <- cor(
+  resid(modele_apl),
+  resid(modele_sante)
+)
+
+modele_sante_complet <- lm(
+  sante_percue ~ fdep_pondere + apl_pondere,
+  data = analyse_regions
+)
+```
+
+### 4.3.3 Limitation d'activité
+
+```{r}
+modele_limitation <- lm(
+  limitation_activite ~ fdep_pondere,
+  data = analyse_regions
+)
+
+cor_residuelle_limitation <- cor(
+  resid(modele_apl),
+  resid(modele_limitation)
+)
+
+modele_limitation_complet <- lm(
+  limitation_activite ~ fdep_pondere + apl_pondere,
+  data = analyse_regions
+)
+```
+
+### 4.3.4 Diabète déclaré
+
+```{r}
+modele_diabete <- lm(
+  diabete_declare ~ fdep_pondere,
+  data = analyse_regions
+)
+
+cor_residuelle_diabete <- cor(
+  resid(modele_apl),
+  resid(modele_diabete)
+)
+
+modele_diabete_complet <- lm(
+  diabete_declare ~ fdep_pondere + apl_pondere,
+  data = analyse_regions
+)
+```
+
+### 4.3.5 Récupération des p-values associées à l'APL
+
+```{r}
+p_sante_apl <- summary(
+  modele_sante_complet
+)$coefficients["apl_pondere", "Pr(>|t|)"]
+
+p_limitation_apl <- summary(
+  modele_limitation_complet
+)$coefficients["apl_pondere", "Pr(>|t|)"]
+
+p_diabete_apl <- summary(
+  modele_diabete_complet
+)$coefficients["apl_pondere", "Pr(>|t|)"]
+```
+
+### 4.3.6 Table des associations résiduelles
+
+```{r}
+correlations_residuelles <- tibble(
+  
+  indicateur = c(
+    "Santé perçue bonne ou très bonne",
+    "Limitation d'activité",
+    "Diabète déclaré"
+  ),
+  
+  correlation_partielle_apl_fdep = c(
+    cor_residuelle_sante,
+    cor_residuelle_limitation,
+    cor_residuelle_diabete
+  ),
+  
+  p_value_apl_apres_fdep = c(
+    p_sante_apl,
+    p_limitation_apl,
+    p_diabete_apl
+  )
+)
+```
+
+## 4.4 Table de synthèse pour la dataviz
+
+```{r}
+relations_territoriales <- correlations_fdep |>
+  
+  rename(
+    correlation_fdep = correlation,
+    p_value_fdep = p_value
+  ) |>
+  
+  left_join(
+    correlations_apl |>
+      rename(
+        correlation_apl = correlation,
+        p_value_apl = p_value
+      ),
+    by = "indicateur"
+  ) |>
+  
+  left_join(
+    correlations_residuelles,
+    by = "indicateur"
+  )
+
+relations_territoriales
+```
+
+
+# 5. STANDARDISATION DES INDICATEURS
+
+Les indicateurs sont orientés de manière à ce qu'un score positif corresponde systématiquement à une situation relativement plus défavorable.
+
+```{r}
 analyse_regions <- analyse_regions |>
   mutate(
     z_fdep = as.numeric(scale(fdep_pondere)),
     z_fedi = as.numeric(scale(fedi_pondere)),
-    
+
+    # APL élevée = meilleure accessibilité
+    # -> inversion pour obtenir "faible accessibilité"
     z_apl = as.numeric(scale(-apl_pondere)),
-    
+
+    # Santé perçue élevée = situation favorable
+    # -> inversion
     z_sante = as.numeric(scale(-sante_percue)),
+
     z_limitation = as.numeric(scale(limitation_activite)),
     z_diabete = as.numeric(scale(diabete_declare))
   )
 ```
 
-## 3. Corrélations 
+# 6. CLASSIFICATION DES PROFILS TERRITORIAUX
+
+## 6.1 Données utilisées pour la classification
 
 ```{r}
-# = associations exploratoires (que 13 régions)
-correlations <- analyse_regions |>
-  select(
-    fdep_pondere,
-    fedi_pondere,
-    apl_pondere,
-    sante_percue,
-    limitation_activite,
-    diabete_declare
-  ) |>
-  cor()
-```
-
-## 4. Construction des profils territoriaux
-
-6 dimensions : 
-- défavorisation (fdep et f-edi)
-- accessibilité (apl)
-- santé (santé perçue, limitation d'activité et diabète)
-
-```{r}
-# Indicateur défavorable social
-analyse_regions <- analyse_regions |>
-  mutate(
-    score_defavorisation = rowMeans(
-      cbind(z_fdep, z_fedi),
-      na.rm = TRUE
-    )
-  )
-# score_defavorisation = niveau relatif de défavorisation
-```
-
-```{r}
-# Indicateur Santé défavorable
-analyse_regions <- analyse_regions |>
-  mutate(
-    score_sante = rowMeans(
-      cbind(
-        z_sante,
-        z_limitation,
-        z_diabete
-      ),
-      na.rm = TRUE
-    )
-  )
-# score_sante = profil de santé relativement défavorable
-```
-
-APL séparément car on cherche si l'accessibilité aux soins apporte une information supplémentaire au-delà de la défavorisation territoriale ?
-
-## 5. Une première lecture des territoires
-
-```{r}
-analyse_regions |>
-  select(
-    region,
-    score_defavorisation,
-    z_apl,
-    score_sante
-  ) |>
-  arrange(score_defavorisation)
-```
-
-```{r}
-analyse_regions |>
-  select(
-    region,
-    score_defavorisation,
-    z_apl,
-    score_sante
-  ) |>
-  arrange(score_sante)
-```
-
-# Préparation des données pour la visualisation
-
-## Base longue des indicateurs de santé
-
-```{r}
-sante_longue <- analyse_regions |>
-  select(
-    region,
-    sante_percue,
-    limitation_activite,
-    diabete_declare
-  ) |>
-  pivot_longer(
-    cols = -region,
-    names_to = "indicateur",
-    values_to = "valeur"
-  )
-```
-
-## Base longue des indicateurs territoriaux
-
-```{r}
-territoires_long <- analyse_regions |>
-  select(
-    region,
-    fdep_pondere,
-    fedi_pondere,
-    apl_pondere
-  ) |>
-  pivot_longer(
-    cols = -region,
-    names_to = "indicateur",
-    values_to = "valeur"
-  )
-```
-
-## Base standardisée pour la comparaison des dimensions
-```{r}
-profils_regions <- analyse_regions |>
-  select(
-    region,
-    z_fdep,
-    z_fedi,
-    z_apl,
-    z_sante,
-    z_limitation,
-    z_diabete
-  ) |>
-  pivot_longer(
-    cols = -region,
-    names_to = "dimension",
-    values_to = "score"
-  )
-```
-
-# Graphique 1 - Défavorisation territoriale × santé
-
-```{r}
-ggplot(
-  analyse_regions,
-  aes(
-    x = score_defavorisation,
-    y = score_sante,
-    size = population
-  )
-) +
-  geom_point() +
-  geom_text(
-    aes(label = region),
-    vjust = -0.8,
-    size = 3
-  ) +
-  labs(
-    x = "Défavorisation territoriale",
-    y = "Profil de santé défavorable",
-    size = "Population",
-    title = "Défavorisation territoriale et profil de santé"
-  ) +
-  theme_minimal()
-```
-# Graphique 2 - Défavorisation territoriale (FDep) × santé 
-```{r}
-ggplot(
-  analyse_regions,
-  aes(
-    x = fdep_pondere,
-    y = score_sante,
-    size = population,
-    color = apl_pondere
-  )
-) +
-  geom_point(alpha = 0.8) +
-  geom_text(
-    aes(label = region),
-    vjust = -0.8,
-    size = 3
-  ) +
-  labs(
-    x = "Défavorisation territoriale (FDep)",
-    y = "Profil de santé défavorable",
-    size = "Population",
-    color = "APL",
-    title = "Défavorisation territoriale et profil de santé"
-  ) +
-  theme_minimal()
-```
-Les régions les plus défavorisées tendent à présenter un profil de santé plus défavorable, mais certaines régions s'écartent de cette relation. L'accessibilité aux soins permet alors d'ajouter une dimension territoriale supplémentaire à la lecture des profils.
-
-# Graphique 3 - Matrice : Des profils territoriaux différenciés
-
-```{r}
-profils_regions <- analyse_regions |>
-  select(
-    region,
-    z_fdep,
-    z_fedi,
-    z_apl,
-    z_sante,
-    z_limitation,
-    z_diabete
-  ) |>
-  pivot_longer(
-    cols = starts_with("z_"),
-    names_to = "indicateur",
-    values_to = "score"
-  ) |>
-  mutate(
-    indicateur = recode(
-      indicateur,
-      z_fdep = "Défavorisation (FDep)",
-      z_fedi = "Défavorisation (F-EDI)",
-      z_apl = "Accessibilité aux soins\n(APL inversée)",
-      z_sante = "Santé perçue",
-      z_limitation = "Limitation d'activité",
-      z_diabete = "Diabète"
-    )
-  )
-```
-
-```{r}
-ggplot(
-  profils_regions,
-  aes(
-    x = indicateur,
-    y = reorder(region, score),
-    fill = score
-  )
-) +
-  geom_tile() +
-  geom_text(
-    aes(label = round(score, 1)),
-    size = 3
-  ) +
-  scale_fill_gradient2(
-    midpoint = 0
-  ) +
-  labs(
-    x = NULL,
-    y = NULL,
-    fill = "Score standardisé",
-    title = "Des profils territoriaux différenciés",
-    subtitle = "Les scores positifs correspondent à des situations plus défavorables"
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = 30, hjust = 1)
-  )
-```
-
-```{r}
-# Matrice des profils régionaux
-matrice_profils <- analyse_regions |>
-  select(
-    region,
-    z_fdep,
-    z_fedi,
-    z_apl,
-    z_sante,
-    z_limitation,
-    z_diabete
-  ) |>
-  arrange(desc(z_fdep))
-
-
-print(matrice_profils, n = Inf)
-```
-
-# Classification
-
-```{r}
-# Données utilisées pour la classification
 classification <- analyse_regions |>
   select(
     region,
@@ -498,46 +428,16 @@ classification <- analyse_regions |>
 
 classification_hcpc <- classification |>
   column_to_rownames("region")
-
-res_hcpc <- HCPC(
-  classification_hcpc,
-  graph = FALSE,
-  consol = TRUE
-)
-```
-```{r}
-# Dendrogramme
-fviz_dend(
-  res_hcpc,
-  cex = 0.7,
-  rect = TRUE
-)
 ```
 
-```{r}
-res_hcpc$call$t
-# choix nombre cluster
-res_hcpc$call$t$within # inertie intra
 
-res_hcpc$call$t$inert.gain # gain d'inertie
+## 6.2 Classification HCPC à quatre groupes
 
-# --> grosse rupture entre 1 et 2 groupes, puis des gains qui diminuent progressivement.
+Le choix de quatre groupes provient de l'analyse exploratoire préalable du dendrogramme et des différents découpages.
 
-# Comparaison des découpages
-classification |>
-     mutate(
-         groupe_2 = cutree(res_hcpc$call$t$tree, k = 2),
-         groupe_3 = cutree(res_hcpc$call$t$tree, k = 3),
-         groupe_4 = cutree(res_hcpc$call$t$tree, k = 4)
-     ) |>
-     select(region, groupe_2, groupe_3, groupe_4) |>
-     arrange(groupe_3, region)
-
-# --> 4 clusters est plus intéressant à interpréter
-```
+La classification est exploratoire compte tenu du faible nombre de régions analysées (n = 13).
 
 ```{r}
-# classification à 4 clusters
 hcpc_4 <- HCPC(
   classification_hcpc,
   graph = FALSE,
@@ -546,237 +446,146 @@ hcpc_4 <- HCPC(
 )
 ```
 
-```{r}
-# taille et variables qui caractérisent les clusters
-table(hcpc_4$data.clust$clust)
-hcpc_4$data.clust
-```
 
-Comment ces groupes se structurent-ils dans l'espace statistique ?
-
-```{r}
-fviz_cluster(
-  hcpc_4,
-  geom = "point",
-  ellipse = TRUE,
-  show.clust.cent = FALSE,
-  ggtheme = theme_minimal()
-)
-```
-**La classification exploratoire fait ressortir quatre profils régionaux distincts.**
-
-# Cluster 1 - Île-de-France : un profil territorial atypique
-
-Elle présente notamment :
-- z_fdep = -2,30 → très faible FDep ;
-- z_sante = -1,40 → santé perçue favorable ;
-- z_limitation = -1,96 → faible limitation d'activité ;
-- mais z_fedi = +1,66 ;
-- et z_apl = +1,89 → APL faible, puisque nous avons inversé l'indicateur.
-
-Le HCPC confirme que les variables qui la distinguent significativement sont notamment **FDep**, **limitation d'activité** et **APL**.
-
-# Cluster 2 - Bretagne, Pays de la Loire, Auvergne-Rhône-Alpes : Un profil globalement favorable
-
-Les trois régions présentent des scores inférieurs à la moyenne sur plusieurs dimensions sociales et sanitaires. Cela correspond, pour les indicateurs orientés défavorablement, à une situation globalement plus favorable : 
-- F-EDI très faible : moyenne du cluster -1,27
-- santé perçue : -1,13
-- diabète : -1,03
-- Et les trois régions présentent également des valeurs négatives sur la limitation d'activité.
-
-Le HCPC identifie notamment :
-- z_fedi : p = 0,012
-- z_sante : p = 0,025
-- z_diabete : p = 0,043
-
-On peut donc parler prudemment de : « Profil territorial globalement favorable »
-
-# Cluster 3 - Nouvelle-Aquitaine, Occitanie, PACA, Corse : Des territoires aux profils de santé contrastés
-
-Il ne se distingue pas fortement par FDep, F-EDI, santé perçue ou diabète.
-En revanche, **la limitation d'activité** est significativement plus élevée :
-moyenne du cluster = +0,93 avec p = 0,026.
-
-Ce cluster représente plutôt des **territoires où la limitation d'activité ressort davantage, sans que les autres dimensions sociales et sanitaires suivent toutes le même schéma.**
-
-# Cluster 4 - Centre-Val de Loire, Bourgogne-Franche-Comté, Normandie, Hauts-de-France, Grand Est : Défavorisation et état de santé plus défavorable
-
-Le quatrième groupe rassemble cinq régions caractérisées par des scores standardisés de défavorisation et plusieurs indicateurs de santé supérieurs à la moyenne des 13 régions.
-
-Les moyennes sont :
-- FDep : +0,96 avec p = 0,006
-- santé perçue : +0,89 avec p = 0,011
-- diabète : +0,79 avec p = 0,024
-
-# Profil moyen des clusters 
-
-```{r}
-profils_clusters <- hcpc_4$data.clust |>
-  as.data.frame() |>
-  rownames_to_column("region") |>
-  select(
-    region,
-    clust,
-    z_fdep,
-    z_fedi,
-    z_apl,
-    z_sante,
-    z_limitation,
-    z_diabete
-  ) |>
-  group_by(clust) |>
-  summarise(
-    across(
-      starts_with("z_"),
-      mean
-    ),
-    .groups = "drop"
-  ) |>
-  pivot_longer(
-    cols = starts_with("z_"),
-    names_to = "indicateur",
-    values_to = "score"
-  ) |>
-  mutate(
-    indicateur = recode(
-      indicateur,
-      z_fdep = "FDep",
-      z_fedi = "F-EDI",
-      z_apl = "Accessibilité\n(APL inversée)",
-      z_sante = "Santé\nperçue",
-      z_limitation = "Limitation\nd'activité",
-      z_diabete = "Diabète"
-    )
-  )
-```
-
-Qu'est-ce qui caractérise les groupes de régions que nous avons identifiés ?
-
-```{r}
-ggplot(
-  profils_clusters,
-  aes(
-    x = indicateur,
-    y = score,
-    group = factor(clust),
-    color = factor(clust)
-  )
-) +
-  geom_hline(
-    yintercept = 0,
-    linetype = "dashed"
-  ) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 3) +
-  labs(
-    x = NULL,
-    y = "Score standardisé moyen",
-    color = "Cluster",
-    title = "Des profils territoriaux différenciés",
-    subtitle = "Moyenne des scores standardisés par cluster"
-  ) +
-  theme_minimal()
-```
-
-| Cluster                                                                                     | Profil qui ressort                                                          |
-| ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| **1 — Île-de-France**                                                                       | Très faible FDep et bonne santé perçue, mais F-EDI élevé et APL défavorable |
-| **2 — Bretagne, Pays de la Loire, Auvergne-Rhône-Alpes**                                    | Profil globalement favorable sur les dimensions sociales et sanitaires      |
-| **3 — Nouvelle-Aquitaine, Occitanie, PACA, Corse**                                          | Profil contrasté, marqué surtout par la limitation d'activité               |
-| **4 — Centre-Val de Loire, Bourgogne-Franche-Comté, Normandie, Hauts-de-France, Grand Est** | FDep élevé et indicateurs de santé globalement plus défavorables            |
-
-Cluster 3 est vraiment un profil de contraste. Sa moyenne de z_limitation = +0,93 est nettement supérieure aux autres dimensions, tandis que FDep (-0,38), F-EDI (+0,22), santé perçue (+0,09) et diabète (+0,07) sont proches de la moyenne. Donc notre formulation actuelle est bonne : il ne faut surtout pas le présenter comme un cluster « défavorisé ».
-
-Cluster 4, à l'inverse, est beaucoup plus homogène : FDep +0,96, santé perçue +0,89 et diabète +0,79. C'est vraiment le profil où le lien entre défavorisation et état de santé ressort le plus clairement.
-
-Et Cluster 2 est également assez net : les trois indicateurs F-EDI, santé perçue et diabète sont tous autour de -1, ce qui justifie bien le qualificatif « globalement favorable ».
-
-# Association des régions à leur cluster
+## 6.3 Association des régions à leur cluster
 
 ```{r}
 clusters_regions <- hcpc_4$data.clust |>
   as.data.frame() |>
   rownames_to_column("region") |>
-  select(region, clust)
+  select(
+    region,
+    clust
+  )
 ```
 
-# table finale d'analyse territoriale
+
+## 6.4 Noms des profils
+
+```{r}
+noms_clusters <- c(
+  "1" = "Profil francilien atypique",
+  "2" = "Profil territorial globalement favorable",
+  "3" = "Profil de santé contrasté",
+  "4" = "Profil de défavorisation et de santé défavorable"
+)
+```
+
+## 6.5 Table régionale avec les profils
+
 ```{r}
 carte_regions <- analyse_regions |>
   left_join(
     clusters_regions,
     by = "region"
   ) |>
-  select(
-    code_region,
-    region,
-    population,
-    clust,
-    fdep_pondere,
-    fedi_pondere,
-    apl_pondere,
-    sante_percue,
-    limitation_activite,
-    diabete_declare
+  mutate(
+    profil = recode(
+      factor(clust),
+      !!!noms_clusters
+    )
   )
 ```
 
-# carte
+## 6.6 Contrôle des profils obtenus
 
-## Import de la géographie
+```{r}
+carte_regions |>
+  select(
+    region,
+    clust,
+    profil
+  ) |>
+  arrange(clust, region)
+```
+
+## 6.7 Profil moyen des clusters
+
+```{r}
+profils_clusters <- carte_regions |>
+  group_by(
+    clust,
+    profil
+  ) |>
+  summarise(
+    across(
+      c(
+        z_fdep,
+        z_fedi,
+        z_apl,
+        z_sante,
+        z_limitation,
+        z_diabete
+      ),
+      mean
+    ),
+    .groups = "drop"
+  )
+
+profils_clusters
+```
+
+# 7. PRÉPARATION DES DONNÉES GÉOGRAPHIQUES
+
+## 7.1 Géométrie des régions françaises
+
 ```{r}
 regions_sf <- gisco_get_nuts(
   year = "2024",
   nuts_level = 2,
-  resolution = "20"
+  resolution = "20",
+  country = "FR"
 )
 
-regions_sf |>
-  filter(CNTR_CODE == "FR") |>
-  select(NUTS_ID, NAME_LATN)
+regions_france <- regions_sf |>
+  filter(CNTR_CODE == "FR")
 ```
 
-## Créer la correspondance : 27 à 13 régions
+
+## 7.2 Correspondance NUTS 2 vers les 13 régions analysées
 
 ```{r}
 correspondance_regions <- tribble(
   ~NUTS_ID, ~region,
+
   "FR10", "Île-de-France",
-  
+
   "FRB0", "Centre-Val de Loire",
-  
+
   "FRC1", "Bourgogne et Franche-Comté",
   "FRC2", "Bourgogne et Franche-Comté",
-  
+
   "FRD1", "Normandie",
   "FRD2", "Normandie",
-  
+
   "FRE1", "Hauts-de-France",
   "FRE2", "Hauts-de-France",
-  
+
   "FRF1", "Grand Est",
   "FRF2", "Grand Est",
   "FRF3", "Grand Est",
-  
+
   "FRG0", "Pays de la Loire",
+
   "FRH0", "Bretagne",
-  
+
   "FRI1", "Nouvelle Aquitaine",
   "FRI2", "Nouvelle Aquitaine",
   "FRI3", "Nouvelle Aquitaine",
-  
+
   "FRJ1", "Occitanie",
   "FRJ2", "Occitanie",
-  
+
   "FRK1", "Auvergne et Rhône-Alpes",
   "FRK2", "Auvergne et Rhône-Alpes",
-  
+
   "FRL0", "Provence-Alpes-Côte d'Azur",
+
   "FRM0", "Corse"
 )
 ```
 
-## Jointure
+## 7.3 Reconstruction des 13 régions
 
 ```{r}
 regions_13_sf <- regions_france |>
@@ -791,52 +600,24 @@ regions_13_sf <- regions_france |>
   )
 ```
 
+## 7.4 Association des profils à la géométrie
+
 ```{r}
 carte_hcpc <- regions_13_sf |>
   left_join(
     carte_regions |>
-      select(region, clust),
+      select(
+        region,
+        clust,
+        profil
+      ),
     by = "region"
   )
 ```
 
-## Carte des clusters
+## 7.5 Géométrie des départements
 
 ```{r}
-ggplot(carte_hcpc) +
-  geom_sf(aes(fill = factor(clust)), color = "white", linewidth = 0.4) +
-  scale_fill_brewer(
-    palette = "Set2",
-    name = "Profil"
-  ) +
-  labs(
-    title = "Quatre profils territoriaux de santé",
-    subtitle = "Classification exploratoire des 13 régions analysées"
-  ) +
-  theme_void()
-```
-```{r}
-noms_clusters <- c(
-  "1" = "Profil francilien atypique",
-  "2" = "Profil territorial globalement favorable",
-  "3" = "Profil de santé contrasté",
-  "4" = "Profil de défavorisation et de santé défavorable"
-)
-```
-
-```{r}
-carte_hcpc <- carte_hcpc |>
-  mutate(
-    profil = recode(
-      factor(clust),
-      !!!noms_clusters
-    )
-  )
-```
-
-```{r}
-# récupérer les départements
-
 departements_sf <- gisco_get_nuts(
   year = "2024",
   nuts_level = 3,
@@ -848,65 +629,49 @@ departements_france <- departements_sf |>
   filter(CNTR_CODE == "FR")
 ```
 
+
+# 8. EXPORTS POUR L'APPLICATION DASH
+
+## Base relations territoriales
+
 ```{r}
-ggplot(departements_france) +
-  geom_sf(
-    fill = "white",
-    color = "black",
-    linewidth = 0.3
-  ) +
-  theme_void()
+write_csv(
+  relations_territoriales,
+  "~/projects/Odisse_Challenge26/data/processed/relations_territoriales.csv"
+)
 ```
 
+## 8.1 Base analytique régionale
 
 ```{r}
-ggplot(carte_hcpc) +
-  geom_sf(
-    aes(fill = profil),
-    color = "white",
-    linewidth = 0.4
-  ) +
-  scale_fill_brewer(
-    palette = "Set2",
-    name = "Profil territorial"
-  ) +
-  labs(
-    title = "Quatre profils territoriaux de santé",
-    subtitle = "Classification exploratoire des 13 régions analysées"
-  ) +
-  theme_void() +
-  theme(
-    plot.title = element_text(face = "bold", size = 14),
-    plot.subtitle = element_text(size = 10),
-    legend.position = "right"
-  )
+write_csv(
+  analyse_regions,
+  "~/projects/Odisse_Challenge26/data/processed/analyse_regions.csv"
+)
 ```
-# Export base régionale cluster classique (sans géo)
+
+## 8.2 Base régionale avec classification
 
 ```{r}
-carte_hcpc_data <- carte_hcpc |>
-  st_drop_geometry() |>
-  select(region, clust, profil) |>
-  left_join(
-    analyse_regions |>
-      select(
-        code_region,
-        region,
-        population,
-        fdep_pondere,
-        fedi_pondere,
-        apl_pondere,
-        sante_percue,
-        limitation_activite,
-        diabete_declare,
-        z_fdep,
-        z_fedi,
-        z_apl,
-        z_sante,
-        z_limitation,
-        z_diabete
-      ),
-    by = "region"
+carte_hcpc_data <- carte_regions |>
+  select(
+    code_region,
+    region,
+    population,
+    clust,
+    profil,
+    fdep_pondere,
+    fedi_pondere,
+    apl_pondere,
+    sante_percue,
+    limitation_activite,
+    diabete_declare,
+    z_fdep,
+    z_fedi,
+    z_apl,
+    z_sante,
+    z_limitation,
+    z_diabete
   )
 
 write_csv(
@@ -915,7 +680,7 @@ write_csv(
 )
 ```
 
-# Export base régionale cluster (avec géo)
+## 8.3 Géométrie régionale
 
 ```{r}
 st_write(
@@ -924,7 +689,8 @@ st_write(
   delete_dsn = TRUE
 )
 ```
-# Export contour des départements
+
+## 8.4 Contours départementaux
 
 ```{r}
 st_write(
@@ -933,9 +699,4 @@ st_write(
   delete_dsn = TRUE
 )
 ```
-
-Commentaires : Création de la carte avec les clusters fonctionne dans Dash.
-
-# Enrichir carte_regions_hcpc.csv
-
 

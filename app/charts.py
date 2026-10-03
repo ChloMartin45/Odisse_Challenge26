@@ -154,3 +154,259 @@ def create_social_chart(data, variable):
     )
 
     return fig
+
+def create_fdep_health_chart(regions, relations, indicateur):
+    """
+    Crée le nuage de points entre le FDep régional
+    et un indicateur de santé.
+    """
+
+    configurations = {
+        "sante": {
+            "colonne": "sante_percue",
+            "libelle": "Santé perçue bonne ou très bonne",
+            "axe_y": "Bonne ou très bonne santé perçue (%)",
+            "titre": (
+                "La santé perçue est moins favorable "
+                "dans les territoires plus défavorisés"
+            ),
+        },
+
+        "limitation": {
+            "colonne": "limitation_activite",
+            "libelle": "Limitation d'activité",
+            "axe_y": "Limitation d'activité (%)",
+            "titre": (
+                "La limitation d'activité tend à augmenter "
+                "avec la défavorisation territoriale"
+            ),
+        },
+
+        "diabete": {
+            "colonne": "diabete_declare",
+            "libelle": "Diabète déclaré",
+            "axe_y": "Diabète déclaré (%)",
+            "titre": (
+                "Le diabète déclaré est plus fréquent "
+                "dans les territoires plus défavorisés"
+            ),
+        },
+    }
+
+    config = configurations[indicateur]
+
+    # Résultats statistiques correspondant à l'indicateur sélectionné
+    stats = relations.loc[
+        relations["indicateur"] == config["libelle"]
+    ].iloc[0]
+
+    correlation = stats["correlation_fdep"]
+    p_value = stats["p_value_fdep"]
+
+    fig = go.Figure()
+
+    # --------------------------------------------------------
+    # Régions
+    # --------------------------------------------------------
+
+    fig.add_trace(
+        go.Scatter(
+            x=regions["fdep_pondere"],
+            y=regions[config["colonne"]],
+            mode="markers",
+            text=regions["region"],
+            customdata=regions["region"],
+
+            marker=dict(
+                size=11,
+            ),
+
+            hovertemplate=(
+                "<b>%{customdata}</b><br>"
+                "FDep : %{x:.2f}<br>"
+                + config["axe_y"]
+                + " : %{y:.1f} %"
+                "<extra></extra>"
+            ),
+        )
+    )
+
+    # --------------------------------------------------------
+    # Droite de tendance
+    # --------------------------------------------------------
+
+    fig.add_trace(
+        go.Scatter(
+            x=regions["fdep_pondere"],
+            y=(
+                regions["fdep_pondere"]
+                * regions[
+                    ["fdep_pondere", config["colonne"]]
+                ].cov().iloc[0, 1]
+                / regions["fdep_pondere"].var()
+                + (
+                    regions[config["colonne"]].mean()
+                    - regions["fdep_pondere"].mean()
+                    * regions[
+                        ["fdep_pondere", config["colonne"]]
+                    ].cov().iloc[0, 1]
+                    / regions["fdep_pondere"].var()
+                )
+            ),
+            mode="lines",
+            name="Tendance linéaire",
+            hoverinfo="skip",
+        )
+    )
+
+    # --------------------------------------------------------
+    # Mise en forme
+    # --------------------------------------------------------
+
+    fig.update_layout(
+        title=config["titre"],
+        xaxis_title="Défavorisation territoriale — FDep",
+        yaxis_title=config["axe_y"],
+        height=500,
+        margin=dict(l=70, r=30, t=90, b=70),
+        showlegend=False,
+
+        annotations=[
+            dict(
+                x=0.02,
+                y=0.98,
+                xref="paper",
+                yref="paper",
+                text=(
+                    f"r = {correlation:.2f}"
+                    f" · p = {p_value:.3f}"
+                    " · n = 13"
+                ),
+                showarrow=False,
+                xanchor="left",
+                yanchor="top",
+            )
+        ],
+    )
+
+    return fig
+
+def create_apl_comparison_chart(relations):
+    """
+    Compare la corrélation brute entre l'APL et la santé
+    à la corrélation partielle après prise en compte du FDep.
+    """
+
+    labels = {
+        "Santé perçue bonne ou très bonne": "Santé perçue",
+        "Limitation d'activité": "Limitation d'activité",
+        "Diabète déclaré": "Diabète déclaré",
+    }
+
+    data = relations.copy()
+
+    data["label"] = data["indicateur"].map(labels)
+
+    fig = go.Figure()
+
+    # --------------------------------------------------------
+    # Corrélation brute avec l'APL
+    # --------------------------------------------------------
+
+    fig.add_trace(
+        go.Scatter(
+            x=data["correlation_apl"],
+            y=data["label"],
+            mode="markers",
+            name="Association brute",
+
+            marker=dict(
+                size=12,
+                symbol="circle",
+            ),
+
+            customdata=data["p_value_apl"],
+
+            hovertemplate=(
+                "<b>%{y}</b><br>"
+                "Corrélation avec l'APL : %{x:.2f}<br>"
+                "p-value : %{customdata:.3f}"
+                "<extra></extra>"
+            ),
+        )
+    )
+
+    # --------------------------------------------------------
+    # Corrélation après prise en compte du FDep
+    # --------------------------------------------------------
+
+    fig.add_trace(
+        go.Scatter(
+            x=data["correlation_partielle_apl_fdep"],
+            y=data["label"],
+            mode="markers",
+            name="Après prise en compte du FDep",
+
+            marker=dict(
+                size=12,
+                symbol="diamond",
+            ),
+
+            customdata=data["p_value_apl_apres_fdep"],
+
+            hovertemplate=(
+                "<b>%{y}</b><br>"
+                "Corrélation partielle : %{x:.2f}<br>"
+                "p-value : %{customdata:.3f}"
+                "<extra></extra>"
+            ),
+        )
+    )
+
+    # --------------------------------------------------------
+    # Ligne correspondant à l'absence de corrélation
+    # --------------------------------------------------------
+
+    fig.add_vline(
+        x=0,
+        line_dash="dash",
+        line_width=1,
+    )
+
+    # --------------------------------------------------------
+    # Mise en forme
+    # --------------------------------------------------------
+
+    fig.update_layout(
+        title=(
+            "L'accessibilité aux soins ne présente pas "
+            "la même relation avec toutes les dimensions de santé"
+        ),
+
+        xaxis=dict(
+            title="Coefficient de corrélation",
+            range=[-1, 1],
+            zeroline=False,
+        ),
+
+        yaxis_title=None,
+
+        height=400,
+
+        margin=dict(
+            l=150,
+            r=40,
+            t=90,
+            b=70,
+        ),
+
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="left",
+            x=0,
+        ),
+    )
+
+    return fig
