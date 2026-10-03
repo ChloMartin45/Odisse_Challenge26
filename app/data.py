@@ -38,6 +38,12 @@ def load_pcs():
         DATA_DIR / "indicateurs_pcs.csv"
     )
 
+def load_synthese_sociale():
+    """Charge la synthèse des écarts sociaux de santé."""
+    return pd.read_csv(
+        DATA_DIR / "synthese_sociale.csv"
+    )
+
 
 # ============================================================
 # 2. Relations territoriales

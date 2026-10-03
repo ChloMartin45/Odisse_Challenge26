@@ -29,7 +29,9 @@ diabete <- read_csv(
 )
 ```
 
-# Préparation de la base Santé générale
+# Préparation des données
+
+Les variables numériques utilisées dans l'analyse sont converties explicitement afin de sécuriser les traitements ultérieurs.
 
 ```{r}
 sante <- sante |>
@@ -42,12 +44,14 @@ sante <- sante |>
   )
 ```
 
-# Préparation de la base Diabète
-
 ```{r}
+# Les estimations égales à -30 correspondent à des valeurs non diffusées
+# en raison d'un effectif de répondants inférieur au seuil de 30.
 diabete <- diabete |>
   mutate(
     Estimation = as.numeric(Estimation),
+    Estimation = na_if(Estimation, -30),
+    
     ic_inf = as.numeric(ic_inf),
     ic_sup = as.numeric(ic_sup),
     Effectif.Brut = as.numeric(`Effectif Brut`),
@@ -55,9 +59,7 @@ diabete <- diabete |>
   )
 ```
 
-# Contrôle des données
-
-## Santé générale
+# Contrôle des données importées
 
 ```{r}
 sante |>
@@ -69,8 +71,6 @@ sante |>
     nb_estimation_manquante = sum(is.na(Estimation))
   )
 ```
-
-## Diabète
 
 ```{r}
 diabete |>
@@ -83,15 +83,12 @@ diabete |>
   )
 ```
 
-# Identification des indicateurs
+# Sélection des indicateurs étudiés
 
-## Indicateurs de santé générale
-
-```{r}
-sante |>
-  distinct(Indicateur) |>
-  arrange(Indicateur)
-```
+Trois indicateurs sont retenus :
+- santé perçue bonne ou très bonne ;
+- limitation d'activité ;
+- diabète déclaré.
 
 ```{r}
 sante_indicateurs <- sante |> 
@@ -103,14 +100,6 @@ sante_indicateurs <- sante |>
     )
 ```
 
-## Indicateur de diabète
-
-```{r}
-diabete |>
-  distinct(Indicateur) |>
-  arrange(Indicateur)
-```
-
 ```{r}
 diabete_declare <- diabete |> 
   filter(
@@ -120,7 +109,7 @@ diabete_declare <- diabete |>
 
 # Préparation des indicateurs régionaux
 
-Pour les analyses territoriales, on conserve uniquement les observations correspondant à l'ensemble des régions disponibles dans les données (Hors Mayotte) et à la population générale, sans ventilation par sexe, âge, diplôme, PCS ou situation financière.
+Les analyses territoriales utilisent les estimations régionales pour l'ensemble de la population, sans ventilation par sexe, âge, diplôme, PCS ou situation financière.
 
 ```{r}
 sante_regions <- sante_indicateurs |>
@@ -146,17 +135,27 @@ diabete_regions <- diabete_declare |>
   )
 ```
 
-# Contrôle
+## Contrôle des données régionales
 
 ```{r}
 sante_regions |>
-  count(Indicateur, `Nouvelles régions`)
+  summarise(
+    nb_observations = n(),
+    nb_regions = n_distinct(`Nouvelles régions`),
+    nb_indicateurs = n_distinct(Indicateur),
+    nb_estimations_manquantes = sum(is.na(Estimation))
+  )
 
 diabete_regions |>
-  count(Indicateur, `Nouvelles régions`)
+  summarise(
+    nb_observations = n(),
+    nb_regions = n_distinct(`Nouvelles régions`),
+    nb_indicateurs = n_distinct(Indicateur),
+    nb_estimations_manquantes = sum(is.na(Estimation))
+  )
 ```
+
 ```{r}
-# Contrôle de la couverture régionale
 sante_regions |>
   distinct(`Nouvelles régions`) |>
   arrange(`Nouvelles régions`)
@@ -164,63 +163,11 @@ sante_regions |>
 diabete_regions |>
   distinct(`Nouvelles régions`) |>
   arrange(`Nouvelles régions`)
-```
-
-```{r}
-# Contrôle final des bases régionales
-
-sante_regions |>
-  summarise(
-    nb_observations = n(),
-    nb_regions = n_distinct(`Nouvelles régions`),
-    nb_indicateurs = n_distinct(Indicateur)
-  )
-
-diabete_regions |>
-  summarise(
-    nb_observations = n(),
-    nb_regions = n_distinct(`Nouvelles régions`),
-    nb_indicateurs = n_distinct(Indicateur)
-  )
-```
-
-# Export
-
-```{r}
-# Export des bases préparées
-
-write_csv(
-  sante,
-  "~/projects/Odisse_Challenge26/data/processed/sante_preparee.csv"
-)
-
-write_csv(
-  diabete,
-  "~/projects/Odisse_Challenge26/data/processed/diabete_prepare.csv"
-)
-
-write_csv(
-  sante_indicateurs,
-  "~/projects/Odisse_Challenge26/data/processed/sante_indicateurs.csv"
-)
-
-write_csv(
-  diabete_declare,
-  "~/projects/Odisse_Challenge26/data/processed/diabete_declare.csv"
-)
-
-write_csv(
-  sante_regions,
-  "~/projects/Odisse_Challenge26/data/processed/sante_regions.csv"
-)
-
-write_csv(
-  diabete_regions,
-  "~/projects/Odisse_Challenge26/data/processed/diabete_regions.csv"
-)
 ```
 
 # Indicateurs selon la situation financière perçue
+
+Les indicateurs nationaux sont extraits en maintenant les autres dimensions sociodémographiques à la modalité « Tous ».
 
 ```{r}
 sante_finance <- sante_indicateurs |>
@@ -229,6 +176,7 @@ sante_finance <- sante_indicateurs |>
     `Classe d'âge` == "Tous",
     Diplôme == "Tous",
     PCS == "Tous",
+    !is.na(`Situation financière perçue`),
     `Situation financière perçue` != "Tous",
     `Nouvelles régions` == "Tous"
   ) |>
@@ -265,21 +213,22 @@ diabete_finance <- diabete_declare |>
 indicateurs_finance <- bind_rows(
   sante_finance,
   diabete_finance
-)
-```
-
-## Préparer les données pour l'application - onglet 1 indicateurs sociaux
-
-```{r}
-indicateurs_finance <- indicateurs_finance |>
+) |>
   mutate(
     situation_financiere = case_when(
-      `Situation financière perçue` == "Vous êtes à l’aise" ~ "À l'aise",
-      `Situation financière perçue` == "Ça va" ~ "Ça va",
-      `Situation financière perçue` == "C’est juste, il faut faire attention" ~ "C'est juste",
+      `Situation financière perçue` ==
+        "Vous êtes à l’aise" ~ "À l'aise",
+
+      `Situation financière perçue` ==
+        "Ça va" ~ "Ça va",
+
+      `Situation financière perçue` ==
+        "C’est juste, il faut faire attention" ~ "C'est juste",
+
       `Situation financière perçue` ==
         "Vous y arrivez difficilement ou vous ne pouvez pas y arriver sans faire de dette" ~
         "Difficultés financières",
+
       TRUE ~ `Situation financière perçue`
     ),
 
@@ -293,14 +242,6 @@ indicateurs_finance <- indicateurs_finance |>
       )
     )
   )
-```
-
-## Export
-```{r}
-write_csv(
-  indicateurs_finance,
-  "~/projects/Odisse_Challenge26/data/processed/indicateurs_finance.csv"
-)
 ```
 
 # Indicateurs selon le niveau de diplôme
@@ -342,18 +283,13 @@ diabete_diplome <- diabete_declare |>
     ic_sup,
     Effectif.Brut
   )
+```
 
+```{r}
 indicateurs_diplome <- bind_rows(
   sante_diplome,
   diabete_diplome
-)
-```
-
-## Préparer les données pour l'application - onglet 1 indicateurs sociaux
-
-```{r}
-# ordre des diplômes
-indicateurs_diplome <- indicateurs_diplome |>
+) |>
   mutate(
     Diplôme = factor(
       Diplôme,
@@ -366,15 +302,6 @@ indicateurs_diplome <- indicateurs_diplome |>
   )
 ```
 
-## Export 
-
-```{r}
-write_csv(
-  indicateurs_diplome,
-  "~/projects/Odisse_Challenge26/data/processed/indicateurs_diplome.csv"
-)
-```
-
 # Indicateurs selon la pcs
 
 ```{r}
@@ -383,6 +310,7 @@ sante_pcs <- sante_indicateurs |>
     Sexe == "Tous",
     `Classe d'âge` == "Tous",
     Diplôme == "Tous",
+    !is.na(PCS),
     PCS != "Tous",
     `Situation financière perçue` == "Tous",
     `Nouvelles régions` == "Tous"
@@ -414,19 +342,245 @@ diabete_pcs <- diabete_declare |>
     ic_sup,
     Effectif.Brut
   )
+```
 
+```{r}
 indicateurs_pcs <- bind_rows(
   sante_pcs,
   diabete_pcs
 )
 ```
 
-## Export 
+# Synthèse des écarts sociaux de santé
+
+La synthèse utilisée dans l'application compare les situations extrêmes pour chaque dimension sociale.
+
+Pour la situation financière et le diplôme, les catégories comparées sont définies par l'ordre de la variable.
+
+Pour la catégorie socioprofessionnelle, qui ne constitue pas une échelle ordonnée, l'écart correspond uniquement à l'amplitude entre les valeurs minimale et maximale observées pour chaque indicateur.
+
+## Situation financière
 
 ```{r}
+synthese_finance <- indicateurs_finance |>
+  filter(
+    situation_financiere %in% c(
+      "À l'aise",
+      "Difficultés financières"
+    )
+  ) |>
+  mutate(
+    situation_financiere = as.character(situation_financiere)
+  ) |>
+  select(
+    Indicateur,
+    situation_financiere,
+    Estimation
+  ) |>
+  pivot_wider(
+    names_from = situation_financiere,
+    values_from = Estimation
+  ) |>
+  transmute(
+    dimension = "finance",
+    dimension_label = "Situation financière",
+    indicateur = Indicateur,
+
+    groupe_reference = "À l'aise",
+    valeur_reference = `À l'aise`,
+
+    groupe_comparaison = "Difficultés financières",
+    valeur_comparaison = `Difficultés financières`,
+
+    ecart = valeur_comparaison - valeur_reference,
+
+    type_comparaison = "categories_ordonnees"
+  )
+```
+
+## Niveau de diplôme 
+
+Pour faciliter la lecture, la catégorie présentant le niveau de diplôme le plus élevé est utilisée comme référence.
+
+```{r}
+synthese_diplome <- indicateurs_diplome |>
+  filter(
+    Diplôme %in% c(
+      "Aucun diplôme ou inférieur au Bac",
+      "Supérieur au Bac"
+    )
+  ) |>
+  mutate(
+    Diplôme = as.character(Diplôme)
+  ) |>
+  select(
+    Indicateur,
+    Diplôme,
+    Estimation
+  ) |>
+  pivot_wider(
+    names_from = Diplôme,
+    values_from = Estimation
+  ) |>
+  transmute(
+    dimension = "diplome",
+    dimension_label = "Niveau de diplôme",
+    indicateur = Indicateur,
+
+    groupe_reference = "Supérieur au Bac",
+    valeur_reference = `Supérieur au Bac`,
+
+    groupe_comparaison = "Aucun diplôme ou inférieur au Bac",
+    valeur_comparaison = `Aucun diplôme ou inférieur au Bac`,
+
+    ecart = valeur_comparaison - valeur_reference,
+
+    type_comparaison = "categories_ordonnees"
+  )
+```
+
+## Catégorie socioprofessionnelle
+
+```{r}
+synthese_pcs <- indicateurs_pcs |>
+  filter(!is.na(Estimation)) |>
+  group_by(Indicateur) |>
+  summarise(
+    groupe_reference = PCS[which.min(Estimation)],
+    valeur_reference = min(Estimation),
+
+    groupe_comparaison = PCS[which.max(Estimation)],
+    valeur_comparaison = max(Estimation),
+
+    ecart = valeur_comparaison - valeur_reference,
+
+    .groups = "drop"
+  ) |>
+  mutate(
+    dimension = "pcs",
+    dimension_label = "Catégorie socioprofessionnelle",
+    type_comparaison = "extremes_observes"
+  ) |>
+  select(
+    dimension,
+    dimension_label,
+    indicateur = Indicateur,
+    groupe_reference,
+    valeur_reference,
+    groupe_comparaison,
+    valeur_comparaison,
+    ecart,
+    type_comparaison
+  )
+```
+
+## Construction de la base de synthèse 
+
+```{r}
+synthese_sociale <- bind_rows(
+  synthese_finance,
+  synthese_diplome,
+  synthese_pcs
+) |>
+  mutate(
+    indicateur = factor(
+      indicateur,
+      levels = c(
+        "Santé perçue bonne ou très bonne",
+        "Limitation d'activité",
+        "Diabète déclaré"
+      )
+    ),
+
+    dimension = factor(
+      dimension,
+      levels = c(
+        "finance",
+        "diplome",
+        "pcs"
+      )
+    )
+  ) |>
+  arrange(
+    dimension,
+    indicateur
+  )
+```
+
+## Contrôle de la synthèse
+
+On attend trois dimensions sociales × trois indicateurs de santé, soit neuf comparaisons.
+
+```{r}
+synthese_sociale
+
+synthese_sociale |>
+  count(dimension)
+
+synthese_sociale |>
+  summarise(
+    nb_lignes = n(),
+    nb_dimensions = n_distinct(dimension),
+    nb_indicateurs = n_distinct(indicateur),
+    nb_ecarts_manquants = sum(is.na(ecart))
+  )
+```
+
+```{r}
+# Contrôle des estimations de diabète utilisées dans les analyses
+
+bind_rows(
+  regions = diabete_regions,
+  finance = diabete_finance,
+  diplome = diabete_diplome,
+  pcs = diabete_pcs,
+  .id = "analyse"
+) |>
+  group_by(analyse) |>
+  summarise(
+    nb_observations = n(),
+    nb_estimations_manquantes = sum(is.na(Estimation)),
+    .groups = "drop"
+  )
+```
+
+# Export des données préparées 
+
+Seules les bases nécessaires aux étapes suivantes du projet ou à l'application sont exportées.
+
+```{r}
+write_csv(
+  sante_regions,
+  "~/projects/Odisse_Challenge26/data/processed/sante_regions.csv"
+)
+
+write_csv(
+  diabete_regions,
+  "~/projects/Odisse_Challenge26/data/processed/diabete_regions.csv"
+)
+
+write_csv(
+  indicateurs_finance,
+  "~/projects/Odisse_Challenge26/data/processed/indicateurs_finance.csv"
+)
+
+write_csv(
+  indicateurs_diplome,
+  "~/projects/Odisse_Challenge26/data/processed/indicateurs_diplome.csv"
+)
+
 write_csv(
   indicateurs_pcs,
   "~/projects/Odisse_Challenge26/data/processed/indicateurs_pcs.csv"
 )
+
+write_csv(
+  synthese_sociale,
+  "~/projects/Odisse_Challenge26/data/processed/synthese_sociale.csv"
+)
 ```
+
+
+
+
 

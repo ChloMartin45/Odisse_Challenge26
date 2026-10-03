@@ -1,0 +1,58 @@
+/* ==========================================================
+   SYNTHÈSE — INÉGALITÉS SOCIALES
+   ========================================================== */
+
+   .summary-grid {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.5fr) repeat(3, 1fr);
+    margin-top: 24px;
+    margin-bottom: 16px;
+    border: 1px solid #e2e6ea;
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+}
+
+.summary-cell {
+    padding: 18px 16px;
+    border-right: 1px solid #e2e6ea;
+    border-bottom: 1px solid #e2e6ea;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+}
+
+.summary-cell:nth-child(4n) {
+    border-right: none;
+}
+
+.summary-cell:nth-last-child(-n + 4) {
+    border-bottom: none;
+}
+
+.summary-header {
+    font-weight: 600;
+    text-align: center;
+    background: #f5f7fa;
+}
+
+.summary-row-label {
+    align-items: flex-start;
+}
+
+.summary-comparison {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    opacity: 0.7;
+}
+
+.summary-cell strong {
+    font-size: 1.05rem;
+}
+
+.summary-row-label strong {
+    font-size: 0.95rem;
+}

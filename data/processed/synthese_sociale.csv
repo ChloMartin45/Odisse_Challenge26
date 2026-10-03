@@ -1,0 +1,10 @@
+dimension,dimension_label,indicateur,groupe_reference,valeur_reference,groupe_comparaison,valeur_comparaison,ecart,type_comparaison
+finance,Situation financière,Santé perçue bonne ou très bonne,À l'aise,82.5,Difficultés financières,50.4,-32.1,categories_ordonnees
+finance,Situation financière,Limitation d'activité,À l'aise,16.3,Difficultés financières,40.1,23.8,categories_ordonnees
+finance,Situation financière,Diabète déclaré,À l'aise,4.5,Difficultés financières,9.3,4.800000000000001,categories_ordonnees
+diplome,Niveau de diplôme,Santé perçue bonne ou très bonne,Supérieur au Bac,77.6,Aucun diplôme ou inférieur au Bac,58,-19.599999999999994,categories_ordonnees
+diplome,Niveau de diplôme,Limitation d'activité,Supérieur au Bac,19.4,Aucun diplôme ou inférieur au Bac,33.4,14,categories_ordonnees
+diplome,Niveau de diplôme,Diabète déclaré,Supérieur au Bac,3.3,Aucun diplôme ou inférieur au Bac,11.5,8.2,categories_ordonnees
+pcs,Catégorie socioprofessionnelle,Santé perçue bonne ou très bonne,Ouvriers,61.7,Cadres et professions intellectuelles supérieures,77.9,16.200000000000003,extremes_observes
+pcs,Catégorie socioprofessionnelle,Limitation d'activité,Cadres et professions intellectuelles supérieures,19.9,Ouvriers,30.9,11,extremes_observes
+pcs,Catégorie socioprofessionnelle,Diabète déclaré,Cadres et professions intellectuelles supérieures,4.5,Ouvriers,11,6.5,extremes_observes
