@@ -60,15 +60,69 @@ def register_callbacks(app):
 
     @app.callback(
         Output("fdep-health-chart", "figure"),
+        Output("fdep-interpretation", "children"),
         Input("territorial-health-variable", "value"),
     )
     def update_fdep_health_chart(indicateur):
 
-        return create_fdep_health_chart(
+        # ----------------------------------------------------
+        # Graphique
+        # ----------------------------------------------------
+
+        figure = create_fdep_health_chart(
             analyse_regions,
             relations_territoriales,
             indicateur,
         )
+
+        # ----------------------------------------------------
+        # Correspondance avec relations_territoriales.csv
+        # ----------------------------------------------------
+
+        indicateurs = {
+            "sante": "Santé perçue bonne ou très bonne",
+            "limitation": "Limitation d'activité",
+            "diabete": "Diabète déclaré",
+        }
+
+        nom_indicateur = indicateurs[indicateur]
+
+        relation = relations_territoriales.loc[
+            relations_territoriales["indicateur"] == nom_indicateur
+        ].iloc[0]
+
+        r = relation["correlation_fdep"]
+        p = relation["p_value_fdep"]
+
+        # ----------------------------------------------------
+        # Interprétation
+        # ----------------------------------------------------
+
+        interpretations = {
+            "sante": (
+                "Une défavorisation territoriale plus élevée est associée "
+                "à une moins bonne santé perçue dans les régions étudiées."
+            ),
+            "limitation": (
+                "La relation observée entre défavorisation territoriale "
+                "et limitation d'activité est plus modérée et plus incertaine."
+            ),
+            "diabete": (
+                "Les régions présentant une défavorisation territoriale "
+                "plus élevée tendent également à présenter davantage "
+                "de diabète déclaré."
+            ),
+        }
+
+        interpretation = html.P([
+            interpretations[indicateur],
+            html.Br(),
+            html.Strong(
+                f"r = {r:.2f} · p = {p:.3f}"
+            ),
+        ])
+
+        return figure, interpretation
 
     # ========================================================
     # 3. Fiche régionale et profil standardisé
@@ -77,6 +131,7 @@ def register_callbacks(app):
     @app.callback(
         Output("region-details", "children"),
         Output("region-profile", "figure"),
+        Output("region-profile-container", "style"),
         Input("map-profiles", "clickData"),
     )
     def update_region_details(click_data):
@@ -91,9 +146,10 @@ def register_callbacks(app):
                 html.H2("Explorer une région"),
                 html.P(
                     "Sélectionnez une région sur la carte "
-                    "pour afficher son profil territorial."
+                    "pour afficher ses indicateurs et situer son profil "
+                    "par rapport aux 13 régions étudiées."
                 ),
-            ], {}
+            ], {}, {"display": "none"}
 
         # ----------------------------------------------------
         # Région sélectionnée
@@ -160,4 +216,4 @@ def register_callbacks(app):
             region_name,
         )
 
-        return details, profile_figure
+        return details, profile_figure, {"display": "block"}

@@ -637,16 +637,34 @@ def create_territorial_tab(
 
     return html.Div([
 
-        html.H2(
+        # ----------------------------------------------------
+        # Introduction
+        # ----------------------------------------------------
+
+        html.P(
+            "02 — TERRITOIRES & SOINS",
+            className="section-label",
+        ),
+
+        html.H1(
             "Les inégalités de santé se retrouvent-elles "
             "à l'échelle des territoires ?"
+        ),
+
+        html.P(
+            "Après avoir observé des différences de santé entre groupes sociaux, "
+            "l'analyse se déplace à l'échelle territoriale. Les 13 régions "
+            "métropolitaines sont comparées selon leur niveau de défavorisation, "
+            "leur accessibilité aux médecins généralistes et leurs indicateurs "
+            "de santé.",
+            className="intro",
         ),
 
         # ----------------------------------------------------
         # FDep
         # ----------------------------------------------------
 
-        html.H3(
+        html.H2(
             "Défavorisation territoriale et santé"
         ),
 
@@ -654,6 +672,31 @@ def create_territorial_tab(
             "Les régions plus défavorisées présentent-elles "
             "des indicateurs de santé différents ?"
         ),
+
+        # Repère de lecture FDep
+
+        html.Div([
+
+            html.Strong(
+                "FDep — défavorisation territoriale"
+            ),
+
+            html.P(
+                "Le FDep est un indice synthétique construit à partir de "
+                "caractéristiques socio-économiques des territoires. "
+                "Une valeur plus élevée correspond à un territoire "
+                "plus défavorisé."
+            ),
+
+            html.P(
+                "Il caractérise le contexte socio-économique d'un territoire "
+                "et non la situation sociale individuelle de ses habitants.",
+                className="indicator-direction",
+            ),
+
+        ], className="reading-guide"),
+
+        # Sélecteur
 
         dcc.RadioItems(
             id="territorial-health-variable",
@@ -673,7 +716,10 @@ def create_territorial_tab(
             ],
             value="sante",
             inline=True,
+            className="selector",
         ),
+
+        # Graphique FDep
 
         dcc.Graph(
             id="fdep-health-chart",
@@ -687,14 +733,23 @@ def create_territorial_tab(
         html.P(
             "Lecture : chaque point représente une région métropolitaine. "
             "Le coefficient r mesure l'intensité et le sens de la relation "
-            "linéaire entre les deux indicateurs."
+            "linéaire entre les deux indicateurs.",
+            className="graph-note",
+        ),
+
+        # Commentaire dynamique
+        # Le contenu sera piloté par le même sélecteur que le graphique.
+
+        html.Div(
+            id="fdep-interpretation",
+            className="result-note",
         ),
 
         # ----------------------------------------------------
         # APL
         # ----------------------------------------------------
 
-        html.H3(
+        html.H2(
             "Accessibilité aux soins"
         ),
 
@@ -703,6 +758,41 @@ def create_territorial_tab(
             "une information supplémentaire à la défavorisation territoriale ?"
         ),
 
+        # Repère de lecture APL
+
+        html.Div([
+
+            html.Strong(
+                "APL — accessibilité aux médecins généralistes"
+            ),
+
+            html.P(
+                "L'Accessibilité potentielle localisée mesure l'accessibilité "
+                "à l'offre de médecins généralistes en tenant compte de l'offre "
+                "disponible et de la demande potentielle. Une valeur plus élevée "
+                "correspond à une meilleure accessibilité."
+            ),
+
+        ], className="reading-guide"),
+
+        # Explication de l'ajustement
+
+        html.Div([
+
+            html.Strong(
+                "Pourquoi prendre en compte le FDep ?"
+            ),
+
+            html.P(
+                "L'objectif est d'examiner si la relation entre accessibilité "
+                "aux soins et santé subsiste une fois isolée statistiquement "
+                "la relation linéaire avec la défavorisation territoriale."
+            ),
+
+        ], className="method-note"),
+
+        # Graphique APL
+
         dcc.Graph(
             id="apl-comparison-chart",
             figure=create_apl_comparison_chart(
@@ -710,11 +800,125 @@ def create_territorial_tab(
             ),
         ),
 
-        html.P(
-            "Ces analyses sont exploratoires et portent sur 13 régions "
-            "métropolitaines. Elles décrivent des associations territoriales "
-            "et ne permettent pas d'établir une relation causale ou individuelle."
-        ),
+        # ----------------------------------------------------
+        # À retenir
+        # ----------------------------------------------------
+
+        html.Div([
+
+            html.P(
+                "À RETENIR",
+                className="section-label",
+            ),
+
+            html.P(
+                "La défavorisation territoriale est nettement associée à "
+                "plusieurs indicateurs de santé, notamment la santé perçue "
+                "et le diabète déclaré. L'accessibilité aux médecins "
+                "généralistes apporte une lecture différente : après prise "
+                "en compte du FDep, la relation la plus marquée concerne "
+                "la limitation d'activité, mais elle reste incertaine compte "
+                "tenu du faible nombre de régions étudiées."
+            ),
+
+        ], className="takeaway"),
+
+        # ----------------------------------------------------
+        # Précautions
+        # ----------------------------------------------------
+
+        html.Div([
+
+            html.H3(
+                "Précautions de lecture"
+            ),
+
+            html.P(
+                "Ces analyses sont exploratoires et portent sur 13 régions "
+                "métropolitaines. Les corrélations décrivent des associations "
+                "entre caractéristiques régionales et ne permettent d'établir "
+                "ni causalité ni relation individuelle. Avec seulement "
+                "13 observations, les résultats doivent être interprétés "
+                "avec prudence."
+            ),
+
+        ], className="method-note"),
+
+        # ----------------------------------------------------
+        # Sources
+        # ----------------------------------------------------
+
+        html.Div([
+
+            html.Strong("Sources : "),
+
+            html.A(
+                "Indice de défavorisation sociale FDep",
+                href=(
+                    "https://odisse.santepubliquefrance.fr/"
+                    "explore/assets/"
+                    "indice-de-defavorisation-sociale-fdep-par-commune/"
+                ),
+                target="_blank",
+            ),
+
+            html.Span(" · "),
+
+            html.A(
+                "Accessibilité potentielle localisée (APL)",
+                href=(
+                    "https://www.observatoire-des-territoires.gouv.fr/"
+                    "accessibilite-potentielle-localisee-apl-"
+                    "aux-medecins-generalistes"
+                ),
+                target="_blank",
+            ),
+
+            html.Span(" · "),
+
+            html.A(
+                "Santé générale — Baromètre 2024",
+                href=(
+                    "https://odisse.santepubliquefrance.fr/"
+                    "explore/assets/"
+                    "sante_generale_indicateurs_barometre_2024/"
+                ),
+                target="_blank",
+            ),
+
+            html.Span(" · "),
+
+            html.A(
+                "Diabète — Baromètre 2024",
+                href=(
+                    "https://odisse.santepubliquefrance.fr/"
+                    "explore/assets/"
+                    "diabete-indicateurs-du-barometre-2024/"
+                ),
+                target="_blank",
+            ),
+
+            html.Span(
+                " — Santé publique France, Odissé "
+                "et Observatoire des territoires."
+            ),
+
+        ], className="sources"),
+
+        # ----------------------------------------------------
+        # Transition
+        # ----------------------------------------------------
+
+        html.Div([
+
+            html.P(
+                "Les territoires ne se distinguent donc pas selon une seule "
+                "dimension. Que se passe-t-il lorsque défavorisation, "
+                "accessibilité aux soins et état de santé sont considérés "
+                "simultanément ?"
+            ),
+
+        ], className="transition"),
 
     ], className="tab-content")
 
@@ -727,45 +931,290 @@ def create_profiles_tab(map_figure):
 
     return html.Div([
 
-        html.H2(
+        # ----------------------------------------------------
+        # Introduction
+        # ----------------------------------------------------
+
+        html.P(
+            "03 — PROFILS TERRITORIAUX",
+            className="section-label",
+        ),
+
+        html.H1(
             "Comment ces dimensions se combinent-elles "
             "selon les régions ?"
         ),
 
         html.P(
-            "Une classification exploratoire permet d'étudier conjointement "
-            "la défavorisation, l'accessibilité aux soins et les indicateurs "
-            "de santé."
+            "Les analyses précédentes ont étudié séparément la "
+            "défavorisation territoriale, l'accessibilité aux soins "
+            "et les indicateurs de santé. Cette dernière étape les "
+            "considère simultanément afin d'identifier différentes "
+            "configurations territoriales.",
+            className="intro",
+        ),
+
+        # ----------------------------------------------------
+        # Méthode simplifiée
+        # ----------------------------------------------------
+
+        html.Div([
+
+            html.H2(
+                "Six indicateurs pour comparer les territoires"
+            ),
+
+            html.P(
+                "Les 13 régions métropolitaines sont comparées à partir "
+                "de six indicateurs décrivant leur contexte social, "
+                "leur accessibilité aux médecins généralistes et "
+                "l'état de santé de leur population."
+            ),
+
+            html.Div([
+
+                html.Div([
+                    html.Strong("Défavorisation"),
+                    html.P("FDep et F-EDI"),
+                ], className="indicator-card"),
+
+                html.Div([
+                    html.Strong("Accessibilité aux soins"),
+                    html.P(
+                        "APL aux médecins généralistes"
+                    ),
+                ], className="indicator-card"),
+
+                html.Div([
+                    html.Strong("Santé"),
+                    html.P(
+                        "Santé perçue, limitation d'activité "
+                        "et diabète déclaré"
+                    ),
+                ], className="indicator-card"),
+
+            ], className="indicator-grid"),
+
+            html.P(
+                "Une classification exploratoire rapproche les régions "
+                "présentant des caractéristiques similaires. "
+                "Quatre profils territoriaux se dégagent de cette analyse.",
+                className="graph-note",
+            ),
+
+        ], className="reading-guide"),
+
+        # ----------------------------------------------------
+        # Les quatre profils
+        # ----------------------------------------------------
+
+        html.H2(
+            "Quatre profils territoriaux se dégagent"
         ),
 
         html.P(
-            "Cliquez sur une région pour explorer son profil."
+            "Ces profils ne constituent pas un classement des régions. "
+            "Ils décrivent différentes combinaisons des caractéristiques "
+            "sociales, de l'accessibilité aux soins et de la santé."
+        ),
+
+        html.Div([
+
+            html.Div([
+                html.Strong(
+                    "Profil francilien atypique"
+                ),
+                html.P(
+                    "Un profil propre à l'Île-de-France, qui se distingue "
+                    "des autres régions par une combinaison particulière "
+                    "des indicateurs étudiés."
+                ),
+                html.P(
+                    "1 région : Île-de-France",
+                    className="profile-regions",
+                ),
+            ], className="profile-card"),
+
+            html.Div([
+                html.Strong(
+                    "Profil territorial globalement favorable"
+                ),
+                html.P(
+                    "Des régions présentant globalement des indicateurs "
+                    "plus favorables que la moyenne des régions étudiées "
+                    "sur plusieurs dimensions."
+                ),
+                html.P(
+                    "3 régions : Pays de la Loire, Bretagne "
+                    "et Auvergne-Rhône-Alpes",
+                    className="profile-regions",
+                ),
+            ], className="profile-card"),
+
+            html.Div([
+                html.Strong(
+                    "Profil de santé contrasté"
+                ),
+                html.P(
+                    "Des territoires dont les indicateurs ne vont pas "
+                    "tous dans le même sens, faisant apparaître une "
+                    "configuration de santé plus contrastée."
+                ),
+                html.P(
+                    "4 régions : Nouvelle-Aquitaine, Occitanie, "
+                    "Provence-Alpes-Côte d'Azur et Corse",
+                    className="profile-regions",
+                ),
+            ], className="profile-card"),
+
+            html.Div([
+                html.Strong(
+                    "Profil de défavorisation et de santé défavorable"
+                ),
+                html.P(
+                    "Des régions qui cumulent davantage de caractéristiques "
+                    "territoriales et sanitaires défavorables relativement "
+                    "aux autres régions étudiées."
+                ),
+                html.P(
+                    "5 régions : Centre-Val de Loire, "
+                    "Bourgogne-Franche-Comté, Normandie, "
+                    "Hauts-de-France et Grand Est",
+                    className="profile-regions",
+                ),
+            ], className="profile-card"),
+
+        ], className="profiles-grid"),
+
+        # ----------------------------------------------------
+        # Carte
+        # ----------------------------------------------------
+
+        html.H2(
+            "Comment ces profils se répartissent-ils "
+            "sur le territoire ?"
+        ),
+
+        html.P(
+            "La carte représente le profil auquel appartient chaque "
+            "région métropolitaine étudiée. Cliquez sur une région "
+            "pour explorer ses indicateurs."
         ),
 
         dcc.Graph(
             id="map-profiles",
             figure=map_figure,
+            config={
+                "scrollZoom": False,
+                "displayModeBar": False,
+                "doubleClick": False,
+            },
         ),
+
+        # ----------------------------------------------------
+        # Exploration d'une région
+        # ----------------------------------------------------
 
         html.Div(
             id="region-details",
             children=[
 
-                html.H3(
+                html.H2(
                     "Explorer une région"
                 ),
 
                 html.P(
-                    "Sélectionnez une région sur la carte "
-                    "pour afficher son profil territorial."
+                    "Sélectionnez une région sur la carte pour afficher "
+                    "ses indicateurs et situer son profil par rapport "
+                    "aux 13 régions étudiées."
                 ),
 
             ],
+            className="region-details",
         ),
 
-        dcc.Graph(
-            id="region-profile"
+        # Le graphique sera masqué tant qu'aucune région
+        # n'est sélectionnée grâce au callback.
+
+        html.Div(
+            id="region-profile-container",
+            children=[
+
+                html.Div([
+
+                    html.H3(
+                        "Comment lire ce graphique ?"
+                    ),
+
+                    html.P(
+                        "Les indicateurs sont standardisés par rapport "
+                        "aux 13 régions étudiées. La ligne 0 représente "
+                        "leur moyenne. Ils ont été orientés dans le même "
+                        "sens : une valeur positive correspond à une "
+                        "situation relativement plus défavorable et une "
+                        "valeur négative à une situation relativement "
+                        "plus favorable."
+                    ),
+
+                ], className="reading-guide"),
+
+                dcc.Graph(
+                    id="region-profile"
+                ),
+
+            ],
+            style={"display": "none"},
         ),
+
+        # ----------------------------------------------------
+        # À retenir
+        # ----------------------------------------------------
+
+        html.Div([
+
+            html.P(
+                "À RETENIR",
+                className="section-label",
+            ),
+
+            html.P(
+                "Les régions ne se différencient pas selon une seule "
+                "dimension. La combinaison de la défavorisation "
+                "territoriale, de l'accessibilité aux soins et des "
+                "indicateurs de santé fait apparaître plusieurs "
+                "configurations territoriales. L'accès aux soins "
+                "contribue ainsi à caractériser les territoires, "
+                "mais ne résume pas à lui seul les inégalités de "
+                "santé observées."
+            ),
+
+        ], className="takeaway"),
+
+        # ----------------------------------------------------
+        # Précautions
+        # ----------------------------------------------------
+
+        html.Div([
+
+            html.H3(
+                "Précautions de lecture"
+            ),
+
+            html.P(
+                "Cette typologie est exploratoire et porte sur "
+                "13 régions métropolitaines. Elle décrit des proximités "
+                "entre territoires à partir des indicateurs retenus "
+                "et ne constitue ni un classement ni une typologie "
+                "définitive des régions françaises."
+            ),
+
+            html.P(
+                "Le profil francilien est constitué de la seule "
+                "Île-de-France. Son interprétation doit donc être "
+                "particulièrement prudente."
+            ),
+
+        ], className="method-note"),
 
     ], className="tab-content")
 
