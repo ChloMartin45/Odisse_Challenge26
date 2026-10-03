@@ -835,6 +835,31 @@ carte_hcpc <- carte_hcpc |>
 ```
 
 ```{r}
+# récupérer les départements
+
+departements_sf <- gisco_get_nuts(
+  year = "2024",
+  nuts_level = 3,
+  resolution = "20",
+  country = "FR"
+)
+
+departements_france <- departements_sf |>
+  filter(CNTR_CODE == "FR")
+```
+
+```{r}
+ggplot(departements_france) +
+  geom_sf(
+    fill = "white",
+    color = "black",
+    linewidth = 0.3
+  ) +
+  theme_void()
+```
+
+
+```{r}
 ggplot(carte_hcpc) +
   geom_sf(
     aes(fill = profil),
@@ -860,11 +885,57 @@ ggplot(carte_hcpc) +
 
 ```{r}
 carte_hcpc_data <- carte_hcpc |>
-  st_drop_geometry()
+  st_drop_geometry() |>
+  select(region, clust, profil) |>
+  left_join(
+    analyse_regions |>
+      select(
+        code_region,
+        region,
+        population,
+        fdep_pondere,
+        fedi_pondere,
+        apl_pondere,
+        sante_percue,
+        limitation_activite,
+        diabete_declare,
+        z_fdep,
+        z_fedi,
+        z_apl,
+        z_sante,
+        z_limitation,
+        z_diabete
+      ),
+    by = "region"
+  )
 
 write_csv(
   carte_hcpc_data,
   "~/projects/Odisse_Challenge26/data/processed/carte_regions_hcpc.csv"
 )
 ```
+
+# Export base régionale cluster (avec géo)
+
+```{r}
+st_write(
+  carte_hcpc,
+  "~/projects/Odisse_Challenge26/data/processed/regions_hcpc.geojson",
+  delete_dsn = TRUE
+)
+```
+# Export contour des départements
+
+```{r}
+st_write(
+  departements_france,
+  "~/projects/Odisse_Challenge26/data/processed/departements.geojson",
+  delete_dsn = TRUE
+)
+```
+
+Commentaires : Création de la carte avec les clusters fonctionne dans Dash.
+
+# Enrichir carte_regions_hcpc.csv
+
 

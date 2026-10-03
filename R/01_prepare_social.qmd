@@ -219,3 +219,214 @@ write_csv(
   "~/projects/Odisse_Challenge26/data/processed/diabete_regions.csv"
 )
 ```
+
+# Indicateurs selon la situation financière perçue
+
+```{r}
+sante_finance <- sante_indicateurs |>
+  filter(
+    Sexe == "Tous",
+    `Classe d'âge` == "Tous",
+    Diplôme == "Tous",
+    PCS == "Tous",
+    `Situation financière perçue` != "Tous",
+    `Nouvelles régions` == "Tous"
+  ) |>
+  select(
+    Indicateur,
+    `Situation financière perçue`,
+    Estimation,
+    ic_inf,
+    ic_sup,
+    Effectif.Brut
+  )
+
+diabete_finance <- diabete_declare |>
+  filter(
+    Sexe == "Tous",
+    `Classe d'âge` == "Tous",
+    Diplôme == "Tous",
+    PCS == "Tous",
+    !is.na(`Situation financière perçue`),
+    `Situation financière perçue` != "Tous",
+    `Nouvelles régions` == "Tous"
+  ) |>
+  select(
+    Indicateur,
+    `Situation financière perçue`,
+    Estimation,
+    ic_inf,
+    ic_sup,
+    Effectif.Brut
+  )
+```
+
+```{r}
+indicateurs_finance <- bind_rows(
+  sante_finance,
+  diabete_finance
+)
+```
+
+## Préparer les données pour l'application - onglet 1 indicateurs sociaux
+
+```{r}
+indicateurs_finance <- indicateurs_finance |>
+  mutate(
+    situation_financiere = case_when(
+      `Situation financière perçue` == "Vous êtes à l’aise" ~ "À l'aise",
+      `Situation financière perçue` == "Ça va" ~ "Ça va",
+      `Situation financière perçue` == "C’est juste, il faut faire attention" ~ "C'est juste",
+      `Situation financière perçue` ==
+        "Vous y arrivez difficilement ou vous ne pouvez pas y arriver sans faire de dette" ~
+        "Difficultés financières",
+      TRUE ~ `Situation financière perçue`
+    ),
+
+    situation_financiere = factor(
+      situation_financiere,
+      levels = c(
+        "À l'aise",
+        "Ça va",
+        "C'est juste",
+        "Difficultés financières"
+      )
+    )
+  )
+```
+
+## Export
+```{r}
+write_csv(
+  indicateurs_finance,
+  "~/projects/Odisse_Challenge26/data/processed/indicateurs_finance.csv"
+)
+```
+
+# Indicateurs selon le niveau de diplôme
+
+```{r}
+sante_diplome <- sante_indicateurs |>
+  filter(
+    Sexe == "Tous",
+    `Classe d'âge` == "Tous",
+    Diplôme != "Tous",
+    PCS == "Tous",
+    `Situation financière perçue` == "Tous",
+    `Nouvelles régions` == "Tous"
+  ) |>
+  select(
+    Indicateur,
+    Diplôme,
+    Estimation,
+    ic_inf,
+    ic_sup,
+    Effectif.Brut
+  )
+
+diabete_diplome <- diabete_declare |>
+  filter(
+    Sexe == "Tous",
+    `Classe d'âge` == "Tous",
+    !is.na(Diplôme),
+    Diplôme != "Tous",
+    PCS == "Tous",
+    `Situation financière perçue` == "Tous",
+    `Nouvelles régions` == "Tous"
+  ) |>
+  select(
+    Indicateur,
+    Diplôme,
+    Estimation,
+    ic_inf,
+    ic_sup,
+    Effectif.Brut
+  )
+
+indicateurs_diplome <- bind_rows(
+  sante_diplome,
+  diabete_diplome
+)
+```
+
+## Préparer les données pour l'application - onglet 1 indicateurs sociaux
+
+```{r}
+# ordre des diplômes
+indicateurs_diplome <- indicateurs_diplome |>
+  mutate(
+    Diplôme = factor(
+      Diplôme,
+      levels = c(
+        "Aucun diplôme ou inférieur au Bac",
+        "Bac",
+        "Supérieur au Bac"
+      )
+    )
+  )
+```
+
+## Export 
+
+```{r}
+write_csv(
+  indicateurs_diplome,
+  "~/projects/Odisse_Challenge26/data/processed/indicateurs_diplome.csv"
+)
+```
+
+# Indicateurs selon la pcs
+
+```{r}
+sante_pcs <- sante_indicateurs |>
+  filter(
+    Sexe == "Tous",
+    `Classe d'âge` == "Tous",
+    Diplôme == "Tous",
+    PCS != "Tous",
+    `Situation financière perçue` == "Tous",
+    `Nouvelles régions` == "Tous"
+  ) |>
+  select(
+    Indicateur,
+    PCS,
+    Estimation,
+    ic_inf,
+    ic_sup,
+    Effectif.Brut
+  )
+
+diabete_pcs <- diabete_declare |>
+  filter(
+    Sexe == "Tous",
+    `Classe d'âge` == "Tous",
+    Diplôme == "Tous",
+    !is.na(PCS),
+    PCS != "Tous",
+    `Situation financière perçue` == "Tous",
+    `Nouvelles régions` == "Tous"
+  ) |>
+  select(
+    Indicateur,
+    PCS,
+    Estimation,
+    ic_inf,
+    ic_sup,
+    Effectif.Brut
+  )
+
+indicateurs_pcs <- bind_rows(
+  sante_pcs,
+  diabete_pcs
+)
+```
+
+## Export 
+
+```{r}
+write_csv(
+  indicateurs_pcs,
+  "~/projects/Odisse_Challenge26/data/processed/indicateurs_pcs.csv"
+)
+```
+

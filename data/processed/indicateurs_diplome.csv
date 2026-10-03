@@ -1,0 +1,10 @@
+Indicateur,Diplôme,Estimation,ic_inf,ic_sup,Effectif.Brut
+Limitation d'activité,Aucun diplôme ou inférieur au Bac,33.4,32.3,34.4,11853
+Limitation d'activité,Supérieur au Bac,19.4,18.6,20.1,14702
+Limitation d'activité,Bac,22.5,21.4,23.6,8320
+Santé perçue bonne ou très bonne,Aucun diplôme ou inférieur au Bac,58,56.8,59.1,11868
+Santé perçue bonne ou très bonne,Bac,71.6,70.4,72.7,8324
+Santé perçue bonne ou très bonne,Supérieur au Bac,77.6,76.8,78.4,14710
+Diabète déclaré,Bac,5,4.5,5.6,8332
+Diabète déclaré,Aucun diplôme ou inférieur au Bac,11.5,10.8,12.3,11885
+Diabète déclaré,Supérieur au Bac,3.3,2.9,3.6,14723
