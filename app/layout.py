@@ -927,7 +927,181 @@ def create_territorial_tab(
 # 03 — PROFILS TERRITORIAUX
 # ============================================================
 
-def create_profiles_tab(map_figure):
+# ============================================================
+# Helpers — Profils territoriaux
+# ============================================================
+
+def format_regions(regions):
+    """Formate proprement une liste de régions en français."""
+
+    regions = list(regions)
+
+    if len(regions) == 1:
+        return regions[0]
+
+    if len(regions) == 2:
+        return f"{regions[0]} et {regions[1]}"
+
+    return (
+        ", ".join(regions[:-1])
+        + f" et {regions[-1]}"
+    )
+
+
+def describe_profile(profil):
+    """
+    Produit une description accessible d'un profil
+    à partir de ses scores standardisés moyens.
+
+    Convention :
+    score positif = situation relativement plus défavorable
+    score négatif = situation relativement plus favorable.
+    """
+
+    seuil = 0.25
+
+    # --------------------------------------------------------
+    # FDep
+    # --------------------------------------------------------
+
+    if profil["z_fdep"] > seuil:
+        fdep = "un niveau de défavorisation FDep supérieur à la moyenne"
+
+    elif profil["z_fdep"] < -seuil:
+        fdep = "un niveau de défavorisation FDep inférieur à la moyenne"
+
+    else:
+        fdep = "un niveau de défavorisation FDep proche de la moyenne"
+
+
+    # --------------------------------------------------------
+    # F-EDI
+    # --------------------------------------------------------
+
+    if profil["z_fedi"] > seuil:
+        fedi = "un F-EDI relativement plus défavorable"
+
+    elif profil["z_fedi"] < -seuil:
+        fedi = "un F-EDI relativement plus favorable"
+
+    else:
+        fedi = "un F-EDI proche de la moyenne"
+
+
+    # --------------------------------------------------------
+    # Accessibilité
+    # z_apl positif = faible accessibilité
+    # --------------------------------------------------------
+
+    if profil["z_apl"] > seuil:
+        apl = "une accessibilité aux médecins généralistes plus faible"
+
+    elif profil["z_apl"] < -seuil:
+        apl = "une accessibilité aux médecins généralistes meilleure"
+
+    else:
+        apl = "une accessibilité aux médecins généralistes proche de la moyenne"
+
+
+    # --------------------------------------------------------
+    # Santé
+    # --------------------------------------------------------
+
+    score_sante = (
+        profil["z_sante"]
+        + profil["z_limitation"]
+        + profil["z_diabete"]
+    ) / 3
+
+    if score_sante > seuil:
+        sante = "des indicateurs de santé globalement moins favorables"
+
+    elif score_sante < -seuil:
+        sante = "des indicateurs de santé globalement plus favorables"
+
+    else:
+        sante = "des indicateurs de santé globalement proches de la moyenne"
+
+
+    return (
+        "Par rapport aux 13 régions étudiées, ce profil associe "
+        f"{fdep}, {fedi}, {apl} et {sante}."
+    )
+
+
+def create_profile_cards(regions, profils_clusters):
+    """Construit les quatre cartes de profils à partir des exports R."""
+
+    cards = []
+
+    profils = profils_clusters.sort_values(
+        "clust"
+    )
+
+    for _, profil in profils.iterrows():
+
+        cluster = int(
+            profil["clust"]
+        )
+
+        regions_cluster = (
+            regions.loc[
+                regions["clust"] == cluster,
+                "region"
+            ]
+            .sort_values()
+            .tolist()
+        )
+
+        nb_regions = len(
+            regions_cluster
+        )
+
+        if nb_regions == 1:
+            label_regions = "1 région"
+        else:
+            label_regions = f"{nb_regions} régions"
+
+
+        cards.append(
+
+            html.Div([
+
+                html.Strong(
+                    profil["profil"]
+                ),
+
+                html.P(
+                    describe_profile(
+                        profil
+                    )
+                ),
+
+                html.P(
+                    f"{label_regions} : "
+                    f"{format_regions(regions_cluster)}",
+                    className="profile-regions",
+                ),
+
+            ], className="profile-card")
+
+        )
+
+    return html.Div(
+        cards,
+        className="profiles-grid",
+    )
+
+
+# ============================================================
+# 03 — PROFILS TERRITORIAUX
+# ============================================================
+
+def create_profiles_tab(
+    map_figure,
+    regions,
+    profils_clusters,
+):
 
     return html.Div([
 
@@ -954,6 +1128,7 @@ def create_profiles_tab(map_figure):
             className="intro",
         ),
 
+
         # ----------------------------------------------------
         # Méthode simplifiée
         # ----------------------------------------------------
@@ -974,35 +1149,58 @@ def create_profiles_tab(map_figure):
             html.Div([
 
                 html.Div([
-                    html.Strong("Défavorisation"),
-                    html.P("FDep et F-EDI"),
+
+                    html.Strong(
+                        "Défavorisation territoriale"
+                    ),
+
+                    html.P(
+                        "FDep et F-EDI"
+                    ),
+
                 ], className="indicator-card"),
 
+
                 html.Div([
-                    html.Strong("Accessibilité aux soins"),
+
+                    html.Strong(
+                        "Accessibilité aux soins"
+                    ),
+
                     html.P(
                         "APL aux médecins généralistes"
                     ),
+
                 ], className="indicator-card"),
 
+
                 html.Div([
-                    html.Strong("Santé"),
+
+                    html.Strong(
+                        "Santé"
+                    ),
+
                     html.P(
                         "Santé perçue, limitation d'activité "
                         "et diabète déclaré"
                     ),
+
                 ], className="indicator-card"),
 
             ], className="indicator-grid"),
 
+
             html.P(
-                "Une classification exploratoire rapproche les régions "
-                "présentant des caractéristiques similaires. "
-                "Quatre profils territoriaux se dégagent de cette analyse.",
+                "Les six indicateurs sont standardisés afin de pouvoir "
+                "être comparés sur une même échelle. Une classification "
+                "exploratoire rapproche ensuite les régions présentant "
+                "les configurations les plus similaires. Quatre profils "
+                "territoriaux se dégagent.",
                 className="graph-note",
             ),
 
         ], className="reading-guide"),
+
 
         # ----------------------------------------------------
         # Les quatre profils
@@ -1014,77 +1212,18 @@ def create_profiles_tab(map_figure):
 
         html.P(
             "Ces profils ne constituent pas un classement des régions. "
-            "Ils décrivent différentes combinaisons des caractéristiques "
-            "sociales, de l'accessibilité aux soins et de la santé."
+            "Ils décrivent différentes combinaisons de défavorisation "
+            "territoriale, d'accessibilité aux médecins généralistes "
+            "et d'indicateurs de santé."
         ),
 
-        html.Div([
 
-            html.Div([
-                html.Strong(
-                    "Profil francilien atypique"
-                ),
-                html.P(
-                    "Un profil propre à l'Île-de-France, qui se distingue "
-                    "des autres régions par une combinaison particulière "
-                    "des indicateurs étudiés."
-                ),
-                html.P(
-                    "1 région : Île-de-France",
-                    className="profile-regions",
-                ),
-            ], className="profile-card"),
+        # Cartes générées à partir des résultats R
+        create_profile_cards(
+            regions,
+            profils_clusters,
+        ),
 
-            html.Div([
-                html.Strong(
-                    "Profil territorial globalement favorable"
-                ),
-                html.P(
-                    "Des régions présentant globalement des indicateurs "
-                    "plus favorables que la moyenne des régions étudiées "
-                    "sur plusieurs dimensions."
-                ),
-                html.P(
-                    "3 régions : Pays de la Loire, Bretagne "
-                    "et Auvergne-Rhône-Alpes",
-                    className="profile-regions",
-                ),
-            ], className="profile-card"),
-
-            html.Div([
-                html.Strong(
-                    "Profil de santé contrasté"
-                ),
-                html.P(
-                    "Des territoires dont les indicateurs ne vont pas "
-                    "tous dans le même sens, faisant apparaître une "
-                    "configuration de santé plus contrastée."
-                ),
-                html.P(
-                    "4 régions : Nouvelle-Aquitaine, Occitanie, "
-                    "Provence-Alpes-Côte d'Azur et Corse",
-                    className="profile-regions",
-                ),
-            ], className="profile-card"),
-
-            html.Div([
-                html.Strong(
-                    "Profil de défavorisation et de santé défavorable"
-                ),
-                html.P(
-                    "Des régions qui cumulent davantage de caractéristiques "
-                    "territoriales et sanitaires défavorables relativement "
-                    "aux autres régions étudiées."
-                ),
-                html.P(
-                    "5 régions : Centre-Val de Loire, "
-                    "Bourgogne-Franche-Comté, Normandie, "
-                    "Hauts-de-France et Grand Est",
-                    className="profile-regions",
-                ),
-            ], className="profile-card"),
-
-        ], className="profiles-grid"),
 
         # ----------------------------------------------------
         # Carte
@@ -1104,6 +1243,7 @@ def create_profiles_tab(map_figure):
         dcc.Graph(
             id="map-profiles",
             figure=map_figure,
+
             config={
                 "scrollZoom": False,
                 "displayModeBar": False,
@@ -1111,12 +1251,14 @@ def create_profiles_tab(map_figure):
             },
         ),
 
+
         # ----------------------------------------------------
         # Exploration d'une région
         # ----------------------------------------------------
 
         html.Div(
             id="region-details",
+
             children=[
 
                 html.H2(
@@ -1130,14 +1272,18 @@ def create_profiles_tab(map_figure):
                 ),
 
             ],
+
             className="region-details",
         ),
 
-        # Le graphique sera masqué tant qu'aucune région
-        # n'est sélectionnée grâce au callback.
+
+        # ----------------------------------------------------
+        # Profil standardisé
+        # ----------------------------------------------------
 
         html.Div(
             id="region-profile-container",
+
             children=[
 
                 html.Div([
@@ -1149,22 +1295,27 @@ def create_profiles_tab(map_figure):
                     html.P(
                         "Les indicateurs sont standardisés par rapport "
                         "aux 13 régions étudiées. La ligne 0 représente "
-                        "leur moyenne. Ils ont été orientés dans le même "
-                        "sens : une valeur positive correspond à une "
-                        "situation relativement plus défavorable et une "
-                        "valeur négative à une situation relativement "
-                        "plus favorable."
+                        "leur moyenne. Tous les indicateurs ont été "
+                        "orientés dans le même sens : une valeur positive "
+                        "correspond à une situation relativement plus "
+                        "défavorable et une valeur négative à une situation "
+                        "relativement plus favorable."
                     ),
 
                 ], className="reading-guide"),
+
 
                 dcc.Graph(
                     id="region-profile"
                 ),
 
             ],
-            style={"display": "none"},
+
+            style={
+                "display": "none"
+            },
         ),
+
 
         # ----------------------------------------------------
         # À retenir
@@ -1179,19 +1330,21 @@ def create_profiles_tab(map_figure):
 
             html.P(
                 "Les régions ne se différencient pas selon une seule "
-                "dimension. La combinaison de la défavorisation "
-                "territoriale, de l'accessibilité aux soins et des "
-                "indicateurs de santé fait apparaître plusieurs "
-                "configurations territoriales. L'accès aux soins "
-                "contribue ainsi à caractériser les territoires, "
-                "mais ne résume pas à lui seul les inégalités de "
-                "santé observées."
+                "dimension. Certains territoires associent une situation "
+                "sociale et sanitaire globalement plus favorable, tandis "
+                "que d'autres présentent des configurations plus contrastées. "
+                "Surtout, une meilleure accessibilité aux médecins généralistes "
+                "ne va pas systématiquement de pair avec des indicateurs "
+                "de santé plus favorables. L'accès aux soins contribue donc "
+                "à caractériser les territoires sans résumer, à lui seul, "
+                "les inégalités territoriales de santé."
             ),
 
         ], className="takeaway"),
 
+
         # ----------------------------------------------------
-        # Précautions
+        # Robustesse et précautions
         # ----------------------------------------------------
 
         html.Div([
@@ -1201,11 +1354,20 @@ def create_profiles_tab(map_figure):
             ),
 
             html.P(
-                "Cette typologie est exploratoire et porte sur "
+                "Cette typologie est exploratoire et porte sur seulement "
                 "13 régions métropolitaines. Elle décrit des proximités "
-                "entre territoires à partir des indicateurs retenus "
+                "entre territoires à partir des six indicateurs retenus "
                 "et ne constitue ni un classement ni une typologie "
                 "définitive des régions françaises."
+            ),
+
+            html.P(
+                "Des analyses de sensibilité ont été réalisées. "
+                "Le retrait du F-EDI ne modifie pas les regroupements. "
+                "Le retrait de l'APL modifie en revanche le classement "
+                "du Grand Est et des Hauts-de-France, ce qui suggère que "
+                "l'accessibilité apporte une information complémentaire "
+                "dans la caractérisation des territoires."
             ),
 
             html.P(
@@ -1215,6 +1377,70 @@ def create_profiles_tab(map_figure):
             ),
 
         ], className="method-note"),
+
+
+        # ----------------------------------------------------
+        # Sources
+        # ----------------------------------------------------
+
+        html.Div([
+
+            html.Strong(
+                "Sources : "
+            ),
+
+            html.A(
+                "FDep",
+                href=(
+                    "https://odisse.santepubliquefrance.fr/"
+                    "explore/assets/"
+                    "indice-de-defavorisation-sociale-fdep-par-commune/"
+                ),
+                target="_blank",
+            ),
+
+            html.Span(" · "),
+
+            html.A(
+                "F-EDI 2021",
+                href=(
+                    "https://odisse.santepubliquefrance.fr/"
+                    "explore/assets/"
+                    "french-european-deprivation-index-f-edi-2021-par-commune/"
+                ),
+                target="_blank",
+            ),
+
+            html.Span(" · "),
+
+            html.A(
+                "APL aux médecins généralistes",
+                href=(
+                    "https://www.observatoire-des-territoires.gouv.fr/"
+                    "accessibilite-potentielle-localisee-apl-"
+                    "aux-medecins-generalistes"
+                ),
+                target="_blank",
+            ),
+
+            html.Span(" · "),
+
+            html.A(
+                "Baromètre 2024",
+                href=(
+                    "https://odisse.santepubliquefrance.fr/"
+                    "explore/assets/"
+                    "sante_generale_indicateurs_barometre_2024/"
+                ),
+                target="_blank",
+            ),
+
+            html.Span(
+                " — Santé publique France, Odissé "
+                "et Observatoire des territoires."
+            ),
+
+        ], className="sources"),
 
     ], className="tab-content")
 
@@ -1230,6 +1456,8 @@ def create_layout(
     synthese_sociale,
     analyse_regions,
     relations_territoriales,
+    regions,
+    profils_clusters,
     map_figure,
 ):
 
@@ -1250,6 +1478,7 @@ def create_layout(
                 dcc.Tab(
                     label="1 · Inégalités sociales",
                     value="social",
+
                     children=create_social_tab(
                         finance,
                         synthese_sociale,
@@ -1259,6 +1488,7 @@ def create_layout(
                 dcc.Tab(
                     label="2 · Territoires & soins",
                     value="territoires",
+
                     children=create_territorial_tab(
                         analyse_regions,
                         relations_territoriales,
@@ -1268,8 +1498,11 @@ def create_layout(
                 dcc.Tab(
                     label="3 · Profils territoriaux",
                     value="profils",
+
                     children=create_profiles_tab(
-                        map_figure
+                        map_figure,
+                        regions,
+                        profils_clusters,
                     ),
                 ),
 

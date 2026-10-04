@@ -5,6 +5,11 @@ import plotly.graph_objects as go
 
 from geojson_rewind import rewind
 
+
+# ============================================================
+# Chemins vers les données géographiques
+# ============================================================
+
 REGIONS_GEOJSON_PATH = (
     Path(__file__).parent.parent
     / "data"
@@ -19,39 +24,70 @@ DEPARTEMENTS_GEOJSON_PATH = (
     / "departements.geojson"
 )
 
+# ============================================================
+# Chargement GeoJSON
+# ============================================================
+
 
 def load_geojson(path):
     """Charge un fichier GeoJSON."""
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
+# ============================================================
+# Carte des profils territoriaux
+# ============================================================
 
 def create_map(regions):
     """Crée la carte interactive des profils territoriaux."""
 
-    regions_geojson = rewind(load_geojson(REGIONS_GEOJSON_PATH), rfc7946=False)
-    departements_geojson = load_geojson(DEPARTEMENTS_GEOJSON_PATH)
+    regions_geojson = rewind(
+        load_geojson(REGIONS_GEOJSON_PATH), 
+        rfc7946=False
+    )
+    
+    departements_geojson = load_geojson(
+        DEPARTEMENTS_GEOJSON_PATH
+    )
 
-    # Correspondance entre les groupes HCPC et les couleurs
+    # ========================================================
+    # Couleurs des quatre profils
+    # ========================================================
+
     couleurs = {
         1: "#4C78A8",
         2: "#59A14F",
         3: "#F28E2B",
         4: "#E15759",
     }
+    
+    # ========================================================
+    # Noms des profils issus directement des données
+    # ========================================================
+
+    profils = (
+        regions[
+            ["clust", "profil"]
+        ]
+        .drop_duplicates()
+        .sort_values("clust")
+    )
+
 
     noms_profils = {
-        1: "Profil francilien atypique",
-        2: "Profil territorial globalement favorable",
-        3: "Profil de santé contrasté",
-        4: "Profil de défavorisation et de santé défavorable",
+        int(row["clust"]): row["profil"]
+        for _, row in profils.iterrows()
     }
+    
+    # ========================================================
+    # Figure
+    # ========================================================
+
+    fig = go.Figure()
 
     # ---------------------------------------------------------
     # 1. Couche principale : régions
     # ---------------------------------------------------------
-
-    fig = go.Figure()
 
     fig.add_trace(
         go.Choropleth(
@@ -81,13 +117,21 @@ def create_map(regions):
             marker_line_width=1.5,
 
             customdata=regions[
-                ["profil", "clust"]
+                [
+                    "profil",
+                    "clust",
+                    "fdep_pondere",
+                    "apl_pondere",
+                    "sante_percue",
+                ]
             ].values,
 
             hovertemplate=(
                 "<b>%{location}</b><br>"
-                "Profil : %{customdata[0]}<br>"
-                "Groupe : %{customdata[1]}"
+                "%{customdata[0]}<br><br>"
+                "FDep : %{customdata[2]:.2f}<br>"
+                "APL : %{customdata[3]:.2f}<br>"
+                "Santé perçue : %{customdata[4]:.1f} %"
                 "<extra></extra>"
             ),
 
@@ -104,7 +148,9 @@ def create_map(regions):
         geometry = feature["geometry"]
 
         if geometry["type"] == "Polygon":
-            polygons = [geometry["coordinates"]]
+            polygons = [
+                geometry["coordinates"]
+            ]
 
         elif geometry["type"] == "MultiPolygon":
             polygons = geometry["coordinates"]
@@ -165,15 +211,13 @@ def create_map(regions):
         lataxis_range=[41, 51.5],
         bgcolor="rgba(0,0,0,0)",
     )    
-    
-    fig.update_layout(
-        dragmode=False,
-    )
+
     # ---------------------------------------------------------
     # 5. Mise en forme
     # ---------------------------------------------------------
 
     fig.update_layout(
+        dragmode=False,
         margin=dict(l=0, r=0, t=30, b=0),
         height=650,
         legend_title_text="Profil territorial",

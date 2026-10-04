@@ -8,6 +8,7 @@ from data import (
     load_synthese_sociale,
     load_analyse_regions,
     load_relations_territoriales,
+    load_profils_clusters,
 )
 
 from layout import create_layout
@@ -36,6 +37,8 @@ synthese_sociale = load_synthese_sociale()
 analyse_regions = load_analyse_regions()
 relations_territoriales = load_relations_territoriales()
 
+profils_clusters = load_profils_clusters()
+
 
 # ============================================================
 # Carte
@@ -55,6 +58,8 @@ app.layout = create_layout(
     synthese_sociale,
     analyse_regions,
     relations_territoriales,
+    regions,
+    profils_clusters,
     map_figure,
 )
 

@@ -72,3 +72,10 @@ def load_regions():
     return pd.read_csv(
         DATA_DIR / "carte_regions_hcpc.csv"
     )
+
+def load_profils_clusters():
+    """Charge les caractéristiques moyennes des quatre profils territoriaux."""
+
+    return pd.read_csv(
+        DATA_DIR / "profils_clusters.csv"
+    )
