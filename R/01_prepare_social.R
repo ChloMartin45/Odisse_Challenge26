@@ -1,39 +1,47 @@
----
-title: "Préparation des indicateurs sociaux et de santé"
-format: html
----
+# 01_prepare_social
+# Préparation des indicateurs sociaux et de santé
 
 # Packages
-
-```{r}
+  
 library(tidyverse)
-```
+
+# Chemins
+
+raw_dir <- "../data/raw"
+processed_dir <- "../data/processed"
+
+dir.create(
+  processed_dir,
+  recursive = TRUE,
+  showWarnings = FALSE
+)
 
 # Importation des données
 
 ## Santé générale
 
-```{r}
 sante <- read_csv(
-  "~/projects/Odisse_Challenge26/data/raw/sante_generale_indicateurs_barometre_2024.csv",
+  file.path(
+    raw_dir,
+    "sante_generale_indicateurs_barometre_2024.csv"
+  ),
   show_col_types = FALSE
 )
-```
 
 ## Diabète déclaré
 
-```{r}
 diabete <- read_csv(
-  "~/projects/Odisse_Challenge26/data/raw/diabete-indicateurs-du-barometre-2024.csv",
+  file.path(
+    raw_dir,
+    "diabete-indicateurs-du-barometre-2024.csv"
+  ),
   show_col_types = FALSE
 )
-```
 
 # Préparation des données
 
-Les variables numériques utilisées dans l'analyse sont converties explicitement afin de sécuriser les traitements ultérieurs.
+# Les variables numériques utilisées dans l'analyse sont converties explicitement afin de sécuriser les traitements ultérieurs.
 
-```{r}
 sante <- sante |>
   mutate(
     Estimation = as.numeric(Estimation),
@@ -42,11 +50,17 @@ sante <- sante |>
     Effectif.Brut = as.numeric(`Effectif Brut`),
     Année = as.integer(Année)
   )
-```
 
-```{r}
+diabete |>
+  summarise(
+    nb_moins30_estimation = sum(Estimation == -30, na.rm = TRUE),
+    nb_moins30_ic_inf = sum(ic_inf == -30, na.rm = TRUE),
+    nb_moins30_ic_sup = sum(ic_sup == -30, na.rm = TRUE)
+  )
+
 # Les estimations égales à -30 correspondent à des valeurs non diffusées
 # en raison d'un effectif de répondants inférieur au seuil de 30.
+
 diabete <- diabete |>
   mutate(
     Estimation = as.numeric(Estimation),
@@ -57,11 +71,21 @@ diabete <- diabete |>
     Effectif.Brut = as.numeric(`Effectif Brut`),
     Année = as.integer(Année)
   )
-```
+
+sante <- sante |>
+  filter(Année == 2024)
+
+diabete <- diabete |>
+  filter(Année == 2024)
 
 # Contrôle des données importées
 
-```{r}
+diabete |>
+  summarise(
+    nb_ic_inf_codees_moins30 = sum(ic_inf == -30, na.rm = TRUE),
+    nb_ic_sup_codees_moins30 = sum(ic_sup == -30, na.rm = TRUE)
+  )
+
 sante |>
   summarise(
     nb_observations = n(),
@@ -70,9 +94,7 @@ sante |>
     nb_annees = n_distinct(Année),
     nb_estimation_manquante = sum(is.na(Estimation))
   )
-```
 
-```{r}
 diabete |>
   summarise(
     nb_observations = n(),
@@ -81,16 +103,15 @@ diabete |>
     nb_annees = n_distinct(Année),
     nb_estimation_manquante = sum(is.na(Estimation))
   )
-```
 
 # Sélection des indicateurs étudiés
 
-Trois indicateurs sont retenus :
-- santé perçue bonne ou très bonne ;
-- limitation d'activité ;
-- diabète déclaré.
+# Trois indicateurs sont retenus :
+ # - santé perçue bonne ou très bonne ;
+ # - limitation d'activité ;
+ # - diabète déclaré.
 
-```{r}
+
 sante_indicateurs <- sante |> 
   filter(
     Indicateur %in% c(
@@ -98,20 +119,20 @@ sante_indicateurs <- sante |>
       "Santé perçue bonne ou très bonne"
       )
     )
-```
 
-```{r}
+
 diabete_declare <- diabete |> 
   filter(
     Indicateur == "Diabète déclaré"
     )
-```
+
 
 # Préparation des indicateurs régionaux
 
-Les analyses territoriales utilisent les estimations régionales pour l'ensemble de la population, sans ventilation par sexe, âge, diplôme, PCS ou situation financière.
+# Les analyses territoriales utilisent les estimations régionales pour l'ensemble de la population, 
+# sans ventilation par sexe, âge, diplôme, PCS ou situation financière.
 
-```{r}
+
 sante_regions <- sante_indicateurs |>
   filter(
     Sexe == "Tous",
@@ -121,9 +142,8 @@ sante_regions <- sante_indicateurs |>
     `Situation financière perçue` == "Tous",
     `Nouvelles régions` != "Tous"
   )
-```
 
-```{r}
+
 diabete_regions <- diabete_declare |>
   filter(
     Sexe == "Tous",
@@ -133,11 +153,10 @@ diabete_regions <- diabete_declare |>
     `Situation financière perçue` == "Tous",
     `Nouvelles régions` != "Tous"
   )
-```
+
 
 ## Contrôle des données régionales
 
-```{r}
 sante_regions |>
   summarise(
     nb_observations = n(),
@@ -153,9 +172,8 @@ diabete_regions |>
     nb_indicateurs = n_distinct(Indicateur),
     nb_estimations_manquantes = sum(is.na(Estimation))
   )
-```
 
-```{r}
+
 sante_regions |>
   distinct(`Nouvelles régions`) |>
   arrange(`Nouvelles régions`)
@@ -163,13 +181,13 @@ sante_regions |>
 diabete_regions |>
   distinct(`Nouvelles régions`) |>
   arrange(`Nouvelles régions`)
-```
+
 
 # Indicateurs selon la situation financière perçue
 
-Les indicateurs nationaux sont extraits en maintenant les autres dimensions sociodémographiques à la modalité « Tous ».
+# Les indicateurs nationaux sont extraits en maintenant les autres dimensions sociodémographiques à la modalité « Tous ».
 
-```{r}
+
 sante_finance <- sante_indicateurs |>
   filter(
     Sexe == "Tous",
@@ -207,9 +225,8 @@ diabete_finance <- diabete_declare |>
     ic_sup,
     Effectif.Brut
   )
-```
 
-```{r}
+
 indicateurs_finance <- bind_rows(
   sante_finance,
   diabete_finance
@@ -242,11 +259,11 @@ indicateurs_finance <- bind_rows(
       )
     )
   )
-```
+
 
 # Indicateurs selon le niveau de diplôme
 
-```{r}
+
 sante_diplome <- sante_indicateurs |>
   filter(
     Sexe == "Tous",
@@ -283,9 +300,9 @@ diabete_diplome <- diabete_declare |>
     ic_sup,
     Effectif.Brut
   )
-```
 
-```{r}
+
+
 indicateurs_diplome <- bind_rows(
   sante_diplome,
   diabete_diplome
@@ -300,11 +317,11 @@ indicateurs_diplome <- bind_rows(
       )
     )
   )
-```
 
-# Indicateurs selon la pcs
 
-```{r}
+# Indicateurs selon la catégorie socioprofessionnelle
+
+
 sante_pcs <- sante_indicateurs |>
   filter(
     Sexe == "Tous",
@@ -342,26 +359,26 @@ diabete_pcs <- diabete_declare |>
     ic_sup,
     Effectif.Brut
   )
-```
 
-```{r}
+
 indicateurs_pcs <- bind_rows(
   sante_pcs,
   diabete_pcs
 )
-```
+
 
 # Synthèse des écarts sociaux de santé
 
-La synthèse utilisée dans l'application compare les situations extrêmes pour chaque dimension sociale.
+  #La synthèse utilisée dans l'application compare les situations extrêmes pour chaque dimension sociale.
 
-Pour la situation financière et le diplôme, les catégories comparées sont définies par l'ordre de la variable.
+  #Pour la situation financière et le diplôme, les catégories comparées sont définies par l'ordre de la variable.
 
-Pour la catégorie socioprofessionnelle, qui ne constitue pas une échelle ordonnée, l'écart correspond uniquement à l'amplitude entre les valeurs minimale et maximale observées pour chaque indicateur.
+  #Pour la catégorie socioprofessionnelle, qui ne constitue pas une échelle ordonnée, l'écart correspond uniquement 
+  #à l'amplitude entre les valeurs minimale et maximale observées pour chaque indicateur.
 
 ## Situation financière
 
-```{r}
+
 synthese_finance <- indicateurs_finance |>
   filter(
     situation_financiere %in% c(
@@ -396,13 +413,13 @@ synthese_finance <- indicateurs_finance |>
 
     type_comparaison = "categories_ordonnees"
   )
-```
+
 
 ## Niveau de diplôme 
 
-Pour faciliter la lecture, la catégorie présentant le niveau de diplôme le plus élevé est utilisée comme référence.
+# Pour faciliter la lecture, la catégorie présentant le niveau de diplôme le plus élevé est utilisée comme référence.
 
-```{r}
+
 synthese_diplome <- indicateurs_diplome |>
   filter(
     Diplôme %in% c(
@@ -437,11 +454,11 @@ synthese_diplome <- indicateurs_diplome |>
 
     type_comparaison = "categories_ordonnees"
   )
-```
+
 
 ## Catégorie socioprofessionnelle
 
-```{r}
+
 synthese_pcs <- indicateurs_pcs |>
   filter(!is.na(Estimation)) |>
   group_by(Indicateur) |>
@@ -472,11 +489,11 @@ synthese_pcs <- indicateurs_pcs |>
     ecart,
     type_comparaison
   )
-```
+
 
 ## Construction de la base de synthèse 
 
-```{r}
+
 synthese_sociale <- bind_rows(
   synthese_finance,
   synthese_diplome,
@@ -505,13 +522,13 @@ synthese_sociale <- bind_rows(
     dimension,
     indicateur
   )
-```
+
 
 ## Contrôle de la synthèse
 
-On attend trois dimensions sociales × trois indicateurs de santé, soit neuf comparaisons.
+  # On attend trois dimensions sociales × trois indicateurs de santé, soit neuf comparaisons.
 
-```{r}
+
 synthese_sociale
 
 synthese_sociale |>
@@ -524,9 +541,8 @@ synthese_sociale |>
     nb_indicateurs = n_distinct(indicateur),
     nb_ecarts_manquants = sum(is.na(ecart))
   )
-```
 
-```{r}
+
 # Contrôle des estimations de diabète utilisées dans les analyses
 
 bind_rows(
@@ -542,45 +558,40 @@ bind_rows(
     nb_estimations_manquantes = sum(is.na(Estimation)),
     .groups = "drop"
   )
-```
+
 
 # Export des données préparées 
 
-Seules les bases nécessaires aux étapes suivantes du projet ou à l'application sont exportées.
+  # Seules les bases nécessaires aux étapes suivantes du projet ou à l'application sont exportées.
 
-```{r}
+
 write_csv(
   sante_regions,
-  "~/projects/Odisse_Challenge26/data/processed/sante_regions.csv"
+  file.path(processed_dir, "sante_regions.csv")
 )
 
 write_csv(
   diabete_regions,
-  "~/projects/Odisse_Challenge26/data/processed/diabete_regions.csv"
+  file.path(processed_dir,"diabete_regions.csv")
 )
 
 write_csv(
   indicateurs_finance,
-  "~/projects/Odisse_Challenge26/data/processed/indicateurs_finance.csv"
+  file.path(processed_dir, "indicateurs_finance.csv")
 )
 
 write_csv(
   indicateurs_diplome,
-  "~/projects/Odisse_Challenge26/data/processed/indicateurs_diplome.csv"
+  file.path(processed_dir, "indicateurs_diplome.csv")
 )
 
 write_csv(
   indicateurs_pcs,
-  "~/projects/Odisse_Challenge26/data/processed/indicateurs_pcs.csv"
+  file.path(processed_dir, "indicateurs_pcs.csv")
 )
 
 write_csv(
   synthese_sociale,
-  "~/projects/Odisse_Challenge26/data/processed/synthese_sociale.csv"
+  file.path(processed_dir, "synthese_sociale.csv")
 )
-```
-
-
-
-
 
