@@ -1,4 +1,4 @@
-from dash import Input, Output, html
+from dash import Input, Output, html, dcc
 
 from data import (
     load_regions,
@@ -100,17 +100,18 @@ def register_callbacks(app):
 
         interpretations = {
             "sante": (
-                "Une défavorisation territoriale plus élevée est associée "
-                "à une moins bonne santé perçue dans les régions étudiées."
+                "Dans les 13 régions étudiées, une défavorisation territoriale plus élevée "
+                "s’accompagne d’une part plus faible de personnes déclarant une bonne ou très bonne santé."
             ),
+
             "limitation": (
-                "La relation observée entre défavorisation territoriale "
-                "et limitation d'activité est plus modérée et plus incertaine."
+                "La limitation d’activité tend à augmenter avec la défavorisation territoriale, "
+                "mais la relation observée est plus modérée et moins précise à cette échelle régionale."
             ),
+
             "diabete": (
-                "Les régions présentant une défavorisation territoriale "
-                "plus élevée tendent également à présenter davantage "
-                "de diabète déclaré."
+                "Dans les régions étudiées, une défavorisation territoriale plus élevée "
+                "s’accompagne également d’une fréquence plus importante de diabète déclaré."
             ),
         }
 
@@ -130,8 +131,7 @@ def register_callbacks(app):
 
     @app.callback(
         Output("region-details", "children"),
-        Output("region-profile", "figure"),
-        Output("region-profile-container", "style"),
+        Output("region-profile-container", "children"),
         Input("map-profiles", "clickData"),
     )
     def update_region_details(click_data):
@@ -142,14 +142,29 @@ def register_callbacks(app):
 
         if click_data is None:
 
-            return [
-                html.H2("Explorer une région"),
-                html.P(
-                    "Sélectionnez une région sur la carte "
-                    "pour afficher ses indicateurs et situer son profil "
-                    "par rapport aux 13 régions étudiées."
-                ),
-            ], {}, {"display": "none"}
+            placeholder = html.Div(
+                [
+                    html.P(
+                        "EXPLORATION",
+                        className="region-eyebrow",
+                    ),
+
+                    html.H3(
+                        "Explorer une région",
+                        className="region-title",
+                    ),
+
+                    html.P(
+                        "Sélectionnez une région sur la carte pour afficher "
+                        "ses indicateurs et situer son profil par rapport aux "
+                        "13 régions étudiées.",
+                        className="region-text",
+                    ),
+                ],
+                className="region-placeholder",
+            )
+
+            return placeholder, None
 
         # ----------------------------------------------------
         # Région sélectionnée
@@ -165,46 +180,194 @@ def register_callbacks(app):
         # Fiche régionale
         # ----------------------------------------------------
 
+        population = (
+            f"{region['population']:,.0f}"
+            .replace(",", " ")
+        )
+
         details = [
-            html.H2(region["region"]),
 
-            html.H3(region["profil"]),
+            html.Div(
+                [
 
-            html.P(
-                f"Population : {region['population']:,.0f}"
-                .replace(",", " ")
+                    html.Div(
+                        [
+                            html.P(
+                                "RÉGION SÉLECTIONNÉE",
+                                className="region-eyebrow",
+                            ),
+
+                            html.H2(
+                                region["region"],
+                                className="region-title",
+                            ),
+
+                            html.P(
+                                region["profil"],
+                                className="region-profile-name",
+                            ),
+                        ]
+                    ),
+
+                    html.Div(
+                        [
+                            html.Span(
+                                "Population",
+                                className="region-population-label",
+                            ),
+
+                            html.Strong(
+                                population,
+                                className="region-population-value",
+                            ),
+
+                            html.Span(
+                                "habitants",
+                                className="region-population-unit",
+                            ),
+                        ],
+                        className="region-population",
+                    ),
+
+                ],
+                className="region-header",
             ),
 
-            html.H4("Indicateurs de santé"),
 
-            html.P(
-                f"Santé perçue bonne ou très bonne : "
-                f"{region['sante_percue']:.1f} %"
+            # ========================================================
+            # Indicateurs
+            # ========================================================
+
+            html.Div(
+                [
+
+                    # ------------------------------------------------
+                    # Santé
+                    # ------------------------------------------------
+
+                    html.Div(
+                        [
+
+                            html.P(
+                                "SANTÉ",
+                                className="region-section-label",
+                            ),
+
+                            html.Div(
+                                [
+                                    html.Span(
+                                        "Santé perçue",
+                                        className="region-metric-label",
+                                    ),
+
+                                    html.Strong(
+                                        f"{region['sante_percue']:.1f} %",
+                                        className="region-metric-value",
+                                    ),
+                                ],
+                                className="region-metric",
+                            ),
+
+                            html.Div(
+                                [
+                                    html.Span(
+                                        "Limitation d'activité",
+                                        className="region-metric-label",
+                                    ),
+
+                                    html.Strong(
+                                        f"{region['limitation_activite']:.1f} %",
+                                        className="region-metric-value",
+                                    ),
+                                ],
+                                className="region-metric",
+                            ),
+
+                            html.Div(
+                                [
+                                    html.Span(
+                                        "Diabète déclaré",
+                                        className="region-metric-label",
+                                    ),
+
+                                    html.Strong(
+                                        f"{region['diabete_declare']:.1f} %",
+                                        className="region-metric-value",
+                                    ),
+                                ],
+                                className="region-metric",
+                            ),
+
+                        ],
+                        className="region-metrics-group",
+                    ),
+
+
+                    # ------------------------------------------------
+                    # Contexte territorial
+                    # ------------------------------------------------
+
+                    html.Div(
+                        [
+
+                            html.P(
+                                "CONTEXTE TERRITORIAL",
+                                className="region-section-label",
+                            ),
+
+                            html.Div(
+                                [
+                                    html.Span(
+                                        "FDep",
+                                        className="region-metric-label",
+                                    ),
+
+                                    html.Strong(
+                                        f"{region['fdep_pondere']:.2f}",
+                                        className="region-metric-value",
+                                    ),
+                                ],
+                                className="region-metric",
+                            ),
+
+                            html.Div(
+                                [
+                                    html.Span(
+                                        "F-EDI",
+                                        className="region-metric-label",
+                                    ),
+
+                                    html.Strong(
+                                        f"{region['fedi_pondere']:.2f}",
+                                        className="region-metric-value",
+                                    ),
+                                ],
+                                className="region-metric",
+                            ),
+
+                            html.Div(
+                                [
+                                    html.Span(
+                                        "APL",
+                                        className="region-metric-label",
+                                    ),
+
+                                    html.Strong(
+                                        f"{region['apl_pondere']:.2f}",
+                                        className="region-metric-value",
+                                    ),
+                                ],
+                                className="region-metric",
+                            ),
+
+                        ],
+                        className="region-metrics-group",
+                    ),
+
+                ],
+                className="region-metrics-grid",
             ),
 
-            html.P(
-                f"Limitation d'activité : "
-                f"{region['limitation_activite']:.1f} %"
-            ),
-
-            html.P(
-                f"Diabète déclaré : "
-                f"{region['diabete_declare']:.1f} %"
-            ),
-
-            html.H4("Contexte territorial"),
-
-            html.P(
-                f"FDep : {region['fdep_pondere']:.2f}"
-            ),
-
-            html.P(
-                f"F-EDI : {region['fedi_pondere']:.2f}"
-            ),
-
-            html.P(
-                f"APL : {region['apl_pondere']:.2f}"
-            ),
         ]
 
         # ----------------------------------------------------
@@ -216,4 +379,45 @@ def register_callbacks(app):
             region_name,
         )
 
-        return details, profile_figure, {"display": "block"}
+        profile_card = html.Div(
+            [
+
+                html.Div(
+                    [
+
+                        html.P(
+                            "POSITION RELATIVE",
+                            className="region-section-label",
+                        ),
+
+                        html.H3(
+                            "Par rapport aux 13 régions"
+                        ),
+
+                    ],
+                    className="region-profile-heading",
+                ),
+
+                html.P(
+                    "0 correspond à la moyenne. Une valeur positive indique "
+                    "une situation relativement plus défavorable et une valeur "
+                    "négative une situation relativement plus favorable.",
+                    className="region-profile-note",
+                ),
+
+                dcc.Graph(
+                    figure=profile_figure,
+
+                    config={
+                        "responsive": True,
+                        "displayModeBar": False,
+                    },
+
+                    className="region-profile-chart",
+                ),
+
+            ],
+            className="region-profile-card",
+        )
+
+        return details, profile_card

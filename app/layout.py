@@ -29,10 +29,11 @@ def create_home_tab():
         ),
 
         html.P(
-            "La santé ne se distribue pas uniformément dans la population "
-            "ni sur le territoire. Cette datavisualisation explore les liens "
-            "entre situation sociale, caractéristiques territoriales, "
-            "accessibilité aux soins et état de santé.",
+            "Selon notre situation sociale et notre territoire de vie, "
+            "nous ne sommes pas tous exposés aux mêmes conditions de santé. "
+            "Cette datavisualisation explore comment contexte social, "
+            "défavorisation territoriale, accessibilité aux soins et état "
+            "de santé se combinent en France.",
             className="intro",
         ),
 
@@ -43,7 +44,7 @@ def create_home_tab():
         html.Div([
 
             html.P(
-                "NOTRE QUESTION",
+                "QUESTION DE DÉPART",
                 className="section-label",
             ),
 
@@ -60,7 +61,7 @@ def create_home_tab():
         # ----------------------------------------------------
 
         html.H2(
-            "Trois étapes pour explorer la question"
+            "Du constat social aux profils territoriaux"
         ),
 
         html.Div([
@@ -69,8 +70,9 @@ def create_home_tab():
                 html.P("01", className="step-number"),
                 html.H3("Inégalités sociales"),
                 html.P(
-                    "Observer les différences de santé selon la situation "
-                    "financière, le diplôme et la catégorie socioprofessionnelle."
+                    "Observer comment plusieurs dimensions sociales — situation "
+                    "financière, diplôme et catégorie socioprofessionnelle — "
+                    "s'accompagnent de différences de santé."
                 ),
             ], className="step-card"),
 
@@ -78,17 +80,18 @@ def create_home_tab():
                 html.P("02", className="step-number"),
                 html.H3("Territoires & soins"),
                 html.P(
-                    "Étudier les relations entre défavorisation territoriale, "
-                    "accessibilité aux médecins généralistes et santé."
-                ),
+                        "Examiner si la défavorisation des territoires et "
+                        "l'accessibilité aux médecins généralistes sont associées "
+                        "aux différences de santé observées entre régions."
+                    ),
             ], className="step-card"),
 
             html.Div([
                 html.P("03", className="step-number"),
                 html.H3("Profils territoriaux"),
                 html.P(
-                    "Combiner ces dimensions pour explorer différents "
-                    "profils régionaux."
+                    "Combiner six indicateurs pour faire émerger différentes "
+                    "configurations régionales et comprendre ce qui les distingue."
                 ),
             ], className="step-card"),
 
@@ -103,9 +106,9 @@ def create_home_tab():
             html.H2("Données mobilisées"),
 
             html.P(
-                "Cette exploration croise des données de santé, "
-                "de défavorisation sociale, d'accessibilité aux soins "
-                "et de population."
+                "Cette exploration croise plusieurs sources publiques portant "
+                "sur la santé, la défavorisation sociale, l'accessibilité aux "
+                "médecins généralistes et la population."
             ),
 
             html.Ul([
@@ -200,9 +203,10 @@ def create_home_tab():
             ),
 
             html.P(
-                "Cette datavisualisation a été réalisée dans le cadre "
-                "de l'Odissé Dataviz Challenge 2026, autour des "
-                "inégalités sociales et territoriales de santé."
+                "Cette datavisualisation a été réalisée dans le cadre de "
+                "l'Odissé Dataviz Challenge 2026. Elle propose une exploration "
+                "des inégalités sociales et territoriales de santé à partir "
+                "de données publiques françaises."
             ),
 
         ], className="about-challenge"),
@@ -216,7 +220,6 @@ def create_home_tab():
 
 def create_social_summary(synthese_sociale):
 
-    # Ordre d'affichage
     dimensions = [
         "finance",
         "diplome",
@@ -231,38 +234,24 @@ def create_social_summary(synthese_sociale):
 
     labels_indicateurs = {
         "Santé perçue bonne ou très bonne": "Santé perçue",
-        "Limitation d'activité": "Limitation d'activité",
-        "Diabète déclaré": "Diabète déclaré",
+        "Limitation d'activité": "Limitation",
+        "Diabète déclaré": "Diabète",
     }
 
-    # --------------------------------------------------------
-    # En-têtes
-    # --------------------------------------------------------
+    def format_number(value):
+        return f"{value:.1f}".replace(".", ",")
 
-    elements = [
-        html.Div(
-            "",
-            className="summary-cell summary-header",
-        )
-    ]
+    cards = []
 
-    for indicateur in indicateurs:
-        elements.append(
-            html.Div(
-                labels_indicateurs[indicateur],
-                className="summary-cell summary-header",
-            )
-        )
-
-    # --------------------------------------------------------
-    # Lignes de la synthèse
-    # --------------------------------------------------------
+    # ========================================================
+    # Une carte par dimension sociale
+    # ========================================================
 
     for dimension in dimensions:
 
         donnees_dimension = synthese_sociale[
             synthese_sociale["dimension"] == dimension
-        ]
+        ].copy()
 
         if donnees_dimension.empty:
             continue
@@ -271,7 +260,6 @@ def create_social_summary(synthese_sociale):
             "dimension_label"
         ].iloc[0]
 
-        # Comparaisons utilisées
         comparaisons = (
             donnees_dimension[
                 ["groupe_reference", "groupe_comparaison"]
@@ -279,8 +267,10 @@ def create_social_summary(synthese_sociale):
             .drop_duplicates()
         )
 
-        # Finance et diplôme :
-        # la comparaison est identique pour les trois indicateurs.
+        # ----------------------------------------------------
+        # Sous-titre
+        # ----------------------------------------------------
+
         if len(comparaisons) == 1:
 
             groupe_reference = comparaisons.iloc[0][
@@ -291,102 +281,144 @@ def create_social_summary(synthese_sociale):
                 "groupe_comparaison"
             ]
 
-            comparaison_label = (
-                f"{groupe_comparaison} vs "
-                f"{groupe_reference}"
+            sous_titre = (
+                f"{groupe_comparaison} "
+                f"par rapport à {groupe_reference}"
             )
 
-        # PCS :
-        # les catégories extrêmes peuvent dépendre
-        # de l'indicateur.
         else:
-            comparaison_label = (
-                "Valeurs extrêmes observées*"
+
+            sous_titre = (
+                "Écart entre les catégories présentant "
+                "les valeurs extrêmes"
             )
 
-        elements.append(
-            html.Div(
-                [
-                    html.Strong(dimension_label),
-                    html.Span(
-                        comparaison_label,
-                        className="summary-comparison",
-                    ),
-                ],
-                className="summary-cell summary-row-label",
-            )
-        )
+        # ----------------------------------------------------
+        # Lignes d'indicateurs
+        # ----------------------------------------------------
 
-        # ----------------------------------------------------
-        # Valeurs des trois indicateurs
-        # ----------------------------------------------------
+        indicateurs_elements = []
 
         for indicateur in indicateurs:
 
             ligne = donnees_dimension[
-                donnees_dimension["indicateur"]
-                == indicateur
+                donnees_dimension["indicateur"] == indicateur
             ]
 
             if ligne.empty:
-                elements.append(
-                    html.Div(
-                        "—",
-                        className="summary-cell",
-                    )
-                )
                 continue
 
             ligne = ligne.iloc[0]
 
             ecart = ligne["ecart"]
+
+            valeur_reference = ligne["valeur_reference"]
+            valeur_comparaison = ligne["valeur_comparaison"]
+
+            groupe_reference = ligne["groupe_reference"]
+            groupe_comparaison = ligne["groupe_comparaison"]
+
             type_comparaison = ligne["type_comparaison"]
 
-            valeur = (
-                f"{abs(ecart):.1f}"
-                .replace(".", ",")
-            )
+            # ------------------------------------------------
+            # Valeur principale
+            # ------------------------------------------------
 
-            # PCS : amplitude entre les extrêmes observés
             if type_comparaison == "extremes_observes":
 
-                texte_direction = " d'écart"
+                valeur_ecart = (
+                    f"{format_number(abs(ecart))} pts"
+                )
 
-            # Finance / diplôme :
-            # direction de l'écart par rapport à la référence
-            elif ecart < 0:
-
-                texte_direction = " de moins"
+                detail = (
+                    f"{groupe_comparaison} "
+                    f"{format_number(valeur_comparaison)} % "
+                    f"↔ {groupe_reference} "
+                    f"{format_number(valeur_reference)} %"
+                )
 
             else:
 
-                texte_direction = " de plus"
+                signe = "+" if ecart > 0 else "−"
 
-            elements.append(
+                valeur_ecart = (
+                    f"{signe}{format_number(abs(ecart))} pts"
+                )
+
+                detail = (
+                    f"{format_number(valeur_comparaison)} % "
+                    f"contre "
+                    f"{format_number(valeur_reference)} %"
+                )
+
+            indicateurs_elements.append(
+
                 html.Div(
                     [
-                        html.Strong(
-                            f"{valeur} pts"
+
+                        html.Div(
+                            [
+                                html.Span(
+                                    labels_indicateurs[indicateur],
+                                    className="summary-indicator-name",
+                                ),
+
+                                html.Strong(
+                                    valeur_ecart,
+                                    className="summary-value",
+                                ),
+                            ],
+                            className="summary-indicator-top",
                         ),
+
                         html.Span(
-                            texte_direction
+                            detail,
+                            className="summary-detail",
                         ),
+
                     ],
-                    className="summary-cell",
-                    title=(
-                        f"{ligne['groupe_comparaison']} : "
-                        f"{ligne['valeur_comparaison']:.1f} % | "
-                        f"{ligne['groupe_reference']} : "
-                        f"{ligne['valeur_reference']:.1f} %"
-                    ),
+                    className="summary-indicator",
                 )
             )
 
-    return html.Div(
-        elements,
-        className="summary-grid",
-    )
+        # ----------------------------------------------------
+        # Carte
+        # ----------------------------------------------------
 
+        cards.append(
+
+            html.Div(
+                [
+
+                    html.Div(
+                        [
+                            html.H3(
+                                dimension_label,
+                                className="summary-card-title",
+                            ),
+
+                            html.P(
+                                sous_titre,
+                                className="summary-card-subtitle",
+                            ),
+                        ],
+                        className="summary-card-header",
+                    ),
+
+                    html.Div(
+                        indicateurs_elements,
+                        className="summary-indicators",
+                    ),
+
+                ],
+                className=f"summary-card summary-card-{dimension}",
+            )
+        )
+
+    return html.Div(
+        cards,
+        className="summary-cards",
+    )
 
 def create_social_tab(finance, synthese_sociale):
 
@@ -503,6 +535,8 @@ def create_social_tab(finance, synthese_sociale):
                 finance,
                 "finance",
             ),
+            config = {"displayModeBar": False },
+            className="chart-container",
         ),
 
         html.P(
@@ -728,12 +762,17 @@ def create_territorial_tab(
                 relations_territoriales,
                 "sante",
             ),
+            config = {"displayModeBar": False },
+            className="chart-container",
         ),
 
         html.P(
             "Lecture : chaque point représente une région métropolitaine. "
-            "Le coefficient r mesure l'intensité et le sens de la relation "
-            "linéaire entre les deux indicateurs.",
+            "L’axe vertical indique l’écart à la moyenne des 13 régions : "
+            "une valeur positive correspond à un niveau supérieur à la moyenne, "
+            "une valeur négative à un niveau inférieur. "
+            "Le coefficient r mesure l’intensité et le sens de la relation linéaire "
+            "entre la défavorisation territoriale et l’indicateur de santé.",
             className="graph-note",
         ),
 
@@ -798,6 +837,17 @@ def create_territorial_tab(
             figure=create_apl_comparison_chart(
                 relations_territoriales
             ),
+            config = {"displayModeBar": False },
+            className="chart-container",
+        ),
+        
+        html.P(
+            "Lecture : chaque ligne compare la corrélation entre l’APL et un indicateur de santé, "
+            "avant puis après prise en compte du FDep. Plus r est proche de −1 ou de +1, plus la relation "
+            "linéaire est marquée ; une valeur proche de 0 traduit une relation faible. "
+            "Ici, la limitation d’activité reste l’indicateur le plus lié à l’APL après prise en compte "
+            "de la défavorisation territoriale.",
+            className="graph-note",
         ),
 
         # ----------------------------------------------------
@@ -1053,38 +1103,83 @@ def create_profile_cards(regions, profils_clusters):
             .tolist()
         )
 
-        nb_regions = len(
-            regions_cluster
+        nb_regions = len(regions_cluster)
+
+        label_regions = (
+            "1 région"
+            if nb_regions == 1
+            else f"{nb_regions} régions"
         )
 
-        if nb_regions == 1:
-            label_regions = "1 région"
-        else:
-            label_regions = f"{nb_regions} régions"
-
-
         cards.append(
+            html.Div(
+                [
 
-            html.Div([
+                    # ----------------------------------------
+                    # Haut de carte
+                    # ----------------------------------------
 
-                html.Strong(
-                    profil["profil"]
+                    html.Div(
+                        [
+                            html.Span(
+                                f"PROFIL {cluster}",
+                                className="profile-number",
+                            ),
+
+                            html.Span(
+                                label_regions,
+                                className="profile-count",
+                            ),
+                        ],
+                        className="profile-card-top",
+                    ),
+
+
+                    # ----------------------------------------
+                    # Nom
+                    # ----------------------------------------
+
+                    html.H3(
+                        profil["profil"],
+                        className="profile-title",
+                    ),
+
+
+                    # ----------------------------------------
+                    # Description
+                    # ----------------------------------------
+
+                    html.P(
+                        describe_profile(profil),
+                        className="profile-description",
+                    ),
+
+
+                    # ----------------------------------------
+                    # Régions
+                    # ----------------------------------------
+
+                    html.Div(
+                        [
+                            html.Span(
+                                "RÉGIONS",
+                                className="profile-regions-label",
+                            ),
+
+                            html.P(
+                                format_regions(regions_cluster),
+                                className="profile-regions",
+                            ),
+                        ],
+                        className="profile-regions-block",
+                    ),
+
+                ],
+                className=(
+                    f"profile-card "
+                    f"profile-card-{cluster}"
                 ),
-
-                html.P(
-                    describe_profile(
-                        profil
-                    )
-                ),
-
-                html.P(
-                    f"{label_regions} : "
-                    f"{format_regions(regions_cluster)}",
-                    className="profile-regions",
-                ),
-
-            ], className="profile-card")
-
+            )
         )
 
     return html.Div(
@@ -1105,9 +1200,9 @@ def create_profiles_tab(
 
     return html.Div([
 
-        # ----------------------------------------------------
-        # Introduction
-        # ----------------------------------------------------
+        # ====================================================
+        # INTRODUCTION
+        # ====================================================
 
         html.P(
             "03 — PROFILS TERRITORIAUX",
@@ -1129,82 +1224,181 @@ def create_profiles_tab(
         ),
 
 
-        # ----------------------------------------------------
-        # Méthode simplifiée
-        # ----------------------------------------------------
+        # ====================================================
+        # MÉTHODE
+        # ====================================================
 
-        html.Div([
+        html.Div(
+            [
 
-            html.H2(
-                "Six indicateurs pour comparer les territoires"
-            ),
+                html.Div(
+                    [
+                        html.P(
+                            "COMMENT SONT CONSTRUITS LES PROFILS ?",
+                            className="method-flow-eyebrow",
+                        ),
 
-            html.P(
-                "Les 13 régions métropolitaines sont comparées à partir "
-                "de six indicateurs décrivant leur contexte social, "
-                "leur accessibilité aux médecins généralistes et "
-                "l'état de santé de leur population."
-            ),
+                        html.H2(
+                            "Six indicateurs, une lecture commune"
+                        ),
 
-            html.Div([
-
-                html.Div([
-
-                    html.Strong(
-                        "Défavorisation territoriale"
-                    ),
-
-                    html.P(
-                        "FDep et F-EDI"
-                    ),
-
-                ], className="indicator-card"),
+                        html.P(
+                            "Les 13 régions métropolitaines sont comparées à partir "
+                            "de dimensions sociales, sanitaires et d'accessibilité "
+                            "aux médecins généralistes.",
+                            className="method-flow-intro",
+                        ),
+                    ],
+                    className="method-flow-header",
+                ),
 
 
-                html.Div([
+                html.Div(
+                    [
 
-                    html.Strong(
-                        "Accessibilité aux soins"
-                    ),
+                        # ----------------------------------------
+                        # Étape 1
+                        # ----------------------------------------
 
-                    html.P(
-                        "APL aux médecins généralistes"
-                    ),
+                        html.Div(
+                            [
+                                html.Span(
+                                    "01",
+                                    className="method-step-number",
+                                ),
 
-                ], className="indicator-card"),
+                                html.Strong(
+                                    "Décrire les territoires"
+                                ),
+
+                                html.Div(
+                                    [
+                                        html.P([
+                                            html.B("Défavorisation"),
+                                            html.Br(),
+                                            "FDep · F-EDI",
+                                        ]),
+
+                                        html.P([
+                                            html.B("Accessibilité"),
+                                            html.Br(),
+                                            "APL médecins généralistes",
+                                        ]),
+
+                                        html.P([
+                                            html.B("Santé"),
+                                            html.Br(),
+                                            "Santé perçue · limitation · diabète",
+                                        ]),
+                                    ],
+                                    className="method-dimensions",
+                                ),
+                            ],
+                            className="method-step",
+                        ),
 
 
-                html.Div([
-
-                    html.Strong(
-                        "Santé"
-                    ),
-
-                    html.P(
-                        "Santé perçue, limitation d'activité "
-                        "et diabète déclaré"
-                    ),
-
-                ], className="indicator-card"),
-
-            ], className="indicator-grid"),
+                        html.Div(
+                            "→",
+                            className="method-arrow",
+                        ),
 
 
-            html.P(
-                "Les six indicateurs sont standardisés afin de pouvoir "
-                "être comparés sur une même échelle. Une classification "
-                "exploratoire rapproche ensuite les régions présentant "
-                "les configurations les plus similaires. Quatre profils "
-                "territoriaux se dégagent.",
-                className="graph-note",
-            ),
+                        # ----------------------------------------
+                        # Étape 2
+                        # ----------------------------------------
 
-        ], className="reading-guide"),
+                        html.Div(
+                            [
+                                html.Span(
+                                    "02",
+                                    className="method-step-number",
+                                ),
+
+                                html.Strong(
+                                    "Mettre sur une même échelle"
+                                ),
+
+                                html.P(
+                                    "Les six indicateurs sont standardisés "
+                                    "pour rendre leurs positions relatives comparables."
+                                ),
+                            ],
+                            className="method-step",
+                        ),
 
 
-        # ----------------------------------------------------
-        # Les quatre profils
-        # ----------------------------------------------------
+                        html.Div(
+                            "→",
+                            className="method-arrow",
+                        ),
+
+
+                        # ----------------------------------------
+                        # Étape 3
+                        # ----------------------------------------
+
+                        html.Div(
+                            [
+                                html.Span(
+                                    "03",
+                                    className="method-step-number",
+                                ),
+
+                                html.Strong(
+                                    "Regrouper les profils proches"
+                                ),
+
+                                html.P(
+                                    "Une classification exploratoire rapproche "
+                                    "les régions présentant les configurations "
+                                    "les plus similaires."
+                                ),
+                            ],
+                            className="method-step",
+                        ),
+
+
+                        html.Div(
+                            "→",
+                            className="method-arrow",
+                        ),
+
+
+                        # ----------------------------------------
+                        # Résultat
+                        # ----------------------------------------
+
+                        html.Div(
+                            [
+                                html.Span(
+                                    "04",
+                                    className="method-step-number",
+                                ),
+
+                                html.Strong(
+                                    "Faire émerger 4 profils"
+                                ),
+
+                                html.P(
+                                    "Ils décrivent des combinaisons territoriales "
+                                    "différentes, sans constituer un classement."
+                                ),
+                            ],
+                            className="method-step method-step-result",
+                        ),
+
+                    ],
+                    className="method-flow",
+                ),
+
+            ],
+            className="method-flow-block",
+        ),
+
+        # ====================================================
+        # LES QUATRE PROFILS
+        # ====================================================
 
         html.H2(
             "Quatre profils territoriaux se dégagent"
@@ -1217,109 +1411,112 @@ def create_profiles_tab(
             "et d'indicateurs de santé."
         ),
 
-
-        # Cartes générées à partir des résultats R
         create_profile_cards(
             regions,
             profils_clusters,
         ),
 
 
-        # ----------------------------------------------------
-        # Carte
-        # ----------------------------------------------------
+        # ====================================================
+        # EXPLORATION INTERACTIVE
+        # ====================================================
 
         html.H2(
-            "Comment ces profils se répartissent-ils "
-            "sur le territoire ?"
+            "Explorer les profils région par région"
         ),
 
         html.P(
-            "La carte représente le profil auquel appartient chaque "
-            "région métropolitaine étudiée. Cliquez sur une région "
-            "pour explorer ses indicateurs."
+            "Cliquez sur une région de la carte pour afficher "
+            "ses indicateurs et situer son profil par rapport "
+            "aux 13 régions étudiées."
         ),
 
-        dcc.Graph(
-            id="map-profiles",
-            figure=map_figure,
-
-            config={
-                "scrollZoom": False,
-                "displayModeBar": False,
-                "doubleClick": False,
-            },
-        ),
-
-
-        # ----------------------------------------------------
-        # Exploration d'une région
-        # ----------------------------------------------------
 
         html.Div(
-            id="region-details",
+            [
 
-            children=[
+                # ============================================
+                # COLONNE GAUCHE — CARTE
+                # ============================================
 
-                html.H2(
-                    "Explorer une région"
+                html.Div(
+                    [
+
+                        dcc.Graph(
+                            id="map-profiles",
+                            figure=map_figure,
+                            className="profiles-map",
+                            config={
+                                "responsive": True,
+                                "scrollZoom": False,
+                                "displayModeBar": False,
+                            },
+                            style={
+                                "height": "100%",
+                                "width": "100%",
+                            },
+                        ),
+                    ],
+                    className="profiles-explorer-map",
                 ),
 
-                html.P(
-                    "Sélectionnez une région sur la carte pour afficher "
-                    "ses indicateurs et situer son profil par rapport "
-                    "aux 13 régions étudiées."
+
+                # ============================================
+                # COLONNE DROITE
+                # ============================================
+
+                html.Div(
+                    [
+
+                        # ------------------------------------
+                        # Fiche région
+                        # ------------------------------------
+
+                        html.Div(
+                            id="region-details",
+                            className="region-details",
+                            children=[
+
+                                html.Div(
+                                    [
+                                        html.H3(
+                                            "Explorer une région",
+                                            className="region-title",
+                                        ),
+                                        html.P(
+                                            "Sélectionnez une région sur la carte pour afficher "
+                                            "ses indicateurs et situer son profil par rapport aux "
+                                            "13 régions étudiées.",
+                                            className="region-text",
+                                        ),
+                                    ],
+                                    className="region-placeholder",
+                                )
+                            ],
+                        ),
+
+                        # ------------------------------------
+                        # Profil standardisé
+                        # ------------------------------------
+
+                        html.Div(
+                            id="region-profile-container",
+                        ),
+
+                    ],
+
+                    className="profiles-explorer-details",
                 ),
 
             ],
 
-            className="region-details",
+            className="profiles-explorer",
         ),
 
 
-        # ----------------------------------------------------
-        # Profil standardisé
-        # ----------------------------------------------------
-
-        html.Div(
-            id="region-profile-container",
-
-            children=[
-
-                html.Div([
-
-                    html.H3(
-                        "Comment lire ce graphique ?"
-                    ),
-
-                    html.P(
-                        "Les indicateurs sont standardisés par rapport "
-                        "aux 13 régions étudiées. La ligne 0 représente "
-                        "leur moyenne. Tous les indicateurs ont été "
-                        "orientés dans le même sens : une valeur positive "
-                        "correspond à une situation relativement plus "
-                        "défavorable et une valeur négative à une situation "
-                        "relativement plus favorable."
-                    ),
-
-                ], className="reading-guide"),
-
-
-                dcc.Graph(
-                    id="region-profile"
-                ),
-
-            ],
-
-            style={
-                "display": "none"
-            },
-        ),
-
-
-        # ----------------------------------------------------
-        # À retenir
-        # ----------------------------------------------------
+        # ====================================================
+        # À RETENIR
+        # ====================================================
 
         html.Div([
 
@@ -1343,9 +1540,9 @@ def create_profiles_tab(
         ], className="takeaway"),
 
 
-        # ----------------------------------------------------
-        # Robustesse et précautions
-        # ----------------------------------------------------
+        # ====================================================
+        # ROBUSTESSE ET PRÉCAUTIONS
+        # ====================================================
 
         html.Div([
 
@@ -1379,9 +1576,9 @@ def create_profiles_tab(
         ], className="method-note"),
 
 
-        # ----------------------------------------------------
-        # Sources
-        # ----------------------------------------------------
+        # ====================================================
+        # SOURCES
+        # ====================================================
 
         html.Div([
 
@@ -1444,7 +1641,6 @@ def create_profiles_tab(
 
     ], className="tab-content")
 
-
 # ============================================================
 # LAYOUT PRINCIPAL
 # ============================================================
@@ -1466,18 +1662,23 @@ def create_layout(
         dcc.Tabs(
             id="main-tabs",
             value="accueil",
+            className="tabs-container",
 
             children=[
 
                 dcc.Tab(
                     label="Accueil",
                     value="accueil",
+                    className="app-tab",
+                    selected_className="app-tab app-tab--selected",
                     children=create_home_tab(),
                 ),
 
                 dcc.Tab(
                     label="1 · Inégalités sociales",
                     value="social",
+                    className="app-tab",
+                    selected_className="app-tab app-tab--selected",
 
                     children=create_social_tab(
                         finance,
@@ -1488,6 +1689,8 @@ def create_layout(
                 dcc.Tab(
                     label="2 · Territoires & soins",
                     value="territoires",
+                    className="app-tab",
+                    selected_className="app-tab app-tab--selected",
 
                     children=create_territorial_tab(
                         analyse_regions,
@@ -1498,6 +1701,8 @@ def create_layout(
                 dcc.Tab(
                     label="3 · Profils territoriaux",
                     value="profils",
+                    className="app-tab",
+                    selected_className="app-tab app-tab--selected",
 
                     children=create_profiles_tab(
                         map_figure,
