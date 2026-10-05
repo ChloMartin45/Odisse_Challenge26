@@ -204,6 +204,20 @@ p {
     text-transform: uppercase;
 }
 
+.text-accent {
+    color: var(--blue);
+    font-weight: 700;
+}
+
+.text-accent-blue {
+    color: var(--navy);
+    font-weight: 700;
+}
+
+.text-highlight {
+    color: var(--raspberry);
+    font-weight: 700;
+}
 
 /* ==========================================================
    5. NAVIGATION / ONGLETS
@@ -718,6 +732,56 @@ p {
 
 
 .method-note p:last-child {
+    margin-bottom: 0;
+}
+
+.method-notes-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 18px;
+
+    margin-top: 30px;
+}
+
+
+.method-notes-grid .method-note {
+    margin: 0;
+}
+
+
+@media (max-width: 850px) {
+
+    .method-notes-grid {
+        grid-template-columns:
+            1fr;
+    }
+}
+
+.method-data-note {
+    margin-top: 20px;
+    padding: 18px 20px;
+
+    background: rgba(255, 255, 255, 0.72);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-medium);
+}
+
+.method-data-note p {
+    margin-bottom: 10px;
+
+    color: var(--text-muted);
+
+    font-size: 0.82rem;
+
+    line-height: 1.5;
+}
+
+.method-data-note p:last-child {
     margin-bottom: 0;
 }
 
@@ -1631,6 +1695,193 @@ p {
 }
 
 /* ==========================================================
+   SYNTHÈSE DES QUATRE PROFILS
+   ========================================================== */
+
+   .profiles-summary-section {
+    margin-top: 72px;
+}
+
+
+.profiles-summary-section .section-heading {
+    margin-bottom: 10px;
+}
+
+
+.profiles-summary-intro {
+    max-width: 1080px;
+
+    margin-bottom: 14px;
+}
+
+
+.profiles-key-result {
+    margin:
+        14px
+        0
+        18px;
+
+    padding:
+        14px
+        18px;
+
+    font-size: 0.9rem;
+
+    line-height: 1.5;
+}
+
+/* ==========================================================
+   SYNTHÈSE DES QUATRE PROFILS
+   ========================================================== */
+
+   .profiles-summary-section {
+    margin-top: 72px;
+}
+
+
+.profiles-summary-section .section-heading {
+    margin-bottom: 12px;
+}
+
+
+.profiles-summary-intro {
+    max-width: 1100px;
+
+    margin-bottom: 18px;
+
+    font-size: 1rem;
+
+    line-height: 1.55;
+}
+
+
+/* Résultat principal */
+
+.profiles-key-result {
+    margin:
+        18px
+        0
+        28px;
+
+    padding:
+        17px
+        22px;
+
+    font-size: 0.92rem;
+
+    line-height: 1.55;
+}
+
+
+/* ----------------------------------------------------------
+   Les 4 profils
+   ---------------------------------------------------------- */
+
+.profiles-summary-section .profiles-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 14px;
+
+    margin:
+        0
+        0
+        14px;
+}
+
+
+.profiles-summary-section .profile-card {
+    display: flex;
+
+    flex-direction: column;
+
+    min-width: 0;
+
+    padding:
+        18px
+        18px
+        16px;
+}
+
+
+/* Haut */
+
+.profiles-summary-section .profile-card-top {
+    margin-bottom: 10px;
+}
+
+
+.profiles-summary-section .profile-number {
+    font-size: 0.7rem;
+}
+
+
+.profiles-summary-section .profile-count {
+    padding:
+        4px
+        9px;
+
+    font-size: 0.72rem;
+}
+
+
+/* Titre */
+
+.profiles-summary-section .profile-title {
+    margin-bottom: 8px;
+
+    font-size: 1rem;
+
+    line-height: 1.28;
+}
+
+
+/* Description */
+
+.profiles-summary-section .profile-description {
+    font-size: 0.82rem;
+
+    line-height: 1.5;
+}
+
+
+/* Régions */
+
+.profiles-summary-section .profile-regions-block {
+    margin-top: auto;
+
+    padding-top: 12px;
+}
+
+
+.profiles-summary-section .profile-regions-label {
+    font-size: 0.66rem;
+}
+
+
+.profiles-summary-section .profile-regions {
+    font-size: 0.77rem;
+
+    line-height: 1.4;
+}
+
+
+/* Note finale */
+
+.profiles-summary-note {
+    margin:
+        10px
+        0
+        0;
+
+    font-size: 0.82rem;
+
+    line-height: 1.5;
+}
+
+/* ==========================================================
    CARTES DES PROFILS TERRITORIAUX
    ========================================================== */
 
@@ -1684,7 +1935,6 @@ p {
     box-shadow:
         var(--shadow-soft);
 }
-
 
 /* Couleurs identiques à la carte */
 

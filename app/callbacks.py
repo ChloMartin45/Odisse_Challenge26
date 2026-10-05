@@ -511,7 +511,9 @@ def register_callbacks(app):
                 html.P(
                     "0 correspond à la moyenne. Une valeur positive indique "
                     "une situation relativement plus défavorable et une valeur "
-                    "négative une situation relativement plus favorable.",
+                    "négative une situation relativement plus favorable. "
+                    "La longueur du segment indique l’écart à la moyenne des 13 régions : "
+                    "plus le point est éloigné de 0, plus la région se distingue sur l’indicateur considéré.",
                     className="region-profile-note",
                 ),
 

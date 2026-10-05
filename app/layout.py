@@ -1053,6 +1053,11 @@ def create_territorial_tab(
                                     "Structure d’âge prise en compte",
                                     className="context-tag",
                                 ),
+                                
+                                html.Span(
+                                    "Agrégation régionale pondérée par la population",
+                                    className="context-tag",
+                                ),
                             ],
                             className="context-tags",
                         ),
@@ -1331,10 +1336,6 @@ def create_territorial_tab(
 # 03 — PROFILS TERRITORIAUX
 # ============================================================
 
-# ============================================================
-# Helpers — Profils territoriaux
-# ============================================================
-
 def format_regions(regions):
     """Formate proprement une liste de régions en français."""
 
@@ -1351,91 +1352,31 @@ def format_regions(regions):
         + f" et {regions[-1]}"
     )
 
-
-def describe_profile(profil):
-    """
-    Produit une description accessible d'un profil
-    à partir de ses scores standardisés moyens.
-
-    Convention :
-    score positif = situation relativement plus défavorable
-    score négatif = situation relativement plus favorable.
-    """
-
-    seuil = 0.25
-
-    # --------------------------------------------------------
-    # FDep
-    # --------------------------------------------------------
-
-    if profil["z_fdep"] > seuil:
-        fdep = "un niveau de défavorisation FDep supérieur à la moyenne"
-
-    elif profil["z_fdep"] < -seuil:
-        fdep = "un niveau de défavorisation FDep inférieur à la moyenne"
-
-    else:
-        fdep = "un niveau de défavorisation FDep proche de la moyenne"
-
-
-    # --------------------------------------------------------
-    # F-EDI
-    # --------------------------------------------------------
-
-    if profil["z_fedi"] > seuil:
-        fedi = "un F-EDI relativement plus défavorable"
-
-    elif profil["z_fedi"] < -seuil:
-        fedi = "un F-EDI relativement plus favorable"
-
-    else:
-        fedi = "un F-EDI proche de la moyenne"
-
-
-    # --------------------------------------------------------
-    # Accessibilité
-    # z_apl positif = faible accessibilité
-    # --------------------------------------------------------
-
-    if profil["z_apl"] > seuil:
-        apl = "une accessibilité aux médecins généralistes plus faible"
-
-    elif profil["z_apl"] < -seuil:
-        apl = "une accessibilité aux médecins généralistes meilleure"
-
-    else:
-        apl = "une accessibilité aux médecins généralistes proche de la moyenne"
-
-
-    # --------------------------------------------------------
-    # Santé
-    # --------------------------------------------------------
-
-    score_sante = (
-        profil["z_sante"]
-        + profil["z_limitation"]
-        + profil["z_diabete"]
-    ) / 3
-
-    if score_sante > seuil:
-        sante = "des indicateurs de santé globalement moins favorables"
-
-    elif score_sante < -seuil:
-        sante = "des indicateurs de santé globalement plus favorables"
-
-    else:
-        sante = "des indicateurs de santé globalement proches de la moyenne"
-
-
-    return (
-        "Par rapport aux 13 régions étudiées, ce profil associe "
-        f"{fdep}, {fedi}, {apl} et {sante}."
-    )
-
-
 def create_profile_cards(regions, profils_clusters):
     """Construit les quatre cartes de profils à partir des exports R."""
+        
+    PROFILE_DESCRIPTIONS = {
+        1: (
+            "L’Île-de-France forme seule ce groupe et se distingue nettement "
+            "des autres régions par la combinaison de ses indicateurs."
+        ),
 
+        2: (
+            "Ce profil se caractérise surtout par des indicateurs de santé "
+            "globalement plus favorables que dans les autres groupes."
+        ),
+
+        3: (
+            "Ici, une défavorisation plus élevée se combine avec une accessibilité "
+            "plus faible aux médecins généralistes, cumulant deux difficultés territoriales."
+        ),
+
+        4: (
+            "Une meilleure accessibilité aux médecins généralistes coexiste ici avec "
+            "des indicateurs de santé plus fragiles."
+        ),
+    }
+    
     cards = []
 
     profils = profils_clusters.sort_values(
@@ -1488,7 +1429,6 @@ def create_profile_cards(regions, profils_clusters):
                         className="profile-card-top",
                     ),
 
-
                     # ----------------------------------------
                     # Nom
                     # ----------------------------------------
@@ -1504,7 +1444,7 @@ def create_profile_cards(regions, profils_clusters):
                     # ----------------------------------------
 
                     html.P(
-                        describe_profile(profil),
+                        PROFILE_DESCRIPTIONS[cluster],
                         className="profile-description",
                     ),
 
@@ -1569,14 +1509,14 @@ def create_profiles_tab(
         ),
 
         html.P(
-            "Les analyses précédentes ont étudié séparément la "
-            "défavorisation territoriale, l'accessibilité aux soins "
-            "et les indicateurs de santé. Cette dernière étape les "
-            "considère simultanément afin d'identifier différentes "
-            "configurations territoriales.",
+            "Les analyses précédentes ont étudié séparément les écarts sociaux, "
+            "la défavorisation territoriale et l'accessibilité aux médecins généralistes. "
+            "Cette dernière étape change de perspective : il ne s'agit plus d'isoler "
+            "une relation, mais d'observer comment plusieurs dimensions se combinent "
+            "au sein d'un même territoire. L'objectif est d'identifier des configurations "
+            "régionales récurrentes, sans établir de classement des régions.",
             className="intro",
         ),
-
 
         # ====================================================
         # MÉTHODE
@@ -1584,6 +1524,10 @@ def create_profiles_tab(
 
         html.Div(
             [
+
+                # ----------------------------------------------------
+                # Introduction de la méthode
+                # ----------------------------------------------------
 
                 html.Div(
                     [
@@ -1593,13 +1537,15 @@ def create_profiles_tab(
                         ),
 
                         html.H2(
-                            "Six indicateurs, une lecture commune"
+                            "De six indicateurs à quatre profils territoriaux"
                         ),
 
                         html.P(
-                            "Les 13 régions métropolitaines sont comparées à partir "
-                            "de dimensions sociales, sanitaires et d'accessibilité "
-                            "aux médecins généralistes.",
+                            "Les régions sont comparées simultanément selon leur contexte "
+                            "social, leur accessibilité aux médecins généralistes et leurs "
+                            "indicateurs de santé. L'objectif est de faire apparaître des "
+                            "configurations territoriales similaires, et non d'établir "
+                            "un classement.",
                             className="method-flow-intro",
                         ),
                     ],
@@ -1607,12 +1553,125 @@ def create_profiles_tab(
                 ),
 
 
+                # ----------------------------------------------------
+                # FDep / F-EDI
+                # ----------------------------------------------------
+
+                html.Div(
+                    [
+                        html.P(
+                            "POURQUOI DEUX INDICES DE DÉFAVORISATION ?",
+                            className="dashboard-eyebrow",
+                        ),
+
+                        html.H3(
+                            "FDep et F-EDI apportent deux lectures complémentaires"
+                        ),
+
+                        html.P([
+                            html.Span(
+                                "FDep20 — ",
+                                className="text-accent",
+                            ),
+                            "un indice synthétique de défavorisation socio-économique fondé sur "
+                            "quatre dimensions : revenu médian, niveau de diplôme, part d'ouvriers "
+                            "et chômage."
+                        ]),
+
+                        html.P([
+                            html.Span(
+                                "F-EDI — ",
+                                className="text-accent",
+                            ),
+                            "un indice écologique de défavorisation sociale construit à partir de "
+                            "l'enquête européenne EU-SILC et du recensement. Il mobilise dix "
+                            "caractéristiques liées notamment à l'emploi, au diplôme, au logement, "
+                            "à l'équipement automobile, à la propriété du logement et à la composition "
+                            "des ménages."
+                        ]),
+                        
+                        html.P([
+                            html.Span(
+                                "Point de vigilance — ",
+                                className="text-accent-blue",
+                            ),
+                            "ces deux indices caractérisent le contexte social d'un territoire. "
+                            "Ils ne mesurent pas la situation sociale individuelle de ses habitants."
+                        ]),
+
+                        html.Div(
+                            [
+                                html.Span(
+                                    "FDep : 4 dimensions socio-économiques",
+                                    className="context-tag",
+                                ),
+
+                                html.Span(
+                                    "F-EDI : 10 dimensions sociales et matérielles",
+                                    className="context-tag",
+                                ),
+
+                                html.Span(
+                                    "F-EDI 2021",
+                                    className="context-tag",
+                                ),
+
+                                html.Span(
+                                    "Indices écologiques territoriaux",
+                                    className="context-tag",
+                                ),
+                                
+                                html.Span(
+                                    "Agrégation régionale pondérée par la population",
+                                    className="context-tag",
+                                ),
+                            ],
+                            className="context-tags",
+                        ),
+
+                        html.Div(
+                            [
+                                html.Strong(
+                                    "Pourquoi le F-EDI apparaît-il seulement ici ?"
+                                ),
+
+                                html.P([
+                                    "Dans l'onglet précédent, le FDep a été retenu comme indicateur principal "
+                                    "pour étudier des relations territoriales simples et lisibles. Ici, ",
+                                    html.Span(
+                                        "la question change : plusieurs dimensions sont considérées simultanément",
+                                        className="text-accent-blue",
+                                    ),
+                                    " pour construire les profils. Le F-EDI complète donc le FDep par une "
+                                    "mesure plus large du contexte social et matériel."
+                                ]),
+
+                                html.P([
+                                    html.Span(
+                                        "Contrôle de robustesse — ",
+                                        className="text-accent",
+                                    ),
+                                    "le retrait du F-EDI ne modifie pas les quatre regroupements obtenus."
+                                ]),
+                            ],
+                            className="learning-subnote",
+                        ),
+
+                    ],
+                    className="learning-card",
+                ),
+
+
+                # ----------------------------------------------------
+                # Parcours méthodologique
+                # ----------------------------------------------------
+
                 html.Div(
                     [
 
-                        # ----------------------------------------
+                        # ------------------------------------------------
                         # Étape 1
-                        # ----------------------------------------
+                        # ------------------------------------------------
 
                         html.Div(
                             [
@@ -1622,13 +1681,13 @@ def create_profiles_tab(
                                 ),
 
                                 html.Strong(
-                                    "Décrire les territoires"
+                                    "Décrire plusieurs dimensions"
                                 ),
 
                                 html.Div(
                                     [
                                         html.P([
-                                            html.B("Défavorisation"),
+                                            html.B("Contexte social"),
                                             html.Br(),
                                             "FDep · F-EDI",
                                         ]),
@@ -1658,9 +1717,9 @@ def create_profiles_tab(
                         ),
 
 
-                        # ----------------------------------------
+                        # ------------------------------------------------
                         # Étape 2
-                        # ----------------------------------------
+                        # ------------------------------------------------
 
                         html.Div(
                             [
@@ -1670,17 +1729,28 @@ def create_profiles_tab(
                                 ),
 
                                 html.Strong(
-                                    "Mettre sur une même échelle"
+                                    "Rendre les indicateurs comparables"
                                 ),
 
-                                html.P(
-                                    "Les six indicateurs sont standardisés "
-                                    "pour rendre leurs positions relatives comparables."
-                                ),
+                                html.P([
+                                    "Les six indicateurs sont standardisés afin de comparer la position "
+                                    "relative de chaque région malgré des unités différentes. Leur sens est "
+                                    "ensuite harmonisé : ",
+                                    html.Span(
+                                        "score positif = situation relativement plus défavorable",
+                                        className="text-accent-blue",
+                                    ),
+                                    " ; ",
+                                    html.Span(
+                                        "score négatif = situation relativement plus favorable",
+                                        className="text-accent-blue",
+                                    ),
+                                    "."
+                                ]),
+
                             ],
                             className="method-step",
                         ),
-
 
                         html.Div(
                             "→",
@@ -1688,9 +1758,9 @@ def create_profiles_tab(
                         ),
 
 
-                        # ----------------------------------------
+                        # ------------------------------------------------
                         # Étape 3
-                        # ----------------------------------------
+                        # ------------------------------------------------
 
                         html.Div(
                             [
@@ -1700,13 +1770,23 @@ def create_profiles_tab(
                                 ),
 
                                 html.Strong(
-                                    "Regrouper les profils proches"
+                                    "Rapprocher les régions qui se ressemblent"
                                 ),
 
+                                html.P([
+                                    "Une classification hiérarchique considère les six indicateurs "
+                                    "simultanément et rapproche ",
+                                    html.Span(
+                                        "les régions présentant les configurations les plus similaires",
+                                        className="text-accent-blue",
+                                    ),
+                                    "."
+                                ]),
+
                                 html.P(
-                                    "Une classification exploratoire rapproche "
-                                    "les régions présentant les configurations "
-                                    "les plus similaires."
+                                    "Chaque indicateur intervient individuellement dans "
+                                    "la construction des groupes.",
+                                    className="method-step-note",
                                 ),
                             ],
                             className="method-step",
@@ -1719,9 +1799,9 @@ def create_profiles_tab(
                         ),
 
 
-                        # ----------------------------------------
-                        # Résultat
-                        # ----------------------------------------
+                        # ------------------------------------------------
+                        # Étape 4
+                        # ------------------------------------------------
 
                         html.Div(
                             [
@@ -1731,13 +1811,19 @@ def create_profiles_tab(
                                 ),
 
                                 html.Strong(
-                                    "Faire émerger 4 profils"
+                                    "Retenir quatre profils interprétables"
                                 ),
 
-                                html.P(
-                                    "Ils décrivent des combinaisons territoriales "
-                                    "différentes, sans constituer un classement."
-                                ),
+                                html.P([
+                                    "La structure de la classification isole d'abord fortement l'Île-de-France. "
+                                    "Avec trois groupes, les autres régions commencent à se différencier. ",
+                                    html.Span(
+                                        "Quatre groupes sont finalement retenus",
+                                        className="text-highlight",
+                                    ),
+                                    " pour obtenir une lecture plus fine tout en conservant des profils interprétables."
+                                ]),
+
                             ],
                             className="method-step method-step-result",
                         ),
@@ -1745,36 +1831,152 @@ def create_profiles_tab(
                     ],
                     className="method-flow",
                 ),
+                
+                # ----------------------------------------------------
+                # Données et échelles
+                # ----------------------------------------------------
+                
+                html.Div(
+                    [
+                        html.P(
+                            "DONNÉES ET ÉCHELLES",
+                            className="dashboard-eyebrow",
+                        ),
 
+                        html.P([
+                            html.Span(
+                                "FDep, F-EDI et APL — ",
+                                className="text-accent",
+                            ),
+                            "ces indicateurs proviennent de données territoriales plus fines "
+                            "et sont ramenés à l'échelle régionale par moyenne pondérée selon "
+                            "la population communale 2023. Les communes les plus peuplées "
+                            "contribuent donc davantage à la valeur régionale."
+                        ]),
+
+                        html.P([
+                            html.Span(
+                                "Santé perçue, limitation d'activité et diabète — ",
+                                className="text-accent-blue",
+                            ),
+                            "ces indicateurs sont déjà disponibles à l'échelle régionale dans "
+                            "le Baromètre 2024 et sont utilisés tels que fournis, sans nouvelle "
+                            "agrégation communale."
+                        ]),
+                    ],
+                    className="method-data-note",
+                ),
+
+                # ----------------------------------------------------
+                # Robustesse
+                # ----------------------------------------------------
+
+                html.Div(
+                    [
+                        html.P(
+                            "TESTER LA ROBUSTESSE",
+                            className="dashboard-eyebrow",
+                        ),
+
+                        html.H3([
+                            "Les profils ont été confrontés à ",
+                            html.Span(
+                                "plusieurs scénarios",
+                                className="text-accent",
+                            ),
+                        ]),
+
+                        html.P(
+                            "La classification a été recalculée avec trois groupes, "
+                            "puis à quatre groupes en retirant successivement le F-EDI "
+                            "et l'APL. Ces tests servent à vérifier la stabilité générale "
+                            "de la typologie, et non à rechercher a posteriori le découpage "
+                            "le plus favorable."
+                        ),
+
+                        html.Div(
+                            [
+                                html.Span(
+                                    "3 groupes : structure plus agrégée",
+                                    className="context-tag",
+                                ),
+
+                                html.Span(
+                                    "Sans F-EDI : mêmes 4 regroupements",
+                                    className="context-tag",
+                                ),
+
+                                html.Span(
+                                    "Sans APL : certaines régions changent de profil",
+                                    className="context-tag",
+                                ),
+                            ],
+                            className="context-tags",
+                        ),
+                    ],
+                    className="learning-card",
+                ),
             ],
             className="method-flow-block",
         ),
         
-        html.P(
-            "Méthode : les six indicateurs sont standardisés avant classification. "
-            "Les regroupements ont ensuite fait l'objet d'analyses de sensibilité "
-            "afin de vérifier leur stabilité.",
-            className="graph-note",
+        html.Div(
+            [
+                html.P(
+                    "La typologie retenue ne repose donc pas sur un seul indicateur : "
+                    "elle résulte de la combinaison de plusieurs dimensions territoriales "
+                    "et reste globalement stable lorsque certains choix méthodologiques "
+                    "sont modifiés."
+                ),
+            ],
+            className="result-note",
         ),
 
-        # ====================================================
+       # ====================================================
         # LES QUATRE PROFILS
         # ====================================================
 
-        html.H2(
-            "Quatre profils territoriaux se dégagent"
-        ),
+        html.Div(
+            [
 
-        html.P(
-            "Ces profils ne constituent pas un classement des régions. "
-            "Ils décrivent différentes combinaisons de défavorisation "
-            "territoriale, d'accessibilité aux médecins généralistes "
-            "et d'indicateurs de santé."
-        ),
+                html.H2(
+                    "Quatre configurations territoriales se distinguent",
+                    className="section-heading",
+                ),
 
-        create_profile_cards(
-            regions,
-            profils_clusters,
+                html.P(
+                    "Les quatre profils combinent différemment contexte social, "
+                    "accessibilité aux médecins généralistes et santé. Ils font apparaître "
+                    "des situations de cumul, mais aussi des configurations plus contrastées.",
+                    className="profiles-summary-intro",
+                ),
+
+                html.Div(
+                    [
+                        html.P(
+                            "Une meilleure accessibilité aux médecins généralistes ne coïncide "
+                            "pas systématiquement avec des indicateurs de santé plus favorables : "
+                            "l'accès aux soins ne suffit donc pas, à lui seul, à résumer les "
+                            "inégalités territoriales de santé."
+                        ),
+                    ],
+                    className="result-note profiles-key-result",
+                ),
+
+                create_profile_cards(
+                    regions,
+                    profils_clusters,
+                ),
+
+                html.P(
+                    "Les profils décrivent des configurations moyennes et ne constituent "
+                    "pas un classement. Le profil francilien, composé d’une seule région, "
+                    "doit être interprété avec prudence.",
+                    className="note profiles-summary-note",
+                ),
+
+            ],
+            className="profiles-summary-section",
         ),
 
 
@@ -1787,9 +1989,9 @@ def create_profiles_tab(
         ),
 
         html.P(
-            "Cliquez sur une région de la carte pour afficher "
-            "ses indicateurs et situer son profil par rapport "
-            "aux 13 régions étudiées."
+            "Sélectionnez une région pour découvrir les indicateurs qui caractérisent "
+            "son territoire et situer sa position par rapport à la moyenne des "
+            "13 régions métropolitaines étudiées."
         ),
 
 
@@ -1905,45 +2107,61 @@ def create_profiles_tab(
         # ROBUSTESSE ET PRÉCAUTIONS
         # ====================================================
 
-        html.Div([
+        html.Div(
+            [
 
-            html.H3(
-                "Précautions de lecture"
-            ),
+                html.Div(
+                    [
+                        html.H3(
+                            "Portée de l'analyse"
+                        ),
 
-            html.P(
-                "Cette typologie est exploratoire et porte sur seulement "
-                "13 régions métropolitaines. Elle décrit des proximités "
-                "entre territoires à partir des six indicateurs retenus "
-                "et ne constitue ni un classement ni une typologie "
-                "définitive des régions françaises."
-            ),
-            
-            html.P(
-                "Les sources mobilisées ne portent pas toutes sur la même période : "
-                "FDep à partir de données socio-économiques 2020, F-EDI 2021, "
-                "APL et population 2023, indicateurs de santé du Baromètre 2024. "
-                "Les croisements décrivent donc des configurations territoriales "
-                "proches dans le temps, et non une photographie strictement simultanée."
-            ),
+                        html.P(
+                            "Cette typologie est exploratoire et porte sur seulement "
+                            "13 régions métropolitaines. Elle décrit des proximités "
+                            "entre territoires à partir des six indicateurs retenus "
+                            "et ne constitue ni un classement ni une typologie "
+                            "définitive des régions françaises."
+                        ),
 
-            html.P(
-                "Des analyses de sensibilité ont été réalisées. "
-                "Le retrait du F-EDI ne modifie pas les regroupements. "
-                "Le retrait de l'APL modifie en revanche le classement "
-                "du Grand Est et des Hauts-de-France, ce qui suggère que "
-                "l'accessibilité apporte une information complémentaire "
-                "dans la caractérisation des territoires."
-            ),
+                        html.P(
+                            "Le profil francilien est constitué de la seule "
+                            "Île-de-France. Son interprétation doit donc être "
+                            "particulièrement prudente."
+                        ),
+                    ],
+                    className="method-note",
+                ),
 
-            html.P(
-                "Le profil francilien est constitué de la seule "
-                "Île-de-France. Son interprétation doit donc être "
-                "particulièrement prudente."
-            ),
+                html.Div(
+                    [
+                        html.H3(
+                            "Données et robustesse"
+                        ),
 
-        ], className="method-note"),
+                        html.P(
+                            "Les sources mobilisées ne portent pas toutes sur la même période : "
+                            "FDep à partir de données socio-économiques 2020, F-EDI 2021, "
+                            "APL et population 2023, indicateurs de santé du Baromètre 2024. "
+                            "FDep, F-EDI et APL sont agrégés à l'échelle régionale en pondérant "
+                            "les valeurs communales par la population, tandis que les indicateurs "
+                            "de santé correspondent directement aux estimations régionales du "
+                            "Baromètre 2024."
+                        ),
 
+                        html.P(
+                            "Des analyses de sensibilité ont été réalisées. "
+                            "Le retrait du F-EDI ne modifie pas les regroupements. "
+                            "Le retrait de l'APL modifie en revanche le classement "
+                            "du Grand Est et des Hauts-de-France."
+                        ),
+                    ],
+                    className="method-note",
+                ),
+
+            ],
+            className="method-notes-grid",
+        ),
 
         # ====================================================
         # SOURCES
