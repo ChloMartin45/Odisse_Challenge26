@@ -339,6 +339,125 @@ p {
     line-height: 1.35;
 }
 
+/* ==========================================================
+   BLOCS PÉDAGOGIQUES
+   ========================================================== */
+
+   .learning-card {
+    margin:
+        24px
+        0
+        34px;
+
+    padding:
+        24px
+        28px;
+
+    background:
+        rgba(150, 187, 255, 0.085);
+
+    border:
+        1px solid rgba(17, 75, 138, 0.10);
+
+    border-radius:
+        var(--radius-medium);
+}
+
+
+.learning-card h3 {
+    margin:
+        0
+        0
+        8px;
+
+    color:
+        var(--navy);
+}
+
+
+.learning-card > p:not(.dashboard-eyebrow) {
+    margin-bottom:
+        16px;
+
+    color:
+        var(--text-muted);
+
+    line-height:
+        1.55;
+}
+
+.learning-subnote {
+    margin-top: 20px;
+
+    padding-top: 16px;
+
+    border-top:
+        1px solid rgba(17, 75, 138, 0.12);
+}
+
+
+.learning-subnote strong {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: var(--navy);
+
+    font-size: 0.86rem;
+}
+
+
+.learning-subnote p {
+    margin: 0 !important;
+
+    color: var(--text-muted);
+
+    font-size: 0.82rem;
+
+    line-height: 1.5;
+}
+
+/* Petits tags méthodologiques */
+
+.context-tags {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-top:
+        18px;
+}
+
+
+.context-tag {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding:
+        6px
+        10px;
+
+    background:
+        rgba(255, 255, 255, 0.75);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        999px;
+
+    color:
+        var(--text-muted);
+
+    font-size:
+        0.75rem;
+
+    font-weight:
+        600;
+}
 
 /* ==========================================================
     7. CARTES DU PARCOURS
@@ -686,36 +805,78 @@ p {
 }
 
 /* ==========================================================
-   DASHBOARD SOCIAL
+   DASHBOARDS DE DATAVISUALISATION
    ========================================================== */
 
-   .social-dashboard {
-    margin-top: 28px;
+   .dashboard-section {
+    margin-top: 34px;
 }
 
-.social-dashboard-header {
+
+/* Séparation entre deux grandes analyses successives */
+
+.dashboard-section + .dashboard-section {
+    margin-top: 100px;
+}
+
+
+.dashboard-section > h2:first-child {
+    margin-top: 0;
+}
+
+/* ----------------------------------------------------------
+   En-tête d'exploration
+   ---------------------------------------------------------- */
+
+.dashboard-header {
+    margin-top: 48px;
     margin-bottom: 18px;
 }
 
-.social-dashboard-header h2 {
+
+.dashboard-header h2 {
+    position: relative;
+
+    margin-top: 0;
     margin-bottom: 8px;
 }
 
-.social-dashboard-header > p {
-    margin-bottom: 18px;
+
+/* Trait signature */
+
+.dashboard-header h2::before {
+    content: "";
+
+    display: block;
+
+    width: 34px;
+    height: 3px;
+
+    margin-bottom: 15px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--raspberry),
+            var(--blue-light)
+        );
+
+    border-radius: 3px;
 }
 
-.social-dashboard-selector {
-    margin-bottom: 0;
+
+.dashboard-header > p {
+    margin-bottom: 18px;
 }
 
 
 /* ----------------------------------------------------------
-   Corps
+   Corps du dashboard
    ---------------------------------------------------------- */
 
-.social-dashboard-body {
+.dashboard-body {
     display: grid;
+
     grid-template-columns:
         minmax(0, 1.45fr)
         minmax(280px, 0.55fr);
@@ -723,31 +884,33 @@ p {
     gap: 18px;
 
     align-items: stretch;
-
-    min-height: 520px;
 }
 
 
 /* ----------------------------------------------------------
-   Graphique
+   Visualisation
    ---------------------------------------------------------- */
 
-.social-dashboard-visual {
+.dashboard-visual {
     min-width: 0;
 
-    background: var(--surface);
+    background:
+        var(--surface);
 
-    border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-    border-radius: var(--radius-medium);
+    border-radius:
+        var(--radius-medium);
 
-    overflow: hidden;
+    overflow:
+        hidden;
 }
 
-.social-dashboard-chart {
+
+.dashboard-chart {
     width: 100%;
-    height: 100%;
-    min-height: 500px;
+    height: 500px;
 }
 
 
@@ -755,24 +918,34 @@ p {
    Colonne de lecture
    ---------------------------------------------------------- */
 
-.social-dashboard-side {
+.dashboard-side {
     display: flex;
+
     flex-direction: column;
 
     gap: 14px;
 }
 
 
+/* ----------------------------------------------------------
+   Cartes latérales
+   ---------------------------------------------------------- */
+
 .dashboard-reading-block,
 .dashboard-info-block,
 .dashboard-source-block {
-    padding: 18px 20px;
+    padding:
+        18px
+        20px;
 
-    background: var(--surface);
+    background:
+        var(--surface);
 
-    border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-    border-radius: var(--radius-medium);
+    border-radius:
+        var(--radius-medium);
 }
 
 
@@ -780,61 +953,94 @@ p {
     flex: 1;
 }
 
-.dashboard-reading-title {
-    margin: 0 0 10px;
 
-    color: var(--navy);
+.dashboard-eyebrow {
+    margin:
+        0
+        0
+        8px;
 
-    font-size: 1rem;
-    line-height: 1.35;
+    color:
+        var(--raspberry);
 
-    font-weight: 700;
+    font-size:
+        0.68rem;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.12em;
+
+    text-transform:
+        uppercase;
 }
+
+
+.dashboard-reading-title {
+    margin:
+        0
+        0
+        10px;
+
+    color:
+        var(--navy);
+
+    font-size:
+        1rem;
+
+    line-height:
+        1.35;
+
+    font-weight:
+        700;
+}
+
 
 .dashboard-reading-text {
     margin: 0;
 
-    color: var(--text-muted);
+    color:
+        var(--text-muted);
 
-    font-size: 0.84rem;
-    line-height: 1.55;
-}
+    font-size:
+        0.84rem;
 
-.dashboard-eyebrow {
-    margin: 0 0 8px;
-
-    color: var(--raspberry);
-
-    font-size: 0.68rem;
-
-    font-weight: 700;
-
-    letter-spacing: 0.12em;
-
-    text-transform: uppercase;
+    line-height:
+        1.55;
 }
 
 
 .dashboard-interpretation {
-    color: var(--navy);
+    color:
+        var(--navy);
 
-    font-size: 0.95rem;
+    font-size:
+        0.95rem;
 
-    line-height: 1.55;
+    line-height:
+        1.55;
 
-    font-weight: 600;
+    font-weight:
+        600;
 }
 
 
 .dashboard-info-block p,
 .dashboard-source-block p {
-    margin: 0 0 8px;
+    margin:
+        0
+        0
+        8px;
 
-    color: var(--text-muted);
+    color:
+        var(--text-muted);
 
-    font-size: 0.8rem;
+    font-size:
+        0.8rem;
 
-    line-height: 1.45;
+    line-height:
+        1.45;
 }
 
 
@@ -844,18 +1050,44 @@ p {
 }
 
 
+.dashboard-stat {
+    margin:
+        14px
+        0
+        0;
+
+    padding-top:
+        12px;
+
+    border-top:
+        1px solid var(--border);
+
+    color:
+        var(--navy);
+
+    font-size:
+        0.82rem;
+
+    font-weight:
+        700;
+}
+
+
 /* ----------------------------------------------------------
    Responsive
    ---------------------------------------------------------- */
 
 @media (max-width: 900px) {
 
-    .social-dashboard-body {
-        grid-template-columns: 1fr;
+    .dashboard-body {
+        grid-template-columns:
+            1fr;
     }
 
-    .social-dashboard-chart {
-        min-height: 460px;
+
+    .dashboard-chart {
+        height:
+            460px;
     }
 }
 
@@ -874,7 +1106,6 @@ p {
         0
         30px;
 }
-
 
 /* ----------------------------------------------------------
    Carte
@@ -2424,18 +2655,15 @@ a:hover {
 
 
 /* ==========================================================
-   20. PETITS DÉTAILS VISUELS
+   TRAIT SIGNATURE DES TITRES DE SECTION
    ========================================================== */
 
-/* Ligne discrète avant certains grands titres */
-
-.tab-content > h2,
-.social-dashboard-header h2 {
+   .tab-content > h2 {
     position: relative;
 }
 
-.tab-content > h2::before,
-.social-dashboard-header h2::before {
+
+.tab-content > h2::before {
     content: "";
 
     display: block;
@@ -2449,10 +2677,41 @@ a:hover {
         linear-gradient(
             90deg,
             var(--raspberry),
-        var(--blue-light)
+            var(--blue-light)
         );
 
     border-radius: 3px;
+}
+
+.section-heading,
+.dashboard-header h2 {
+    position: relative;
+}
+
+
+.section-heading::before,
+.dashboard-header h2::before {
+    content: "";
+
+    display: block;
+
+    width: 34px;
+    height: 3px;
+
+    margin-bottom: 15px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--raspberry),
+            var(--blue-light)
+        );
+
+    border-radius: 3px;
+}
+
+.section-heading {
+    margin-top: 0;
 }
 
 

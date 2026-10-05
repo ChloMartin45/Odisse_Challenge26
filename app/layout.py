@@ -547,7 +547,7 @@ def create_social_tab(finance, synthese_sociale):
                             className="selector social-dashboard-selector",
                         ),
                     ],
-                    className="social-dashboard-header",
+                    className="dashboard-header",
                 ),
 
                 # ====================================================
@@ -573,10 +573,10 @@ def create_social_tab(finance, synthese_sociale):
                                         "displayModeBar": False,
                                         "responsive": True,
                                     },
-                                    className="social-dashboard-chart",
+                                    className="dashboard-chart",
                                 ),
                             ],
-                            className="social-dashboard-visual",
+                            className="dashboard-visual",
                         ),
 
                         # --------------------------------------------
@@ -640,15 +640,15 @@ def create_social_tab(finance, synthese_sociale):
                                 ),
 
                             ],
-                            className="social-dashboard-side",
+                            className="dashboard-side",
                         ),
 
                     ],
-                    className="social-dashboard-body",
+                    className="dashboard-body",
                 ),
 
             ],
-            className="social-dashboard",
+            className="dashboard-section",
         ),
 
         # ----------------------------------------------------
@@ -792,11 +792,12 @@ def create_territorial_tab(
         ),
 
         html.P(
-            "Après avoir observé des différences de santé entre groupes sociaux, "
-            "l'analyse se déplace à l'échelle territoriale. Les 13 régions "
-            "métropolitaines sont comparées selon leur niveau de défavorisation, "
-            "leur accessibilité aux médecins généralistes et leurs indicateurs "
-            "de santé.",
+            "Après avoir mis en évidence des écarts de santé entre groupes sociaux, "
+            "l'analyse change d'échelle pour examiner si ces différences se retrouvent "
+            "également entre territoires. Deux dimensions sont étudiées successivement : "
+            "la défavorisation territoriale, puis l'accessibilité aux médecins généralistes. "
+            "L'objectif est d'observer si elles apportent des informations complémentaires "
+            "pour caractériser les écarts de santé entre les 13 régions métropolitaines.",
             className="intro",
         ),
 
@@ -804,189 +805,405 @@ def create_territorial_tab(
         # FDep
         # ----------------------------------------------------
 
-        html.H2(
-            "Défavorisation territoriale et santé"
-        ),
-
-        html.P(
-            "Les régions plus défavorisées présentent-elles "
-            "des indicateurs de santé différents ?"
-        ),
-
-        # Repère de lecture FDep
-
-        html.Div([
-
-            html.Strong(
-                "FDep — défavorisation territoriale"
-            ),
-
-            html.P(
-                "Le FDep20 est un indice communal de défavorisation territoriale "
-                "construit à partir de quatre dimensions socio-économiques : "
-                "revenu médian, niveau de diplôme, part d'ouvriers et chômage. "
-                "Une valeur plus élevée correspond à un territoire plus défavorisé."
-            ),
-
-            html.P(
-                "Il repose sur des données socio-économiques de 2020 et une "
-                "géographie communale au 1er janvier 2023.",
-                className="indicator-direction",
-            ),
-
-            html.P(
-                "Il caractérise le contexte socio-économique d'un territoire "
-                "et non la situation sociale individuelle de ses habitants.",
-                className="indicator-direction",
-            ),
-
-        ], className="reading-guide"),
-
-        # Agrégation commune -> région
-        
         html.Div(
             [
-                html.Strong(
-                    "Passage à l'échelle régionale"
+
+                # ====================================================
+                # Partie pédagogique
+                # ====================================================
+
+                html.H2(
+                    "Défavorisation territoriale et santé",
+                    className="section-heading",
                 ),
 
                 html.P(
-                    "Les indicateurs communaux de défavorisation et d'accessibilité "
-                    "ont été agrégés à l'échelle régionale par moyenne pondérée "
-                    "par la population afin de permettre leur comparaison avec "
-                    "les indicateurs de santé régionaux."
+                    "Première étape : observer si les régions relativement plus défavorisées "
+                    "présentent également des indicateurs de santé moins favorables."
                 ),
+
+                html.Div(
+                    [
+                        html.P(
+                            "COMPRENDRE L'INDICATEUR",
+                            className="dashboard-eyebrow",
+                        ),
+
+                        html.H3(
+                            "FDep20 — indice de défavorisation territoriale"
+                        ),
+
+                        html.P(
+                            "Le FDep20 synthétise quatre dimensions socio-économiques : "
+                            "revenu médian, niveau de diplôme, part d'ouvriers et chômage. "
+                            "Une valeur plus élevée correspond à un territoire plus défavorisé."
+                        ),
+
+                        html.Div(
+                            [
+                                html.Span(
+                                    "Données 2020",
+                                    className="context-tag",
+                                ),
+
+                                html.Span(
+                                    "Géographie communale 2023",
+                                    className="context-tag",
+                                ),
+
+                                html.Span(
+                                    "Agrégation régionale pondérée par la population",
+                                    className="context-tag",
+                                ),
+                            ],
+                            className="context-tags",
+                        ),
+
+                    ],
+                    className="learning-card",
+                ),
+
+
+                # ====================================================
+                # Exploration
+                # ====================================================
+
+                html.Div(
+                    [
+                        html.H2(
+                            "Explorez la relation"
+                        ),
+
+                        html.P(
+                            "Sélectionnez un indicateur de santé pour observer "
+                            "sa relation avec la défavorisation territoriale."
+                        ),
+
+                        dcc.RadioItems(
+                            id="territorial-health-variable",
+                            options=[
+                                {
+                                    "label": "Santé perçue",
+                                    "value": "sante",
+                                },
+                                {
+                                    "label": "Limitation d'activité",
+                                    "value": "limitation",
+                                },
+                                {
+                                    "label": "Diabète déclaré",
+                                    "value": "diabete",
+                                },
+                            ],
+                            value="sante",
+                            inline=True,
+                            className="selector",
+                        ),
+
+                    ],
+                    className="dashboard-header",
+                ),
+
+
+                # ====================================================
+                # Dashboard
+                # ====================================================
+
+                html.Div(
+                    [
+
+                        html.Div(
+                            [
+                                dcc.Graph(
+                                    id="fdep-health-chart",
+                                    figure=create_fdep_health_chart(
+                                        analyse_regions,
+                                        relations_territoriales,
+                                        "sante",
+                                    ),
+                                    config={
+                                        "displayModeBar": False,
+                                        "responsive": True,
+                                    },
+                                    className="dashboard-chart",
+                                ),
+                            ],
+                            className="dashboard-visual",
+                        ),
+
+
+                        html.Div(
+                            [
+
+                                html.Div(
+                                    [
+                                        html.P(
+                                            "LECTURE",
+                                            className="dashboard-eyebrow",
+                                        ),
+
+                                        html.Div(
+                                            id="fdep-interpretation",
+                                            className="dashboard-interpretation",
+                                        ),
+                                    ],
+                                    className="dashboard-reading-block",
+                                ),
+
+
+                                html.Div(
+                                    [
+                                        html.P(
+                                            "REPÈRES",
+                                            className="dashboard-eyebrow",
+                                        ),
+
+                                        html.P(
+                                            "Chaque point représente une région métropolitaine."
+                                        ),
+
+                                        html.P(
+                                            "L’axe vertical indique l’écart à la moyenne des 13 régions : "
+                                            "une valeur positive correspond à un niveau supérieur à la moyenne."
+                                        ),
+
+                                        html.P(
+                                            "Le FDep augmente de gauche à droite : les régions situées à droite "
+                                            "sont relativement plus défavorisées."
+                                        ),
+
+                                        html.P(
+                                            "La ligne pointillée représente la tendance linéaire observée entre "
+                                            "la défavorisation territoriale et l’indicateur de santé."
+                                        ),
+                                    ],
+                                    className="dashboard-info-block",
+                                ),
+                            ],
+                            className="dashboard-side",
+                        ),
+
+                    ],
+                    className="dashboard-body",
+                ),
+
             ],
-            className="method-note",
+            className="dashboard-section",
         ),
         
-        # Sélecteur
-
-        dcc.RadioItems(
-            id="territorial-health-variable",
-            options=[
-                {
-                    "label": "Santé perçue",
-                    "value": "sante",
-                },
-                {
-                    "label": "Limitation d'activité",
-                    "value": "limitation",
-                },
-                {
-                    "label": "Diabète déclaré",
-                    "value": "diabete",
-                },
-            ],
-            value="sante",
-            inline=True,
-            className="selector",
-        ),
-
-        # Graphique FDep
-
-        dcc.Graph(
-            id="fdep-health-chart",
-            figure=create_fdep_health_chart(
-                analyse_regions,
-                relations_territoriales,
-                "sante",
-            ),
-            config = {"displayModeBar": False },
-            className="chart-container",
-        ),
-
-        html.P(
-            "Lecture : chaque point représente une région métropolitaine. "
-            "L’axe vertical indique l’écart à la moyenne des 13 régions : "
-            "une valeur positive correspond à un niveau supérieur à la moyenne, "
-            "une valeur négative à un niveau inférieur. "
-            "Le coefficient r mesure l’intensité et le sens de la relation linéaire "
-            "entre la défavorisation territoriale et l’indicateur de santé.",
-            className="graph-note",
-        ),
-
-        # Commentaire dynamique
-        # Le contenu sera piloté par le même sélecteur que le graphique.
-
-        html.Div(
-            id="fdep-interpretation",
-            className="result-note",
-        ),
-
         # ----------------------------------------------------
         # APL
         # ----------------------------------------------------
 
-        html.H2(
-            "Accessibilité aux soins"
+        html.Div(
+            [
+
+                # ====================================================
+                # Partie pédagogique
+                # ====================================================
+
+                html.H2(
+                    "Accessibilité aux soins",
+                    className="section-heading",
+                ),
+
+                html.P(
+                    "Deuxième étape : examiner si l'accessibilité aux médecins généralistes "
+                    "apporte une information supplémentaire sur les écarts de santé, une fois "
+                    "prise en compte la relation avec la défavorisation territoriale."
+                ),
+
+                html.Div(
+                    [
+                        html.P(
+                            "COMPRENDRE L'INDICATEUR",
+                            className="dashboard-eyebrow",
+                        ),
+
+                        html.H3(
+                            "APL — accessibilité aux médecins généralistes"
+                        ),
+
+                        html.P(
+                            "L’Accessibilité potentielle localisée estime le nombre de "
+                            "consultations ou visites de médecine générale accessibles "
+                            "par habitant standardisé. Elle tient compte de l’offre "
+                            "disponible, de l’activité des médecins, de la distance "
+                            "d’accès et des besoins de soins liés à l’âge."
+                        ),
+
+                        html.P(
+                            "Une valeur plus élevée correspond à une meilleure "
+                            "accessibilité aux médecins généralistes."
+                        ),
+
+                        html.Div(
+                            [
+                                html.Span(
+                                    "APL 2023",
+                                    className="context-tag",
+                                ),
+
+                                html.Span(
+                                    "Consultations / visites par habitant standardisé",
+                                    className="context-tag",
+                                ),
+
+                                html.Span(
+                                    "Structure d’âge prise en compte",
+                                    className="context-tag",
+                                ),
+                            ],
+                            className="context-tags",
+                        ),
+
+                        html.Div(
+                            [
+                                html.Strong(
+                                    "Pourquoi prendre en compte le FDep ?"
+                                ),
+
+                                html.P(
+                                    "Pour examiner si la relation entre accessibilité "
+                                    "et santé reste visible une fois prise en compte "
+                                    "la relation linéaire avec la défavorisation territoriale."
+                                ),
+                            ],
+                            className="learning-subnote",
+                        ),
+
+                    ],
+                    className="learning-card",
+                ),
+
+
+                # ====================================================
+                # Exploration
+                # ====================================================
+
+                html.Div(
+                    [
+                        html.H2(
+                            "Comparez les relations avant et après prise en compte du FDep"
+                        ),
+
+                        html.P(
+                            "Pour chaque indicateur de santé, comparez la relation brute "
+                            "avec l’APL à celle observée après prise en compte de la "
+                            "défavorisation territoriale."
+                        ),
+
+                    ],
+                    className="dashboard-header",
+                ),
+
+
+                # ====================================================
+                # Dashboard
+                # ====================================================
+
+                html.Div(
+                    [
+
+                        # ------------------------------------------------
+                        # Graphique
+                        # ------------------------------------------------
+
+                        html.Div(
+                            [
+                                dcc.Graph(
+                                    id="apl-comparison-chart",
+                                    figure=create_apl_comparison_chart(
+                                        relations_territoriales
+                                    ),
+                                    config={
+                                        "displayModeBar": False,
+                                        "responsive": True,
+                                    },
+                                    className="dashboard-chart",
+                                ),
+                            ],
+                            className="dashboard-visual",
+                        ),
+
+
+                        # ------------------------------------------------
+                        # Lecture
+                        # ------------------------------------------------
+
+                        html.Div(
+                            [
+
+                                html.Div(
+                                    [
+                                        html.P(
+                                            "LECTURE",
+                                            className="dashboard-eyebrow",
+                                        ),
+
+                                        html.H3(
+                                            "La limitation d’activité reste la relation "
+                                            "la plus marquée avec l’APL",
+                                            className="dashboard-reading-title",
+                                        ),
+
+                                        html.P(
+                                            "Après prise en compte du FDep, la relation "
+                                            "avec la limitation d’activité reste proche de "
+                                            "celle observée initialement."
+                                            "Les relations avec la santé perçue "
+                                            "et le diabète déclaré restent plus faibles.",
+                                            className="dashboard-reading-text",
+                                        ),
+
+                                    ],
+                                    className="dashboard-reading-block",
+                                ),
+
+
+                                html.Div(
+                                    [
+                                        html.P(
+                                            "REPÈRES",
+                                            className="dashboard-eyebrow",
+                                        ),
+
+                                        html.P(
+                                            "Chaque ligne correspond à un indicateur de santé."
+                                        ),
+
+                                        html.P(
+                                            "Le cercle représente la relation brute avec l’APL ; "
+                                            "le losange la relation après prise en compte du FDep."
+                                        ),
+
+                                        html.P(
+                                            "Plus le coefficient r est proche de −1 ou de +1, "
+                                            "plus la relation linéaire est marquée. "
+                                            "Une valeur proche de 0 traduit une relation faible."
+                                        ),
+
+                                        html.P(
+                                            "Le déplacement entre les deux symboles montre "
+                                            "comment la relation évolue après prise en compte "
+                                            "de la défavorisation territoriale."
+                                        ),
+
+                                    ],
+                                    className="dashboard-info-block",
+                                ),
+
+                            ],
+                            className="dashboard-side",
+                        ),
+
+                    ],
+                    className="dashboard-body",
+                ),
+
+            ],
+            className="dashboard-section",
         ),
-
-        html.P(
-            "L'accessibilité aux médecins généralistes apporte-t-elle "
-            "une information supplémentaire à la défavorisation territoriale ?"
-        ),
-
-        # Repère de lecture APL
-
-        html.Div([
-
-            html.Strong(
-                "APL — accessibilité aux médecins généralistes"
-            ),
-
-            html.P(
-                "L’Accessibilité potentielle localisée (APL) estime le nombre de "
-                "consultations ou visites de médecine générale accessibles par habitant "
-                "standardisé. Elle tient compte de l’offre disponible, de l’activité des "
-                "médecins, de la distance d’accès et des besoins de soins liés à l’âge. "
-                "Une valeur plus élevée correspond à une meilleure accessibilité."
-            ),
-
-            html.P(
-                "Unité : consultations ou visites de médecine générale accessibles "
-                "par habitant standardisé.",
-                className="indicator-direction",
-            ),
-
-        ], className="reading-guide"),
-
-        # Explication de l'ajustement
-
-        html.Div([
-
-            html.Strong(
-                "Pourquoi prendre en compte le FDep ?"
-            ),
-
-            html.P(
-                "L'objectif est d'examiner si la relation entre accessibilité "
-                "aux soins et santé subsiste une fois isolée statistiquement "
-                "la relation linéaire avec la défavorisation territoriale."
-            ),
-
-        ], className="method-note"),
-
-        # Graphique APL
-
-        dcc.Graph(
-            id="apl-comparison-chart",
-            figure=create_apl_comparison_chart(
-                relations_territoriales
-            ),
-            config = {"displayModeBar": False },
-            className="chart-container",
-        ),
-        
-        html.P(
-            "Lecture : chaque ligne compare la corrélation entre l’APL et un indicateur de santé, "
-            "avant puis après prise en compte du FDep. Plus r est proche de −1 ou de +1, plus la relation "
-            "linéaire est marquée ; une valeur proche de 0 traduit une relation faible. "
-            "Ici, la limitation d’activité reste l’indicateur le plus lié à l’APL après prise en compte "
-            "de la défavorisation territoriale.",
-            className="graph-note",
-        ),
-
         # ----------------------------------------------------
         # À retenir
         # ----------------------------------------------------

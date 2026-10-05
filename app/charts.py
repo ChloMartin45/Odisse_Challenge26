@@ -1376,16 +1376,7 @@ def create_apl_comparison_chart(relations):
     # ========================================================
 
     fig.update_layout(
-        title=dict(
-            text="L'APL reste surtout liée à la limitation d'activité",
-            x=0,
-            xanchor="left",
-            font=dict(
-                family="Outfit, Arial, sans-serif",
-                size=20,
-                color=COLOR_NAVY,
-            ),
-        ),
+        title=None,
 
         font=dict(
             family="Outfit, Arial, sans-serif",

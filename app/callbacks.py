@@ -179,30 +179,60 @@ def register_callbacks(app):
         # ----------------------------------------------------
 
         interpretations = {
-            "sante": (
-                "Dans les 13 régions étudiées, une défavorisation territoriale plus élevée "
-                "s’accompagne d’une part plus faible de personnes déclarant une bonne ou très bonne santé."
-            ),
 
-            "limitation": (
-                "La limitation d’activité tend à augmenter avec la défavorisation territoriale, "
-                "mais la relation observée est plus modérée et moins précise à cette échelle régionale."
-            ),
+            "sante": {
+                "titre": (
+                    "La santé perçue diminue avec la défavorisation territoriale"
+                ),
+                "texte": (
+                    "Dans les 13 régions étudiées, les régions présentant "
+                    "un FDep plus élevé tendent à compter une part plus faible "
+                    "de personnes déclarant une bonne ou très bonne santé."
+                ),
+            },
 
-            "diabete": (
-                "Dans les régions étudiées, une défavorisation territoriale plus élevée "
-                "s’accompagne également d’une fréquence plus importante de diabète déclaré."
-            ),
+            "limitation": {
+                "titre": (
+                    "La relation avec la limitation d'activité est plus modérée"
+                ),
+                "texte": (
+                    "Les limitations d'activité tendent à être plus fréquentes "
+                    "dans les régions plus défavorisées, mais la relation observée "
+                    "est moins marquée à cette échelle."
+                ),
+            },
+
+            "diabete": {
+                "titre": (
+                    "Le diabète déclaré augmente avec la défavorisation territoriale"
+                ),
+                "texte": (
+                    "Les régions présentant un FDep plus élevé tendent également "
+                    "à présenter une fréquence plus importante de diabète déclaré."
+                ),
+            },
         }
 
-        interpretation = html.P([
-            interpretations[indicateur],
-            html.Br(),
-            html.Strong(
-                f"r = {r:.2f} · p = {p:.3f}"
-            ),
-        ])
+        message = interpretations[indicateur]
 
+        interpretation = html.Div(
+            [
+                html.H3(
+                    message["titre"],
+                    className="dashboard-reading-title",
+                ),
+
+                html.P(
+                    message["texte"],
+                    className="dashboard-reading-text",
+                ),
+
+                html.P(
+                    f"r = {r:.2f} · p = {p:.3f} · 13 régions",
+                    className="dashboard-stat",
+                ),
+            ]
+        )
         return figure, interpretation
     
     # ========================================================
