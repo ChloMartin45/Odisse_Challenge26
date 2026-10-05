@@ -1,14 +1,5 @@
 from dash import Input, Output, html, dcc
 
-from data import (
-    load_regions,
-    load_finance,
-    load_diplome,
-    load_pcs,
-    load_analyse_regions,
-    load_relations_territoriales,
-)
-
 from charts import (
     create_region_profile,
     create_social_chart,
@@ -16,23 +7,110 @@ from charts import (
 )
 
 
-# ============================================================
-# Chargement des données
-# ============================================================
+SOCIAL_MESSAGES = {
+    "finance": {
+        "titre": (
+            "Les écarts se creusent sur les trois dimensions de santé"
+        ),
+        "texte": (
+            "À mesure que la situation financière déclarée devient plus "
+            "difficile, la santé perçue diminue tandis que les limitations "
+            "d’activité et le diabète déclaré augmentent. Le gradient est "
+            "particulièrement marqué pour la santé perçue et les limitations "
+            "d’activité."
+        ),
+    },
 
-regions = load_regions()
+    "diplome": {
+        "titre": (
+            "Le diplôme s’accompagne d’écarts de santé nets"
+        ),
+        "texte": (
+            "Les personnes les plus diplômées déclarent plus souvent une "
+            "bonne santé, et moins souvent une limitation d’activité ou un "
+            "diabète. Les trois indicateurs évoluent ici dans une direction "
+            "cohérente."
+        ),
+    },
 
-finance = load_finance()
-diplome = load_diplome()
-pcs = load_pcs()
+    "pcs": {
+        "titre": (
+            "Des écarts existent sans former un gradient unique"
+        ),
+        "texte": (
+            "Les cadres présentent globalement les indicateurs les plus "
+            "favorables et les ouvriers des niveaux moins favorables. "
+            "Les catégories socioprofessionnelles ne constituent toutefois "
+            "pas une échelle sociale continue : leur comparaison reste "
+            "descriptive."
+        ),
+    },
+}
 
-analyse_regions = load_analyse_regions()
-relations_territoriales = load_relations_territoriales()
+FDEP_INDICATOR_LABELS = {
+    "sante": "Santé perçue bonne ou très bonne",
+    "limitation": "Limitation d'activité",
+    "diabete": "Diabète déclaré",
+}
 
+FDEP_MESSAGES = {
+    "sante": {
+        "titre": (
+            "La santé perçue diminue avec la défavorisation territoriale"
+        ),
+        "texte": (
+            "Les régions présentant "
+            "un FDep plus élevé tendent à compter une part plus faible "
+            "de personnes déclarant une bonne ou très bonne santé."
+        ),
+    },
 
-def register_callbacks(app):
+    "limitation": {
+        "titre": (
+            "La relation avec la limitation d'activité est plus modérée"
+        ),
+        "texte": (
+            "Les limitations d'activité tendent à être plus fréquentes "
+            "dans les régions plus défavorisées, mais la relation observée "
+            "est moins marquée à cette échelle."
+        ),
+    },
+
+    "diabete": {
+        "titre": (
+            "Le diabète déclaré augmente avec la défavorisation territoriale"
+        ),
+        "texte": (
+            "Les régions présentant un FDep plus élevé tendent également "
+            "à présenter une fréquence plus importante de diabète déclaré."
+        ),
+    },
+}
+
+def create_region_metric(label, value):
+    return html.Div(
+        [
+            html.Span(
+                label,
+                className="region-metric-label",
+            ),
+
+            html.Strong(
+                value,
+                className="region-metric-value",
+            ),
+        ],
+        className="region-metric",
+    )
+
+def register_callbacks(app, regions, finance, diplome, pcs, analyse_regions, relations_territoriales):
     """Enregistre les interactions de l'application."""
 
+    social_datasets = {
+        "finance": finance,
+        "diplome": diplome,
+        "pcs": pcs,
+    }
     # ========================================================
     # 1. Inégalités sociales de santé
     # ========================================================
@@ -45,77 +123,19 @@ def register_callbacks(app):
     def update_social_chart(variable):
 
         # ----------------------------------------------------
-        # Données
-        # ----------------------------------------------------
-
-        datasets = {
-            "finance": finance,
-            "diplome": diplome,
-            "pcs": pcs,
-        }
-
-
-        # ----------------------------------------------------
         # Graphique
         # ----------------------------------------------------
 
         figure = create_social_chart(
-            datasets[variable],
+            social_datasets[variable],
             variable,
         )
-
-
-        # ----------------------------------------------------
-        # Messages de lecture
-        # ----------------------------------------------------
-
-        social_messages = {
-
-            "finance": {
-                "titre": (
-                    "Les écarts se creusent sur les trois dimensions de santé"
-                ),
-                "texte": (
-                    "À mesure que la situation financière déclarée devient plus "
-                    "difficile, la santé perçue diminue tandis que les limitations "
-                    "d’activité et le diabète déclaré augmentent. Le gradient est "
-                    "particulièrement marqué pour la santé perçue et les limitations "
-                    "d’activité."
-                ),
-            },
-
-            "diplome": {
-                "titre": (
-                    "Le diplôme s’accompagne d’écarts de santé nets"
-                ),
-                "texte": (
-                    "Les personnes les plus diplômées déclarent plus souvent une "
-                    "bonne santé, et moins souvent une limitation d’activité ou un "
-                    "diabète. Les trois indicateurs évoluent ici dans une direction "
-                    "cohérente."
-                ),
-            },
-
-            "pcs": {
-                "titre": (
-                    "Des écarts existent sans former un gradient unique"
-                ),
-                "texte": (
-                    "Les cadres présentent globalement les indicateurs les plus "
-                    "favorables et les ouvriers des niveaux moins favorables. "
-                    "Les catégories socioprofessionnelles ne constituent toutefois "
-                    "pas une échelle sociale continue : leur comparaison reste "
-                    "descriptive."
-                ),
-            },
-        }
-
 
         # ----------------------------------------------------
         # Interprétation
         # ----------------------------------------------------
 
-        message = social_messages[variable]
+        message = SOCIAL_MESSAGES[variable]
 
         interpretation = html.Div(
             [
@@ -130,7 +150,6 @@ def register_callbacks(app):
                 ),
             ]
         )
-
 
         return figure, interpretation
 
@@ -159,13 +178,7 @@ def register_callbacks(app):
         # Correspondance avec relations_territoriales.csv
         # ----------------------------------------------------
 
-        indicateurs = {
-            "sante": "Santé perçue bonne ou très bonne",
-            "limitation": "Limitation d'activité",
-            "diabete": "Diabète déclaré",
-        }
-
-        nom_indicateur = indicateurs[indicateur]
+        nom_indicateur = FDEP_INDICATOR_LABELS[indicateur]
 
         relation = relations_territoriales.loc[
             relations_territoriales["indicateur"] == nom_indicateur
@@ -178,42 +191,7 @@ def register_callbacks(app):
         # Interprétation
         # ----------------------------------------------------
 
-        interpretations = {
-
-            "sante": {
-                "titre": (
-                    "La santé perçue diminue avec la défavorisation territoriale"
-                ),
-                "texte": (
-                    "Les régions présentant "
-                    "un FDep plus élevé tendent à compter une part plus faible "
-                    "de personnes déclarant une bonne ou très bonne santé."
-                ),
-            },
-
-            "limitation": {
-                "titre": (
-                    "La relation avec la limitation d'activité est plus modérée"
-                ),
-                "texte": (
-                    "Les limitations d'activité tendent à être plus fréquentes "
-                    "dans les régions plus défavorisées, mais la relation observée "
-                    "est moins marquée à cette échelle."
-                ),
-            },
-
-            "diabete": {
-                "titre": (
-                    "Le diabète déclaré augmente avec la défavorisation territoriale"
-                ),
-                "texte": (
-                    "Les régions présentant un FDep plus élevé tendent également "
-                    "à présenter une fréquence plus importante de diabète déclaré."
-                ),
-            },
-        }
-
-        message = interpretations[indicateur]
+        message = FDEP_MESSAGES[indicateur]
 
         interpretation = html.Div(
             [
@@ -244,6 +222,7 @@ def register_callbacks(app):
         Output("region-profile-container", "children"),
         Input("map-profiles", "clickData"),
     )
+
     def update_region_details(click_data):
 
         # ----------------------------------------------------
@@ -363,51 +342,20 @@ def register_callbacks(app):
                                 className="region-section-label",
                             ),
 
-                            html.Div(
-                                [
-                                    html.Span(
-                                        "Santé perçue",
-                                        className="region-metric-label",
-                                    ),
-
-                                    html.Strong(
-                                        f"{region['sante_percue']:.1f} %",
-                                        className="region-metric-value",
-                                    ),
-                                ],
-                                className="region-metric",
+                            create_region_metric(
+                                "Santé perçue",
+                                f"{region['sante_percue']:.1f} %",
                             ),
 
-                            html.Div(
-                                [
-                                    html.Span(
-                                        "Limitation d'activité",
-                                        className="region-metric-label",
-                                    ),
-
-                                    html.Strong(
-                                        f"{region['limitation_activite']:.1f} %",
-                                        className="region-metric-value",
-                                    ),
-                                ],
-                                className="region-metric",
+                            create_region_metric(
+                                "Limitation d'activité",
+                                f"{region['limitation_activite']:.1f} %",
                             ),
 
-                            html.Div(
-                                [
-                                    html.Span(
-                                        "Diabète déclaré",
-                                        className="region-metric-label",
-                                    ),
-
-                                    html.Strong(
-                                        f"{region['diabete_declare']:.1f} %",
-                                        className="region-metric-value",
-                                    ),
-                                ],
-                                className="region-metric",
+                            create_region_metric(
+                                "Diabète déclaré",
+                                f"{region['diabete_declare']:.1f} %",
                             ),
-
                         ],
                         className="region-metrics-group",
                     ),
@@ -425,59 +373,25 @@ def register_callbacks(app):
                                 className="region-section-label",
                             ),
 
-                            html.Div(
-                                [
-                                    html.Span(
-                                        "FDep",
-                                        className="region-metric-label",
-                                    ),
-
-                                    html.Strong(
-                                        f"{region['fdep_pondere']:.2f}",
-                                        className="region-metric-value",
-                                    ),
-                                ],
-                                className="region-metric",
+                            create_region_metric(
+                                "FDep",
+                                f"{region['fdep_pondere']:.2f}",
                             ),
 
-                            html.Div(
-                                [
-                                    html.Span(
-                                        "F-EDI",
-                                        className="region-metric-label",
-                                    ),
-
-                                    html.Strong(
-                                        f"{region['fedi_pondere']:.2f}",
-                                        className="region-metric-value",
-                                    ),
-                                ],
-                                className="region-metric",
+                            create_region_metric(
+                                "F-EDI",
+                                f"{region['fedi_pondere']:.2f}",
                             ),
-
-                            html.Div(
-                                [
-                                    html.Span(
-                                        "APL",
-                                        className="region-metric-label",
-                                    ),
-
-                                    html.Strong(
-                                        f"{region['apl_pondere']:.2f}",
-                                        className="region-metric-value",
-                                    ),
-                                ],
-                                className="region-metric",
+                            create_region_metric(
+                                "APL",
+                                f"{region['apl_pondere']:.2f}",
                             ),
-
                         ],
                         className="region-metrics-group",
                     ),
-
                 ],
                 className="region-metrics-grid",
             ),
-
         ]
 
         # ----------------------------------------------------
@@ -503,7 +417,6 @@ def register_callbacks(app):
                         html.H3(
                             "Par rapport aux 13 régions"
                         ),
-
                     ],
                     className="region-profile-heading",
                 ),

@@ -373,9 +373,9 @@ def create_social_chart(data, variable):
             "colonne": "Diplôme",
 
             "ordre": [
-                "Aucun diplôme ou inférieur au Bac",
-                "Bac",
                 "Supérieur au Bac",
+                "Bac",
+                "Aucun diplôme ou inférieur au Bac",
             ],
 
             "titre": (

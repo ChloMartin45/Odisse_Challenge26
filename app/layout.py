@@ -6,6 +6,19 @@ from charts import (
     create_apl_comparison_chart,
 )
 
+# ============================================================
+# CONFIGURATION COMMUNES POUR SOULAGER LE CODE
+# ============================================================
+
+GRAPH_CONFIG = {
+    "displayModeBar": False,
+    "responsive": True,
+}
+
+MAP_CONFIG = {
+    **GRAPH_CONFIG,
+    "scrollZoom": False,
+}
 
 # ============================================================
 # ACCUEIL
@@ -569,10 +582,7 @@ def create_social_tab(finance, synthese_sociale):
                                         finance,
                                         "finance",
                                     ),
-                                    config={
-                                        "displayModeBar": False,
-                                        "responsive": True,
-                                    },
+                                    config=GRAPH_CONFIG,
                                     className="dashboard-chart",
                                 ),
                             ],
@@ -921,10 +931,7 @@ def create_territorial_tab(
                                         relations_territoriales,
                                         "sante",
                                     ),
-                                    config={
-                                        "displayModeBar": False,
-                                        "responsive": True,
-                                    },
+                                    config=GRAPH_CONFIG,
                                     className="dashboard-chart",
                                 ),
                             ],
@@ -1121,10 +1128,7 @@ def create_territorial_tab(
                                     figure=create_apl_comparison_chart(
                                         relations_territoriales
                                     ),
-                                    config={
-                                        "displayModeBar": False,
-                                        "responsive": True,
-                                    },
+                                    config=GRAPH_CONFIG,
                                     className="dashboard-chart",
                                 ),
                             ],
@@ -2009,11 +2013,7 @@ def create_profiles_tab(
                             id="map-profiles",
                             figure=map_figure,
                             className="profiles-map",
-                            config={
-                                "responsive": True,
-                                "scrollZoom": False,
-                                "displayModeBar": False,
-                            },
+                            config=MAP_CONFIG,
                             style={
                                 "height": "100%",
                                 "width": "100%",
@@ -2234,8 +2234,6 @@ def create_profiles_tab(
 
 def create_layout(
     finance,
-    diplome,
-    pcs,
     synthese_sociale,
     analyse_regions,
     relations_territoriales,

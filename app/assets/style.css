@@ -35,9 +35,6 @@
     --shadow-soft:
         0 5px 18px rgba(0, 43, 89, 0.045);
 
-    --shadow-hover:
-        0 10px 25px rgba(0, 43, 89, 0.075);
-
     --radius-small: 8px;
     --radius-medium: 13px;
     --radius-large: 18px;
@@ -113,7 +110,7 @@ body {
 
 
 /* ==========================================================
-   4. TYPOGRAPHIE
+   4. TYPOGRAPHIE & TITRES
    ========================================================== */
 
 h1,
@@ -223,7 +220,62 @@ p {
 }
 
 /* ==========================================================
-   5. NAVIGATION / ONGLETS
+   Titres de section
+   ========================================================== */
+
+.section-heading {
+    margin-top: 0;
+}
+
+/* Trait signature Odissé */
+
+.tab-content > h2,
+.section-heading,
+.dashboard-header h2 {
+    position: relative;
+}
+
+
+.tab-content > h2::before,
+.section-heading::before,
+.dashboard-header h2::before {
+    content: "";
+
+    display: block;
+
+    width: 34px;
+    height: 3px;
+
+    margin-bottom: 15px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--raspberry),
+            var(--blue-light)
+        );
+
+    border-radius: 3px;
+}
+
+.dashboard-eyebrow,
+.method-flow-eyebrow,
+.region-eyebrow {
+    color:
+        var(--raspberry);
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.12em;
+
+    text-transform:
+        uppercase;
+}
+
+/* ==========================================================
+   5. NAVIGATION
    ========================================================== */
 
 .tabs-container {
@@ -292,7 +344,11 @@ p {
 
 
 /* ==========================================================
-   6. QUESTION CENTRALE
+   6. BLOCS DE STORYTELLING
+   ========================================================== */
+
+/* ==========================================================
+   6. Blocs de questionnement
    ========================================================== */
 
 .question-block {
@@ -357,19 +413,11 @@ p {
 }
 
 /* ==========================================================
-   BLOCS PÉDAGOGIQUES
+   Blocs pédagogiques
    ========================================================== */
 
-   .learning-card {
-    margin:
-        24px
-        0
-        34px;
-
-    padding:
-        24px
-        28px;
-
+.learning-card,
+.reading-guide {
     background:
         rgba(150, 187, 255, 0.085);
 
@@ -378,6 +426,17 @@ p {
 
     border-radius:
         var(--radius-medium);
+}
+
+.learning-card {
+    margin:
+        24px
+        0
+        34px;
+
+    padding:
+        24px
+        28px;
 }
 
 
@@ -577,6 +636,30 @@ p {
     8. CARTES INDICATEURS
    ========================================================== */
 
+/* ==========================================================
+    Base commune des cartes
+   ========================================================== */
+
+.indicator-card,
+.method-step,
+.dashboard-visual,
+.dashboard-reading-block,
+.dashboard-info-block,
+.dashboard-source-block,
+.summary-card,
+.profile-card,
+.region-details,
+.region-profile-card {
+    background:
+        var(--surface);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius-medium);
+}
+
 .indicator-grid {
     display: grid;
 
@@ -596,15 +679,6 @@ p {
 
     padding:
         24px;
-
-    background:
-        var(--surface);
-
-    border:
-        1px solid var(--border);
-
-    border-radius:
-        var(--radius-medium);
 
     overflow: hidden;
 
@@ -680,7 +754,7 @@ p {
 
 
 /* ==========================================================
-   9. GUIDES DE LECTURE
+   9. MÉTHODES & GUIDES DE LECTURE
    ========================================================== */
 
 .reading-guide {
@@ -691,15 +765,6 @@ p {
     padding:
         27px
         30px;
-
-    background:
-        rgba(150, 187, 255, 0.085);
-
-    border:
-        1px solid rgba(17, 75, 138, 0.10);
-
-    border-radius:
-        var(--radius-medium);
 }
 
 
@@ -752,15 +817,6 @@ p {
 
 .method-notes-grid .method-note {
     margin: 0;
-}
-
-
-@media (max-width: 850px) {
-
-    .method-notes-grid {
-        grid-template-columns:
-            1fr;
-    }
 }
 
 .method-data-note {
@@ -849,33 +905,10 @@ p {
 
 
 /* ==========================================================
-   11. GRAPHIQUES
+   11. DASHBOARDS DE DATAVISUALISATION
    ========================================================== */
 
-   .chart-container {
-    margin:
-        20px
-        0
-        10px;
-
-    background:
-        white;
-
-    border:
-        1px solid var(--border);
-
-    border-radius:
-        var(--radius-medium);
-
-    overflow:
-        hidden;
-}
-
-/* ==========================================================
-   DASHBOARDS DE DATAVISUALISATION
-   ========================================================== */
-
-   .dashboard-section {
+.dashboard-section {
     margin-top: 34px;
 }
 
@@ -908,30 +941,6 @@ p {
     margin-bottom: 8px;
 }
 
-
-/* Trait signature */
-
-.dashboard-header h2::before {
-    content: "";
-
-    display: block;
-
-    width: 34px;
-    height: 3px;
-
-    margin-bottom: 15px;
-
-    background:
-        linear-gradient(
-            90deg,
-            var(--raspberry),
-            var(--blue-light)
-        );
-
-    border-radius: 3px;
-}
-
-
 .dashboard-header > p {
     margin-bottom: 18px;
 }
@@ -963,11 +972,6 @@ p {
     height: var(--dashboard-height);
 
     min-width: 0;
-
-    background: var(--surface);
-
-    border: 1px solid var(--border);
-    border-radius: var(--radius-medium);
 
     overflow: hidden;
 }
@@ -1011,11 +1015,6 @@ p {
     padding:
         15px
         17px;
-
-    background: var(--surface);
-
-    border: 1px solid var(--border);
-    border-radius: var(--radius-medium);
 }
 
 
@@ -1061,14 +1060,7 @@ p {
         0
         8px;
 
-    color: var(--raspberry);
-
     font-size: 0.68rem;
-    font-weight: 700;
-
-    letter-spacing: 0.12em;
-
-    text-transform: uppercase;
 }
 
 
@@ -1146,44 +1138,6 @@ p {
     font-weight: 700;
 }
 
-
-/* ----------------------------------------------------------
-   Responsive
-   ---------------------------------------------------------- */
-
-@media (max-width: 900px) {
-
-    .dashboard-body {
-        grid-template-columns:
-            1fr;
-    }
-
-
-    .dashboard-visual,
-    .dashboard-chart {
-        height: 460px;
-    }
-
-
-    /*
-    Une fois les colonnes empilées,
-    plus besoin de forcer les cartes
-    dans une hauteur de 500 px.
-    */
-
-    .dashboard-side {
-        height: auto;
-    }
-
-
-    .dashboard-info-block {
-        flex:
-            0
-            0
-            auto;
-    }
-}
-
 /* ==========================================================
    12. SYNTHÈSE SOCIALE
    ========================================================== */
@@ -1209,15 +1163,6 @@ p {
     flex-direction: column;
 
     min-width: 0;
-
-    background:
-        var(--surface);
-
-    border:
-        1px solid var(--border);
-
-    border-radius:
-        var(--radius-medium);
 
     overflow: hidden;
 
@@ -1401,7 +1346,7 @@ p {
 }
 
 /* ==========================================================
-   13. BLOCS "À RETENIR"
+   13. BLOCS DE SYNTHÈSE
    ========================================================== */
 
 .takeaway {
@@ -1491,33 +1436,8 @@ p {
    14. PROFILS TERRITORIAUX
    ========================================================== */
 
-   .profiles-explorer {
-    display: grid;
-
-    grid-template-columns:
-        minmax(0, 1.15fr)
-        minmax(390px, 0.85fr);
-
-    gap: 22px;
-
-    /* Le dashboard s'adapte à la hauteur disponible */
-    height:
-        clamp(
-            520px,
-            calc(100vh - 190px),
-            610px
-        );
-
-    margin:
-        26px
-        0
-        38px;
-
-    align-items: stretch;
-}
-
 /* ==========================================================
-   PARCOURS MÉTHODOLOGIQUE
+   Parcours méthodologique
    ========================================================== */
 
    .method-flow-block {
@@ -1546,17 +1466,8 @@ p {
         0
         6px;
 
-    color:
-        var(--raspberry);
-
     font-size:
         0.68rem;
-
-    font-weight:
-        700;
-
-    letter-spacing:
-        0.12em;
 }
 
 
@@ -1605,15 +1516,6 @@ p {
 .method-step {
     padding:
         18px;
-
-    background:
-        var(--surface);
-
-    border:
-        1px solid var(--border);
-
-    border-radius:
-        var(--radius-medium);
 }
 
 
@@ -1706,28 +1608,11 @@ p {
 }
 
 
-@media (max-width: 950px) {
-
-    .method-flow {
-        grid-template-columns:
-            1fr;
-    }
-
-
-    .method-arrow {
-        transform:
-            rotate(90deg);
-
-        min-height:
-            18px;
-    }
-}
-
 /* ==========================================================
-   SYNTHÈSE DES QUATRE PROFILS
+   Synthèse des quatre profils
    ========================================================== */
 
-   .profiles-summary-section {
+.profiles-summary-section {
     margin-top: 72px;
 }
 
@@ -1771,7 +1656,6 @@ p {
    ---------------------------------------------------------- */
 
 .profiles-summary-section .profiles-grid {
-    display: grid;
 
     grid-template-columns:
         repeat(4, minmax(0, 1fr));
@@ -1790,8 +1674,6 @@ p {
 
     flex-direction: column;
 
-    min-width: 0;
-
     padding:
         18px
         18px
@@ -1809,16 +1691,6 @@ p {
 .profiles-summary-section .profile-number {
     font-size: 0.7rem;
 }
-
-
-.profiles-summary-section .profile-count {
-    padding:
-        4px
-        9px;
-
-    font-size: 0.72rem;
-}
-
 
 /* Titre */
 
@@ -1875,7 +1747,7 @@ p {
 }
 
 /* ==========================================================
-   CARTES DES PROFILS TERRITORIAUX
+   Cartes des profils
    ========================================================== */
 
    .profiles-grid {
@@ -1903,17 +1775,8 @@ p {
         24px
         20px;
 
-    background:
-        var(--surface);
-
-    border:
-        1px solid var(--border);
-
     border-top-width:
         4px;
-
-    border-radius:
-        var(--radius-medium);
 
     transition:
         transform var(--transition),
@@ -2096,17 +1959,34 @@ p {
 }
 
 
-@media (max-width: 850px) {
-
-    .profiles-grid {
-        grid-template-columns:
-            1fr;
-    }
-}
-
 /* ==========================================================
-   CARTE
+   Explorateur régional
    ========================================================== */
+
+.profiles-explorer {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.15fr)
+        minmax(390px, 0.85fr);
+
+    gap: 22px;
+
+    /* Le dashboard s'adapte à la hauteur disponible */
+    height:
+        clamp(
+            520px,
+            calc(100vh - 190px),
+            610px
+        );
+
+    margin:
+        26px
+        0
+        38px;
+
+    align-items: stretch;
+}
 
 .profiles-explorer-map {
     min-width: 0;
@@ -2131,7 +2011,8 @@ p {
 }
 
 
-.profiles-map {
+.profiles-map,
+.region-profile-chart {
     width: 100%;
     height: 100%;
     min-height: 0;
@@ -2140,14 +2021,20 @@ p {
 
 .profiles-map .js-plotly-plot,
 .profiles-map .plot-container,
-.profiles-map .svg-container {
-    width: 100% !important;
-    height: 100% !important;
+.profiles-map .svg-container,
+.region-profile-chart .js-plotly-plot,
+.region-profile-chart .plot-container,
+.region-profile-chart .svg-container {
+    width:
+        100% !important;
+
+    height:
+        100% !important;
 }
 
 
 /* ==========================================================
-   COLONNE DROITE
+   Colonnes de détails
    ========================================================== */
 
 .profiles-explorer-details {
@@ -2169,7 +2056,7 @@ p {
 }
 
 /* ==========================================================
-   ÉTAT INITIAL — AUCUNE RÉGION SÉLECTIONNÉE
+   État initial : pas de région sélectionnée
    ========================================================== */
 
 .region-placeholder {
@@ -2258,20 +2145,11 @@ p {
 }
 
 /* ==========================================================
-   FICHE RÉGION — VERSION PLUS COMPACTE
+   Fiche régionale
    ========================================================== */
 
 .region-details {
     margin: 0;
-
-    background:
-        var(--surface);
-
-    border:
-        1px solid var(--border);
-
-    border-radius:
-        var(--radius-medium);
 
     overflow: hidden;
 
@@ -2314,20 +2192,8 @@ p {
         0
         5px;
 
-    color:
-        var(--raspberry);
-
     font-size:
         0.67rem;
-
-    font-weight:
-        700;
-
-    letter-spacing:
-        0.12em;
-
-    text-transform:
-        uppercase;
 }
 
 
@@ -2439,7 +2305,7 @@ p {
 
 
 /* ==========================================================
-   INDICATEURS — PLUS COMPACTS
+   Indicateurs
    ========================================================== */
 
 .region-metrics-grid {
@@ -2550,7 +2416,7 @@ p {
 
 
 /* ==========================================================
-   POSITION RELATIVE
+   Position relative
    ========================================================== */
 
 #region-profile-container {
@@ -2573,15 +2439,6 @@ p {
 
     min-height:
         0;
-
-    background:
-        var(--surface);
-
-    border:
-        1px solid var(--border);
-
-    border-radius:
-        var(--radius-medium);
 
     overflow:
         hidden;
@@ -2637,76 +2494,8 @@ p {
 }
 
 
-.region-profile-chart {
-    width:
-        100%;
-
-    height:
-        100%;
-
-    min-height:
-        0;
-}
-
-
-.region-profile-chart .js-plotly-plot,
-.region-profile-chart .plot-container,
-.region-profile-chart .svg-container {
-    width:
-        100% !important;
-
-    height:
-        100% !important;
-}
-
-
 /* ==========================================================
-   RESPONSIVE
-   ========================================================== */
-
-@media (max-width: 850px) {
-
-    .profiles-explorer {
-        grid-template-columns:
-            1fr;
-
-        height:
-            auto;
-    }
-
-
-    .profiles-explorer-map {
-        height:
-            520px;
-    }
-
-
-    .profiles-explorer-details {
-        display:
-            flex;
-
-        flex-direction:
-            column;
-
-        height:
-            auto;
-    }
-
-
-    .region-profile-card {
-        height:
-            auto;
-    }
-
-
-    .region-profile-chart {
-        height:
-            300px;
-    }
-}
-
-/* ==========================================================
-   16. RÉSULTAT / INTERPRÉTATION
+   15. SOURCES, TRANSITIONS & NOTES
    ========================================================== */
 
 .result-note {
@@ -2736,7 +2525,7 @@ p {
 
 
 /* ==========================================================
-   17. SOURCES
+   Sources
    ========================================================== */
 
 .sources-block {
@@ -2834,7 +2623,7 @@ a:hover {
 
 
 /* ==========================================================
-   18. TRANSITIONS ENTRE PARTIES
+   Transitions
    ========================================================== */
 
 .transition {
@@ -2882,7 +2671,7 @@ a:hover {
 
 
 /* ==========================================================
-   19. NOTES
+   Notes
    ========================================================== */
 
 .note {
@@ -2898,69 +2687,48 @@ a:hover {
 
 
 /* ==========================================================
-   TRAIT SIGNATURE DES TITRES DE SECTION
+   16. RESPONSIVE
    ========================================================== */
 
-   .tab-content > h2 {
-    position: relative;
+
+/* ----------------------------------------------------------
+   <= 1050 px
+   ---------------------------------------------------------- */
+
+   @media (max-width: 1050px) {
+
+    .profiles-summary-section .profiles-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
 }
 
 
-.tab-content > h2::before {
-    content: "";
+/* ----------------------------------------------------------
+   <= 950 px
+   ---------------------------------------------------------- */
 
-    display: block;
+@media (max-width: 950px) {
 
-    width: 34px;
-    height: 3px;
+    .method-flow {
+        grid-template-columns:
+            1fr;
+    }
 
-    margin-bottom: 15px;
 
-    background:
-        linear-gradient(
-            90deg,
-            var(--raspberry),
-            var(--blue-light)
-        );
+    .method-arrow {
+        transform:
+            rotate(90deg);
 
-    border-radius: 3px;
-}
-
-.section-heading,
-.dashboard-header h2 {
-    position: relative;
+        min-height:
+            18px;
+    }
 }
 
 
-.section-heading::before,
-.dashboard-header h2::before {
-    content: "";
-
-    display: block;
-
-    width: 34px;
-    height: 3px;
-
-    margin-bottom: 15px;
-
-    background:
-        linear-gradient(
-            90deg,
-            var(--raspberry),
-            var(--blue-light)
-        );
-
-    border-radius: 3px;
-}
-
-.section-heading {
-    margin-top: 0;
-}
-
-
-/* ==========================================================
-   21. RESPONSIVE
-   ========================================================== */
+/* ----------------------------------------------------------
+   <= 900 px
+   ---------------------------------------------------------- */
 
 @media (max-width: 900px) {
 
@@ -2976,42 +2744,128 @@ a:hover {
     }
 
 
-    .steps,
-    .indicator-grid {
+    .dashboard-body {
         grid-template-columns:
             1fr;
     }
 
 
+    .dashboard-visual,
+    .dashboard-chart {
+        height:
+            460px;
+    }
+
+
+    .dashboard-side {
+        height:
+            auto;
+    }
+
+
+    .dashboard-info-block {
+        flex:
+            0
+            0
+            auto;
+    }
+
+
+    .steps,
+    .indicator-grid,
+    .summary-cards,
     .profiles-grid {
         grid-template-columns:
             1fr;
     }
 
 
-    .summary-cards {
-        grid-template-columns: 1fr;
-    }
-    
-    .summary-card-header {
-        min-height: auto;
-    }
-    
+    .summary-card-header,
     .summary-indicator {
-        min-height: auto;
+        min-height:
+            auto;
     }
 
 
     .app-tab {
-        font-size:
-            0.85rem !important;
-
         padding:
             14px
             10px !important;
+
+        font-size:
+            0.85rem !important;
+    }
+}
+
+
+/* ----------------------------------------------------------
+   <= 850 px
+   ---------------------------------------------------------- */
+
+@media (max-width: 850px) {
+
+    .method-notes-grid {
+        grid-template-columns:
+            1fr;
     }
 
+
+    .profiles-explorer {
+        grid-template-columns:
+            1fr;
+
+        height:
+            auto;
+    }
+
+
+    .profiles-explorer-map {
+        height:
+            520px;
+    }
+
+
+    .profiles-explorer-details {
+        display:
+            flex;
+
+        flex-direction:
+            column;
+
+        height:
+            auto;
+    }
+
+
+    .region-profile-card {
+        height:
+            auto;
+    }
+
+
+    .region-profile-chart {
+        height:
+            300px;
+    }
 }
+
+
+/* ----------------------------------------------------------
+   <= 650 px
+   ---------------------------------------------------------- */
+
+@media (max-width: 650px) {
+
+    .profiles-summary-section .profiles-grid {
+        grid-template-columns:
+            1fr;
+    }
+}
+
+
+/* ----------------------------------------------------------
+   <= 600 px
+   ---------------------------------------------------------- */
 
 @media (max-width: 600px) {
 
@@ -3041,26 +2895,9 @@ a:hover {
             22px;
     }
 
+
     .selector {
         border-radius:
             var(--radius-small);
-    }
-
-}
-
-@media (max-width: 1050px) {
-
-    .profiles-summary-section .profiles-grid {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-    }
-}
-
-
-@media (max-width: 650px) {
-
-    .profiles-summary-section .profiles-grid {
-        grid-template-columns:
-            1fr;
     }
 }

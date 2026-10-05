@@ -53,8 +53,6 @@ map_figure = create_map(regions)
 
 app.layout = create_layout(
     finance,
-    diplome,
-    pcs,
     synthese_sociale,
     analyse_regions,
     relations_territoriales,
@@ -68,7 +66,14 @@ app.layout = create_layout(
 # Callbacks
 # ============================================================
 
-register_callbacks(app)
+register_callbacks(
+    app,
+    regions,
+    finance,
+    diplome,
+    pcs,
+    analyse_regions,
+    relations_territoriales,)
 
 
 # ============================================================
