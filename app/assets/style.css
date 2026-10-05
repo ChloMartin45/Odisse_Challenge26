@@ -2626,47 +2626,100 @@ a:hover {
    Transitions
    ========================================================== */
 
-.transition {
+   .transition {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: 10px;
+
     position: relative;
 
-    margin-top:
-        64px;
+    margin-top: 64px;
 
     padding:
-        22px 0 22px 28px;
+        22px
+        0
+        22px
+        28px;
 
-    color:
-        var(--navy);
-
-    font-weight:
-        500;
+    color: var(--navy);
 
     border-left:
         3px solid var(--purple-light);
 }
 
 
-.transition::before {
-    content: "→";
+.transition p {
+    margin: 0;
 
-    display: inline-block;
+    max-width: 1000px;
 
-    margin-right:
-        10px;
+    color: var(--navy);
 
-    color:
-        var(--raspberry);
-
-    font-weight:
-        700;
+    font-weight: 500;
 }
 
 
-.transition p {
-    display: inline;
+/* Lien vers l'étape suivante */
 
-    margin:
-        0;
+.transition-link {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 0.45rem;
+
+    width: fit-content;
+
+    padding: 0;
+
+    background: transparent;
+
+    border: 0;
+
+    color: var(--blue);
+
+    font: inherit;
+    font-weight: 650;
+    line-height: 1.4;
+
+    cursor: pointer;
+}
+
+
+.transition-arrow {
+    display: inline-block;
+
+    width: 17px;
+    height: 17px;
+
+    flex-shrink: 0;
+
+    background-color: currentColor;
+
+    -webkit-mask:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+        center / contain
+        no-repeat;
+
+    mask:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+        center / contain
+        no-repeat;
+
+    transition:
+        transform var(--transition);
+}
+
+
+.transition-link:hover {
+    color: var(--raspberry);
+}
+
+
+.transition-link:hover .transition-arrow {
+    transform:
+        translateX(3px);
 }
 
 
@@ -2684,7 +2737,6 @@ a:hover {
     line-height:
         1.65;
 }
-
 
 /* ==========================================================
    16. RESPONSIVE

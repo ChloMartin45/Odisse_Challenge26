@@ -1,4 +1,4 @@
-from dash import Input, Output, html, dcc
+from dash import Input, Output, html, dcc, ctx, no_update
 
 from charts import (
     create_region_profile,
@@ -111,6 +111,40 @@ def register_callbacks(app, regions, finance, diplome, pcs, analyse_regions, rel
         "diplome": diplome,
         "pcs": pcs,
     }
+    
+    app.clientside_callback(
+        """
+        function(tab) {
+            window.scrollTo(0, 0);
+            return tab;
+        }
+        """,
+        Output("scroll-trigger", "data"),
+        Input("main-tabs", "value"),
+    )
+    
+    # ========================================================
+    # Navigation entre les onglets
+    # ========================================================
+
+    @app.callback(
+        Output("main-tabs", "value"),
+        Input("go-to-territoires", "n_clicks"),
+        Input("go-to-profils", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def navigate_tabs(go_territoires, go_profils):
+
+        triggered = ctx.triggered_id
+
+        if triggered == "go-to-territoires":
+            return "territoires"
+
+        if triggered == "go-to-profils":
+            return "profils"
+
+        return no_update
+
     # ========================================================
     # 1. Inégalités sociales de santé
     # ========================================================

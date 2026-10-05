@@ -764,15 +764,29 @@ def create_social_tab(finance, synthese_sociale):
         # Transition
         # ----------------------------------------------------
 
-        html.Div([
-
-            html.P(
-                "Ces différences apparaissent entre groupes sociaux. "
-                "Mais observe-t-on également des écarts de santé entre "
-                "territoires aux caractéristiques sociales différentes ?"
-            ),
-
-        ], className="transition"),
+        html.Div(
+            [
+                html.P(
+                    "Ces différences apparaissent entre groupes sociaux. "
+                    "Mais observe-t-on également des écarts de santé entre "
+                    "territoires aux caractéristiques sociales différentes ?"
+                ),
+                
+                html.Button(
+                    [
+                        html.Span(
+                            className="transition-arrow",
+                            **{"aria-hidden": "true"},
+                        ),
+                        html.Span("Continuer vers Territoires & soins"),
+                    ],
+                    id="go-to-territoires",
+                    className="transition-link",
+                    n_clicks=0,
+                ),
+            ],
+            className="transition",
+        ),
 
     ], className="tab-content")
 
@@ -1322,16 +1336,30 @@ def create_territorial_tab(
         # Transition
         # ----------------------------------------------------
 
-        html.Div([
-
-            html.P(
-                "Les territoires ne se distinguent donc pas selon une seule "
-                "dimension. Que se passe-t-il lorsque défavorisation, "
-                "accessibilité aux soins et état de santé sont considérés "
-                "simultanément ?"
-            ),
-
-        ], className="transition"),
+        html.Div(
+            [
+                html.P(
+                    "Les territoires ne se distinguent donc pas selon une seule "
+                    "dimension. Que se passe-t-il lorsque défavorisation, "
+                    "accessibilité aux soins et état de santé sont considérés "
+                    "simultanément ?"
+                ),
+                
+                html.Button(
+                    [
+                        html.Span(
+                            className="transition-arrow",
+                            **{"aria-hidden": "true"},
+                        ),
+                        html.Span("Continuer vers Profils territoriaux"),
+                    ],
+                    id="go-to-profils",
+                    className="transition-link",
+                    n_clicks=0,
+                ),
+            ],
+            className="transition",
+        ),
 
     ], className="tab-content")
 
@@ -1964,7 +1992,7 @@ def create_profiles_tab(
                             "inégalités territoriales de santé."
                         ),
                     ],
-                    className="result-note profiles-key-result",
+                    className="result-note",
                 ),
 
                 create_profile_cards(
@@ -2243,6 +2271,8 @@ def create_layout(
 ):
 
     return html.Div([
+        
+        dcc.Store(id="scroll-trigger"),
 
         dcc.Tabs(
             id="main-tabs",
