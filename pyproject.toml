@@ -1,15 +1,12 @@
 [project]
 name = "odisse-challenge26"
 version = "0.1.0"
-description = "Add your description here"
+description = "Datavisualisation interactive sur les inégalités sociales et territoriales de santé"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "callbacks>=0.3.0",
     "dash>=4.4.1",
     "geojson-rewind>=1.2.1",
-    "layout>=0.4.1",
     "pandas>=3.0.6",
-    "pathlib>=1.0.1",
     "plotly>=7.1.0",
 ]
