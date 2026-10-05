@@ -106,9 +106,10 @@ def create_home_tab():
             html.H2("Données mobilisées"),
 
             html.P(
-                "Cette exploration croise plusieurs sources publiques portant "
-                "sur la santé, la défavorisation sociale, l'accessibilité aux "
-                "médecins généralistes et la population."
+                "Cette exploration croise plusieurs sources publiques portant sur "
+                "la santé, la défavorisation sociale, l'accessibilité aux médecins "
+                "généralistes et la population. Les données mobilisées couvrent "
+                "principalement la période 2020–2024."
             ),
 
             html.Ul([
@@ -206,7 +207,7 @@ def create_home_tab():
                 "Cette datavisualisation a été réalisée dans le cadre de "
                 "l'Odissé Dataviz Challenge 2026. Elle propose une exploration "
                 "des inégalités sociales et territoriales de santé à partir "
-                "de données publiques françaises."
+                "de données ouvertes françaises."
             ),
 
         ], className="about-challenge"),
@@ -455,39 +456,47 @@ def create_social_tab(finance, synthese_sociale):
 
             html.H3("Trois indicateurs de santé"),
 
+            html.P(
+                "Ces trois indicateurs décrivent des dimensions complémentaires "
+                "de l'état de santé déclaré.",
+                className="reading-guide-intro",
+            ),
+
             html.Div([
 
                 html.Div([
                     html.Strong("Santé perçue"),
                     html.P(
-                        "Part déclarant une santé bonne "
-                        "ou très bonne."
+                        "Part de la population déclarant un état de santé "
+                        "bon ou très bon."
                     ),
                     html.P(
-                        "↑ valeur élevée = situation plus favorable",
-                        className="indicator-direction",
+                        "Une valeur élevée correspond à une situation plus favorable.",
+                        className="indicator-direction indicator-direction-positive",
                     ),
                 ], className="indicator-card"),
 
                 html.Div([
                     html.Strong("Limitation d'activité"),
                     html.P(
-                        "Part déclarant une limitation d'activité."
+                        "Part de la population déclarant être limitée "
+                        "dans ses activités."
                     ),
                     html.P(
-                        "↑ valeur élevée = situation plus défavorable",
-                        className="indicator-direction",
+                        "Une valeur élevée correspond à une situation plus défavorable.",
+                        className="indicator-direction indicator-direction-negative",
                     ),
                 ], className="indicator-card"),
 
                 html.Div([
                     html.Strong("Diabète déclaré"),
                     html.P(
-                        "Part déclarant un diabète."
+                        "Part de la population déclarant être atteinte "
+                        "de diabète."
                     ),
                     html.P(
-                        "↑ valeur élevée = situation plus défavorable",
-                        className="indicator-direction",
+                        "Une valeur élevée correspond à une situation plus défavorable.",
+                        className="indicator-direction indicator-direction-negative",
                     ),
                 ], className="indicator-card"),
 
@@ -495,54 +504,151 @@ def create_social_tab(finance, synthese_sociale):
 
         ], className="reading-guide"),
 
-        # ----------------------------------------------------
+       # ----------------------------------------------------
         # Exploration
         # ----------------------------------------------------
 
-        html.H2(
-            "Explorez les écarts selon la situation sociale"
-        ),
+        html.Div(
+            [
 
-        html.P(
-            "Sélectionnez une dimension sociale pour comparer "
-            "les trois indicateurs de santé."
-        ),
+                # ====================================================
+                # EN-TÊTE
+                # ====================================================
 
-        dcc.RadioItems(
-            id="social-variable",
-            options=[
-                {
-                    "label": "Situation financière",
-                    "value": "finance",
-                },
-                {
-                    "label": "Diplôme",
-                    "value": "diplome",
-                },
-                {
-                    "label": "Catégorie socioprofessionnelle",
-                    "value": "pcs",
-                },
+                html.Div(
+                    [
+                        html.H2(
+                            "Explorez les écarts selon la situation sociale"
+                        ),
+
+                        html.P(
+                            "Sélectionnez une dimension sociale pour comparer "
+                            "les trois indicateurs de santé."
+                        ),
+
+                        dcc.RadioItems(
+                            id="social-variable",
+                            options=[
+                                {
+                                    "label": "Situation financière",
+                                    "value": "finance",
+                                },
+                                {
+                                    "label": "Diplôme",
+                                    "value": "diplome",
+                                },
+                                {
+                                    "label": "Catégorie socioprofessionnelle",
+                                    "value": "pcs",
+                                },
+                            ],
+                            value="finance",
+                            inline=True,
+                            className="selector social-dashboard-selector",
+                        ),
+                    ],
+                    className="social-dashboard-header",
+                ),
+
+                # ====================================================
+                # CONTENU
+                # ====================================================
+
+                html.Div(
+                    [
+
+                        # --------------------------------------------
+                        # Graphique
+                        # --------------------------------------------
+
+                        html.Div(
+                            [
+                                dcc.Graph(
+                                    id="social-chart",
+                                    figure=create_social_chart(
+                                        finance,
+                                        "finance",
+                                    ),
+                                    config={
+                                        "displayModeBar": False,
+                                        "responsive": True,
+                                    },
+                                    className="social-dashboard-chart",
+                                ),
+                            ],
+                            className="social-dashboard-visual",
+                        ),
+
+                        # --------------------------------------------
+                        # Colonne de lecture
+                        # --------------------------------------------
+
+                        html.Div(
+                            [
+
+                                html.Div(
+                                    [
+                                        html.P(
+                                            "LECTURE",
+                                            className="dashboard-eyebrow",
+                                        ),
+
+                                        html.Div(
+                                            id="social-interpretation",
+                                            className="dashboard-interpretation",
+                                        ),
+                                    ],
+                                    className="dashboard-reading-block",
+                                ),
+
+                                html.Div(
+                                    [
+                                        html.P(
+                                            "REPÈRES",
+                                            className="dashboard-eyebrow",
+                                        ),
+
+                                        html.P(
+                                            "Chaque point représente une estimation "
+                                            "pour le groupe social considéré."
+                                        ),
+
+                                        html.P(
+                                            "Les barres indiquent les intervalles "
+                                            "de confiance à 95 %."
+                                        ),
+
+                                        html.P(
+                                            "Unité : part de la population (%)"
+                                        ),
+                                    ],
+                                    className="dashboard-info-block",
+                                ),
+
+                                html.Div(
+                                    [
+                                        html.P(
+                                            "SOURCE",
+                                            className="dashboard-eyebrow",
+                                        ),
+
+                                        html.P(
+                                            "Baromètre de Santé publique France 2024."
+                                        ),
+                                    ],
+                                    className="dashboard-source-block",
+                                ),
+
+                            ],
+                            className="social-dashboard-side",
+                        ),
+
+                    ],
+                    className="social-dashboard-body",
+                ),
+
             ],
-            value="finance",
-            inline=True,
-            className="selector",
-        ),
-
-        dcc.Graph(
-            id="social-chart",
-            figure=create_social_chart(
-                finance,
-                "finance",
-            ),
-            config = {"displayModeBar": False },
-            className="chart-container",
-        ),
-
-        html.P(
-            "Les estimations sont accompagnées de leur "
-            "intervalle de confiance à 95 %.",
-            className="graph-note",
+            className="social-dashboard",
         ),
 
         # ----------------------------------------------------
@@ -716,10 +822,16 @@ def create_territorial_tab(
             ),
 
             html.P(
-                "Le FDep est un indice synthétique construit à partir de "
-                "caractéristiques socio-économiques des territoires. "
-                "Une valeur plus élevée correspond à un territoire "
-                "plus défavorisé."
+                "Le FDep20 est un indice communal de défavorisation territoriale "
+                "construit à partir de quatre dimensions socio-économiques : "
+                "revenu médian, niveau de diplôme, part d'ouvriers et chômage. "
+                "Une valeur plus élevée correspond à un territoire plus défavorisé."
+            ),
+
+            html.P(
+                "Il repose sur des données socio-économiques de 2020 et une "
+                "géographie communale au 1er janvier 2023.",
+                className="indicator-direction",
             ),
 
             html.P(
@@ -730,6 +842,24 @@ def create_territorial_tab(
 
         ], className="reading-guide"),
 
+        # Agrégation commune -> région
+        
+        html.Div(
+            [
+                html.Strong(
+                    "Passage à l'échelle régionale"
+                ),
+
+                html.P(
+                    "Les indicateurs communaux de défavorisation et d'accessibilité "
+                    "ont été agrégés à l'échelle régionale par moyenne pondérée "
+                    "par la population afin de permettre leur comparaison avec "
+                    "les indicateurs de santé régionaux."
+                ),
+            ],
+            className="method-note",
+        ),
+        
         # Sélecteur
 
         dcc.RadioItems(
@@ -806,10 +936,17 @@ def create_territorial_tab(
             ),
 
             html.P(
-                "L'Accessibilité potentielle localisée mesure l'accessibilité "
-                "à l'offre de médecins généralistes en tenant compte de l'offre "
-                "disponible et de la demande potentielle. Une valeur plus élevée "
-                "correspond à une meilleure accessibilité."
+                "L’Accessibilité potentielle localisée (APL) estime le nombre de "
+                "consultations ou visites de médecine générale accessibles par habitant "
+                "standardisé. Elle tient compte de l’offre disponible, de l’activité des "
+                "médecins, de la distance d’accès et des besoins de soins liés à l’âge. "
+                "Une valeur plus élevée correspond à une meilleure accessibilité."
+            ),
+
+            html.P(
+                "Unité : consultations ou visites de médecine générale accessibles "
+                "par habitant standardisé.",
+                className="indicator-direction",
             ),
 
         ], className="reading-guide"),
@@ -1395,6 +1532,13 @@ def create_profiles_tab(
             ],
             className="method-flow-block",
         ),
+        
+        html.P(
+            "Méthode : les six indicateurs sont standardisés avant classification. "
+            "Les regroupements ont ensuite fait l'objet d'analyses de sensibilité "
+            "afin de vérifier leur stabilité.",
+            className="graph-note",
+        ),
 
         # ====================================================
         # LES QUATRE PROFILS
@@ -1556,6 +1700,14 @@ def create_profiles_tab(
                 "entre territoires à partir des six indicateurs retenus "
                 "et ne constitue ni un classement ni une typologie "
                 "définitive des régions françaises."
+            ),
+            
+            html.P(
+                "Les sources mobilisées ne portent pas toutes sur la même période : "
+                "FDep à partir de données socio-économiques 2020, F-EDI 2021, "
+                "APL et population 2023, indicateurs de santé du Baromètre 2024. "
+                "Les croisements décrivent donc des configurations territoriales "
+                "proches dans le temps, et non une photographie strictement simultanée."
             ),
 
             html.P(

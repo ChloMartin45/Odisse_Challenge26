@@ -686,6 +686,180 @@ p {
 }
 
 /* ==========================================================
+   DASHBOARD SOCIAL
+   ========================================================== */
+
+   .social-dashboard {
+    margin-top: 28px;
+}
+
+.social-dashboard-header {
+    margin-bottom: 18px;
+}
+
+.social-dashboard-header h2 {
+    margin-bottom: 8px;
+}
+
+.social-dashboard-header > p {
+    margin-bottom: 18px;
+}
+
+.social-dashboard-selector {
+    margin-bottom: 0;
+}
+
+
+/* ----------------------------------------------------------
+   Corps
+   ---------------------------------------------------------- */
+
+.social-dashboard-body {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1.45fr)
+        minmax(280px, 0.55fr);
+
+    gap: 18px;
+
+    align-items: stretch;
+
+    min-height: 520px;
+}
+
+
+/* ----------------------------------------------------------
+   Graphique
+   ---------------------------------------------------------- */
+
+.social-dashboard-visual {
+    min-width: 0;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-medium);
+
+    overflow: hidden;
+}
+
+.social-dashboard-chart {
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+}
+
+
+/* ----------------------------------------------------------
+   Colonne de lecture
+   ---------------------------------------------------------- */
+
+.social-dashboard-side {
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+
+.dashboard-reading-block,
+.dashboard-info-block,
+.dashboard-source-block {
+    padding: 18px 20px;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-medium);
+}
+
+
+.dashboard-reading-block {
+    flex: 1;
+}
+
+.dashboard-reading-title {
+    margin: 0 0 10px;
+
+    color: var(--navy);
+
+    font-size: 1rem;
+    line-height: 1.35;
+
+    font-weight: 700;
+}
+
+.dashboard-reading-text {
+    margin: 0;
+
+    color: var(--text-muted);
+
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+
+.dashboard-eyebrow {
+    margin: 0 0 8px;
+
+    color: var(--raspberry);
+
+    font-size: 0.68rem;
+
+    font-weight: 700;
+
+    letter-spacing: 0.12em;
+
+    text-transform: uppercase;
+}
+
+
+.dashboard-interpretation {
+    color: var(--navy);
+
+    font-size: 0.95rem;
+
+    line-height: 1.55;
+
+    font-weight: 600;
+}
+
+
+.dashboard-info-block p,
+.dashboard-source-block p {
+    margin: 0 0 8px;
+
+    color: var(--text-muted);
+
+    font-size: 0.8rem;
+
+    line-height: 1.45;
+}
+
+
+.dashboard-info-block p:last-child,
+.dashboard-source-block p:last-child {
+    margin-bottom: 0;
+}
+
+
+/* ----------------------------------------------------------
+   Responsive
+   ---------------------------------------------------------- */
+
+@media (max-width: 900px) {
+
+    .social-dashboard-body {
+        grid-template-columns: 1fr;
+    }
+
+    .social-dashboard-chart {
+        min-height: 460px;
+    }
+}
+
+/* ==========================================================
    12. SYNTHÈSE SOCIALE
    ========================================================== */
 
@@ -2255,12 +2429,13 @@ a:hover {
 
 /* Ligne discrète avant certains grands titres */
 
-.tab-content > h2 {
+.tab-content > h2,
+.social-dashboard-header h2 {
     position: relative;
 }
 
-
-.tab-content > h2::before {
+.tab-content > h2::before,
+.social-dashboard-header h2::before {
     content: "";
 
     display: block;
@@ -2274,11 +2449,10 @@ a:hover {
         linear-gradient(
             90deg,
             var(--raspberry),
-            var(--blue-light)
+        var(--blue-light)
         );
 
-    border-radius:
-        3px;
+    border-radius: 3px;
 }
 
 

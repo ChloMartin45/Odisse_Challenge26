@@ -39,9 +39,14 @@ def register_callbacks(app):
 
     @app.callback(
         Output("social-chart", "figure"),
+        Output("social-interpretation", "children"),
         Input("social-variable", "value"),
     )
     def update_social_chart(variable):
+
+        # ----------------------------------------------------
+        # Données
+        # ----------------------------------------------------
 
         datasets = {
             "finance": finance,
@@ -49,10 +54,85 @@ def register_callbacks(app):
             "pcs": pcs,
         }
 
-        return create_social_chart(
+
+        # ----------------------------------------------------
+        # Graphique
+        # ----------------------------------------------------
+
+        figure = create_social_chart(
             datasets[variable],
             variable,
         )
+
+
+        # ----------------------------------------------------
+        # Messages de lecture
+        # ----------------------------------------------------
+
+        social_messages = {
+
+            "finance": {
+                "titre": (
+                    "Les écarts se creusent sur les trois dimensions de santé"
+                ),
+                "texte": (
+                    "À mesure que la situation financière déclarée devient plus "
+                    "difficile, la santé perçue diminue tandis que les limitations "
+                    "d’activité et le diabète déclaré augmentent. Le gradient est "
+                    "particulièrement marqué pour la santé perçue et les limitations "
+                    "d’activité."
+                ),
+            },
+
+            "diplome": {
+                "titre": (
+                    "Le diplôme s’accompagne d’écarts de santé nets"
+                ),
+                "texte": (
+                    "Les personnes les plus diplômées déclarent plus souvent une "
+                    "bonne santé, et moins souvent une limitation d’activité ou un "
+                    "diabète. Les trois indicateurs évoluent ici dans une direction "
+                    "cohérente."
+                ),
+            },
+
+            "pcs": {
+                "titre": (
+                    "Des écarts existent sans former un gradient unique"
+                ),
+                "texte": (
+                    "Les cadres présentent globalement les indicateurs les plus "
+                    "favorables et les ouvriers des niveaux moins favorables. "
+                    "Les catégories socioprofessionnelles ne constituent toutefois "
+                    "pas une échelle sociale continue : leur comparaison reste "
+                    "descriptive."
+                ),
+            },
+        }
+
+
+        # ----------------------------------------------------
+        # Interprétation
+        # ----------------------------------------------------
+
+        message = social_messages[variable]
+
+        interpretation = html.Div(
+            [
+                html.H3(
+                    message["titre"],
+                    className="dashboard-reading-title",
+                ),
+
+                html.P(
+                    message["texte"],
+                    className="dashboard-reading-text",
+                ),
+            ]
+        )
+
+
+        return figure, interpretation
 
     # ========================================================
     # 2. Défavorisation territoriale et santé
@@ -124,7 +204,7 @@ def register_callbacks(app):
         ])
 
         return figure, interpretation
-
+    
     # ========================================================
     # 3. Fiche régionale et profil standardisé
     # ========================================================
