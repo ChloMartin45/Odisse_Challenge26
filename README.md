@@ -1,7 +1,7 @@
 # Odissé Dataviz Challenge 2026 - Inégalités sociales et territoriales de santé
 
 **Équipe :** Chloé Martin  
-**Mail de contact :** chloe_martin45@outlook.com
+**Mail de contact :** [chloe_martin45@outlook.com](mailto:chloe_martin45@outlook.com) 
 **Défi :** Défi 3 — Inégalités sociales et territoriales de santé
 
 ## Notre question
