@@ -1155,7 +1155,7 @@ def create_territorial_tab(
                                         html.P(
                                             "Après prise en compte du FDep, la relation "
                                             "avec la limitation d’activité reste proche de "
-                                            "celle observée initialement."
+                                            "celle observée initialement. "
                                             "Les relations avec la santé perçue "
                                             "et le diabète déclaré restent plus faibles.",
                                             className="dashboard-reading-text",

@@ -362,8 +362,7 @@ def create_social_chart(data, variable):
             ],
 
             "titre": (
-                "La santé se dégrade à mesure que "
-                "les difficultés financières augmentent"
+                "La santé se dégrade avec les difficultés financières"
             ),
 
             "axe": "Situation financière perçue",
@@ -380,8 +379,7 @@ def create_social_chart(data, variable):
             ],
 
             "titre": (
-                "Les indicateurs de santé diffèrent "
-                "selon le niveau de diplôme"
+                "Les indicateurs de santé varient selon le niveau de diplôme"
             ),
 
             "axe": "Niveau de diplôme",
@@ -400,8 +398,7 @@ def create_social_chart(data, variable):
             ],
 
             "titre": (
-                "Les indicateurs de santé diffèrent "
-                "selon la catégorie socioprofessionnelle"
+                "Les indicateurs de santé varient selon la catégorie socioprofessionnelle"
             ),
 
             "axe": "Catégorie socioprofessionnelle",
@@ -579,7 +576,7 @@ def create_social_chart(data, variable):
         paper_bgcolor=PLOT_BACKGROUND,
 
 
-        height=510,
+        height=500,
 
 
         margin=dict(
@@ -646,14 +643,23 @@ def create_social_chart(data, variable):
             size=13,
             color=COLOR_MUTED,
         ),
+        standoff=18,
     ),
-
+    
+    categoryorder="array",
+    categoryarray=(
+        [
+            pcs_labels.get(value, value)
+            for value in config["ordre"]
+        ]
+        if variable == "pcs"
+        else config["ordre"]
+    ),
+    
     showgrid=False,
 
     showline=True,
-
     linecolor="#D5DEE8",
-
     linewidth=1,
 
     tickfont=dict(
@@ -663,11 +669,8 @@ def create_social_chart(data, variable):
 
     tickangle=0,
 
-    automargin=True,
-
     ticks="",
 )
-
 
     # ========================================================
     # Axe Y
@@ -680,14 +683,22 @@ def create_social_chart(data, variable):
                 size=13,
                 color=COLOR_MUTED,
             ),
+            standoff=12,
         ),
 
         # Même échelle pour les trois dimensions sociales
         range=[0, 100],
 
-        tickmode="linear",
-        tick0=0,
-        dtick=20,
+        tickmode="array",
+        tickvals=[0, 20, 40, 60, 80, 100],
+        ticktext=[
+            "0 %",
+            "20 %",
+            "40 %",
+            "60 %",
+            "80 %",
+            "100 %",
+        ],
 
         showgrid=True,
         gridcolor=COLOR_GRID,
@@ -701,7 +712,7 @@ def create_social_chart(data, variable):
             size=12,
         ),
 
-        ticksuffix=" %",
+        ticks="",
     )
 
 
@@ -763,68 +774,6 @@ def create_fdep_health_chart(regions, relations, indicateur):
     regions_plot["ecart_moyenne"] = (
         regions_plot[config["colonne"]]
         - moyenne_indicateur
-    )
-
-    # --------------------------------------------------------
-    # Échelle commune aux trois indicateurs
-    # --------------------------------------------------------
-
-    colonnes_sante = [
-        "sante_percue",
-        "limitation_activite",
-        "diabete_declare",
-    ]
-
-    ecarts_max = []
-
-    for colonne in colonnes_sante:
-        moyenne = regions[colonne].mean()
-
-        ecarts = (
-            regions[colonne]
-            - moyenne
-        ).abs()
-
-        ecarts_max.append(ecarts.max())
-
-    max_abs_global = max(ecarts_max)
-
-    # 15 % de marge autour de l'écart maximal
-    max_abs_global *= 1.15
-
-
-    def nice_step(value):
-        """
-        Retourne un pas de graduation lisible :
-        1, 2, 5, 10, 20, 50...
-        """
-        if value <= 0:
-            return 1
-
-        exponent = math.floor(math.log10(value))
-        fraction = value / (10 ** exponent)
-
-        if fraction <= 1:
-            nice_fraction = 1
-        elif fraction <= 2:
-            nice_fraction = 2
-        elif fraction <= 5:
-            nice_fraction = 5
-        else:
-            nice_fraction = 10
-
-        return nice_fraction * (10 ** exponent)
-
-
-    # Environ 6 à 8 intervalles sur l'ensemble de l'axe
-    tick_step = nice_step(
-        (2 * max_abs_global) / 8
-    )
-
-    # Borne symétrique autour de 0
-    limite_y = (
-        math.ceil(max_abs_global / tick_step)
-        * tick_step
     )
 
     stats = relations.loc[
@@ -925,24 +874,20 @@ def create_fdep_health_chart(regions, relations, indicateur):
     )
 
     # --------------------------------------------------------
+    # Bornes de l'axe Y
+    # --------------------------------------------------------
+    
+
+    Y_RANGE_FDEP = [-6, 6]
+    Y_TICKS_FDEP = [-6, -4, -2, 0, 2, 4, 6]
+
+    # --------------------------------------------------------
     # Bornes de l'axe X
     # --------------------------------------------------------
-
-    fdep_min = regions["fdep_pondere"].min()
-    fdep_max = regions["fdep_pondere"].max()
-
-    amplitude = fdep_max - fdep_min
-
-    x_min = min(
-        fdep_min - 0.10 * amplitude,
-        0
-    )
-
-    x_max = max(
-        fdep_max + 0.10 * amplitude,
-        0
-    )
-
+    
+    X_RANGE_FDEP = [-1.0, 0.75]
+    X_TICKS_FDEP = [-1.0, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75]
+    
     # --------------------------------------------------------
     # Mise en forme
     # --------------------------------------------------------
@@ -1029,7 +974,10 @@ def create_fdep_health_chart(regions, relations, indicateur):
             ),
         ),
 
-        range=[x_min, x_max],
+        range=X_RANGE_FDEP,
+        
+        tickmode="array",
+        tickvals=X_TICKS_FDEP,
 
         showgrid=False,
 
@@ -1061,14 +1009,19 @@ def create_fdep_health_chart(regions, relations, indicateur):
             ),
         ),
 
-        range=[
-            -limite_y,
-            limite_y,
-        ],
+        range=Y_RANGE_FDEP,
 
-        tickmode="linear",
-        tick0=0,
-        dtick=tick_step,
+        tickmode="array",
+        tickvals=Y_TICKS_FDEP,
+        ticktext=[
+            "−6 pt",
+            "−4 pt",
+            "−2 pt",
+            "0 pt",
+            "2 pt",
+            "4 pt",
+            "6 pt",
+        ],
 
         showgrid=True,
         gridcolor=COLOR_GRID,
@@ -1085,7 +1038,7 @@ def create_fdep_health_chart(regions, relations, indicateur):
             size=12,
         ),
 
-        ticksuffix=" pt",
+        ticks="",
     )
 
     # --------------------------------------------------------
@@ -1093,6 +1046,8 @@ def create_fdep_health_chart(regions, relations, indicateur):
     # --------------------------------------------------------
 
     aide_color = "#98A8B8"
+    
+    x_min, x_max = X_RANGE_FDEP
 
     # Ligne gauche
     fig.add_shape(
@@ -1361,14 +1316,48 @@ def create_apl_comparison_chart(relations):
     )
 
     # ========================================================
-    # Ligne repère
+    # Ligne repère verticale sur 0
     # ========================================================
 
     fig.add_vline(
         x=0,
         line_dash="dash",
-        line_width=1.2,
+        line_width=1.4,
         line_color="#9FB0C3",
+    )
+
+    # ========================================================
+    # Séparateurs horizontaux entre indicateurs
+    # ========================================================
+
+    fig.add_shape(
+        type="line",
+        x0=-1,
+        x1=1,
+        y0=0.5,
+        y1=0.5,
+        xref="x",
+        yref="y",
+        line=dict(
+            color="#EEF2F6",
+            width=1,
+        ),
+        layer="below",
+    )
+
+    fig.add_shape(
+        type="line",
+        x0=-1,
+        x1=1,
+        y0=1.5,
+        y1=1.5,
+        xref="x",
+        yref="y",
+        line=dict(
+            color="#EEF2F6",
+            width=1,
+        ),
+        layer="below",
     )
 
     # ========================================================
@@ -1387,29 +1376,49 @@ def create_apl_comparison_chart(relations):
         plot_bgcolor=PLOT_BACKGROUND,
         paper_bgcolor=PLOT_BACKGROUND,
 
-        height=420,
+        height=430,
 
         margin=dict(
             l=150,
-            r=40,
-            t=95,
+            r=35,
+            t=75,
             b=80,
         ),
 
         legend=dict(
             orientation="h",
+            
             yanchor="bottom",
-            y=1.02,
-            xanchor="left",
-            x=0,
+            y=1.08,
+            
+            xanchor="center",
+            x=0.5,
+            
             title=None,
+            
             font=dict(
                 size=12,
                 color=COLOR_TEXT,
             ),
-            bgcolor="rgba(0,0,0,0)",
+            
+            bgcolor="rgba(255,255,255,0.88)",
+            bordercolor="#D5DEE8",
+            borderwidth=1,
+        ),
+
+        hoverlabel=dict(
+            bgcolor="white",
+            bordercolor="#D5DEE8",
+            font=dict(
+                family="Outfit, Arial, sans-serif",
+                color=COLOR_TEXT,
+            ),
         ),
     )
+
+    # ========================================================
+    # Axe X
+    # ========================================================
 
     fig.update_xaxes(
         title=dict(
@@ -1418,27 +1427,52 @@ def create_apl_comparison_chart(relations):
                 size=13,
                 color=COLOR_MUTED,
             ),
+            standoff=14,
         ),
+        
         range=[-1, 1],
+        
         tickvals=[-1, -0.5, 0, 0.5, 1],
         ticktext=["−1", "−0,5", "0", "0,5", "1"],
+        
         showgrid=True,
         gridcolor=COLOR_GRID,
         gridwidth=1,
+        
         zeroline=False,
-        showline=False,
+
+        showline=True,
+        linecolor="#D5DEE8",
+        linewidth=1,
+
+        ticks="outside",
+        ticklen=4,
+        tickcolor="#B8C4D0",
+
         tickfont=dict(
             color=COLOR_TEXT,
             size=12,
         ),
     )
 
+    # ========================================================
+    # Axe Y
+    # ========================================================
+
     fig.update_yaxes(
         title=None,
+        
         categoryorder="array",
         categoryarray=ordre[::-1],
+        
+        # Même espace au-dessus de Santé perçue
+        # et sous Diabète déclaré
+        range=[-0.5, 2.5],
+    
         showgrid=False,
         showline=False,
+        ticks="",
+        
         tickfont=dict(
             color=COLOR_TEXT,
             size=12,

@@ -185,7 +185,7 @@ def register_callbacks(app):
                     "La santé perçue diminue avec la défavorisation territoriale"
                 ),
                 "texte": (
-                    "Dans les 13 régions étudiées, les régions présentant "
+                    "Les régions présentant "
                     "un FDep plus élevé tendent à compter une part plus faible "
                     "de personnes déclarant une bonne ou très bonne santé."
                 ),
