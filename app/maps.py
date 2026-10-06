@@ -209,8 +209,8 @@ def create_map(regions):
                         mode="lines",
 
                         line=dict(
-                            color="rgba(45, 67, 86, 0.38)",
-                            width=0.55,
+                            color="rgba(45, 67, 86, 0.18)",
+                            width=0.4,
                         ),
 
                         hoverinfo="skip",

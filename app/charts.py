@@ -71,36 +71,36 @@ def create_region_profile(regions, region_name):
         {
             "colonne": "z_fdep",
             "label": "FDep",
-            "label_complet": "Défavorisation — FDep",
+            "label_complet": "Défavorisation territoriale — FDep",
             "color": COLOR_DEPRIVATION,
         },
         {
             "colonne": "z_fedi",
             "label": "F-EDI",
-            "label_complet": "Défavorisation — F-EDI",
+            "label_complet": "Défavorisation territoriale — F-EDI",
             "color": COLOR_DEPRIVATION,
         },
         {
             "colonne": "z_apl",
-            "label": "Accessibilité",
-            "label_complet": "Faible accessibilité aux soins",
+            "label": "Accessibilité faible",
+            "label_complet": "Faible accessibilité aux médecins généralistes",
             "color": COLOR_NAVY,
         },
         {
             "colonne": "z_sante",
-            "label": "Santé perçue",
+            "label": "Santé perçue défavorable",
             "label_complet": "Santé perçue défavorable",
             "color": COLOR_HEALTH,
         },
         {
             "colonne": "z_limitation",
             "label": "Limitations habituelles",
-            "label_complet": "Limitation durable dans les activités habituelles",
+            "label_complet": "Limitation dans les activités habituelles",
             "color": COLOR_RASPBERRY,
         },
         {
             "colonne": "z_diabete",
-            "label": "Diabète",
+            "label": "Diabète déclaré",
             "label_complet": "Diabète déclaré",
             "color": COLOR_ORANGE,
         },
@@ -242,11 +242,37 @@ def create_region_profile(regions, region_name):
     fig.add_vline(
         x=0,
 
-        line_width=1.5,
+        line_width=1.7,
 
         line_dash="dash",
 
-        line_color="#98A8B8",
+        line_color="#7F92A6",
+    )
+    
+    fig.add_annotation(
+        x=-limite * 0.6,
+        y=-0.23,
+        xref="x",
+        yref="paper",
+        text="Plus favorable",
+        showarrow=False,
+        font=dict(
+            size=10,
+            color=COLOR_MUTED,
+        ),
+    )
+
+    fig.add_annotation(
+        x=limite * 0.6,
+        y=-0.23,
+        xref="x",
+        yref="paper",
+        text="Plus défavorable",
+        showarrow=False,
+        font=dict(
+            size=10,
+            color=COLOR_MUTED,
+        ),
     )
 
 
@@ -271,7 +297,7 @@ def create_region_profile(regions, region_name):
             l=125,
             r=18,
             t=18,
-            b=42,
+            b=56,
         ),
 
         showlegend=False,

@@ -382,12 +382,12 @@ def register_callbacks(app, regions, finance, diplome, pcs, analyse_regions, rel
                             ),
 
                             create_region_metric(
-                                "Santé perçue",
+                                "Bonne santé perçue",
                                 f"{region['sante_percue']:.1f} %",
                             ),
 
                             create_region_metric(
-                                "Limitation durable dans les activités habituelles",
+                                "Limitations dans les activités habituelles",
                                 f"{region['limitation_activite']:.1f} %",
                             ),
 
@@ -413,16 +413,16 @@ def register_callbacks(app, regions, finance, diplome, pcs, analyse_regions, rel
                             ),
 
                             create_region_metric(
-                                "FDep",
+                                "FDep pondéré",
                                 f"{region['fdep_pondere']:.2f}",
                             ),
 
                             create_region_metric(
-                                "F-EDI",
+                                "F-EDI pondéré",
                                 f"{region['fedi_pondere']:.2f}",
                             ),
                             create_region_metric(
-                                "APL",
+                                "APL pondérée",
                                 f"{region['apl_pondere']:.2f}",
                             ),
                         ],
@@ -454,18 +454,18 @@ def register_callbacks(app, regions, finance, diplome, pcs, analyse_regions, rel
                         ),
 
                         html.H3(
-                            "Par rapport aux 13 régions"
+                            "Écart à la moyenne des 13 régions"
                         ),
                     ],
                     className="region-profile-heading",
                 ),
 
                 html.P(
-                    "0 correspond à la moyenne. Une valeur positive indique "
-                    "une situation relativement plus défavorable et une valeur "
-                    "négative une situation relativement plus favorable. "
-                    "La longueur du segment indique l’écart à la moyenne des 13 régions : "
-                    "plus le point est éloigné de 0, plus la région se distingue sur l’indicateur considéré.",
+                    "0 correspond à la moyenne des 13 régions. "
+                    "Les scores standardisés sont orientés dans le même sens : "
+                    "plus le point est à droite, plus la situation est relativement défavorable. "
+                    "Plus il est éloigné de 0, plus la région se distingue de la moyenne.",
+
                     className="region-profile-note",
                 ),
 
