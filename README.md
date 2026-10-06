@@ -6,7 +6,7 @@
 
 ## Notre question
 
-**Comment les inégalités sociales et territoriales de santé se combinent-elles avec l’accessibilité aux soins pour caractériser différents profils de territoires en France ?**
+**Comment les inégalités sociales et territoriales de santé se combinent-elles avec l’accessibilité aux médecins généralistes pour caractériser différents profils de territoires en France ?**
 
 La visualisation propose un parcours en trois étapes : 
 - partir des écarts de santé observés selon plusieurs caractéristiques sociales, 
@@ -42,6 +42,9 @@ L’objectif n’est pas d’établir un classement des régions, mais de montre
 | Santé publique France — Odissé | French European Deprivation Index — F-EDI 2021 | https://odisse.santepubliquefrance.fr/explore/assets/french-european-deprivation-index-f-edi-2021-par-commune/ |
 | Observatoire des territoires | Accessibilité potentielle localisée (APL) aux médecins généralistes — 2023 | https://www.observatoire-des-territoires.gouv.fr/accessibilite-potentielle-localisee-apl-aux-medecins-generalistes |
 | Insee | Populations communales 2023 | https://www.insee.fr/fr/statistiques/8680726 |
+
+**Source de contexte pour l’introduction :** les chiffres nationaux mentionnés au début de l’application, notamment les 68 % d’adultes déclarant une bonne ou très bonne santé et les 26 % déclarant une limitation dans leurs activités habituelles depuis au moins six mois, proviennent de la publication *Santé générale — Baromètre de Santé publique France 2024* :  
+https://www.santepubliquefrance.fr/sites/default/files/rdd/document/907125_spf00006377.pdf
 
 Les données mobilisées ne correspondent pas toutes exactement à la même année : 
 - FDep repose sur des données socio-économiques 2020,
@@ -145,6 +148,8 @@ Des analyses de sensibilité ont également été réalisées en faisant varier 
 
 Ces analyses restent exploratoires : les relations observées ne permettent pas d’établir de causalité et les indices de défavorisation utilisés sont des indicateurs écologiques caractérisant les territoires, et non la situation individuelle de leurs habitants.
 
+Les définitions des indicateurs, leurs unités et leur sens de lecture, ainsi que les principales précautions d’interprétation et la méthode de construction des profils territoriaux, sont également présentés directement dans l’interface de l’application. La partie consacrée aux profils détaille notamment la standardisation des indicateurs, la classification hiérarchique, le choix des quatre groupes et les analyses de sensibilité réalisées.
+
 ## Les outils employés
 
 ### Exploration, préparation et analyse des données
@@ -164,6 +169,8 @@ Ces analyses restent exploratoires : les relations observées ne permettent pas 
 - Plotly
 - pandas
 - HTML / CSS
+
+L’identité visuelle de l’application s’appuie sur les couleurs de la charte graphique d’Odissé, adaptées à l’interface afin de conserver une cohérence visuelle avec l’univers du challenge tout en assurant la lisibilité des visualisations.
 
 ### Gestion de l'environnement Python
 
