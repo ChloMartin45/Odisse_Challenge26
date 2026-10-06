@@ -21,7 +21,7 @@ from callbacks import register_callbacks
 # ============================================================
 
 app = Dash(__name__)
-
+server = app.server
 
 # ============================================================
 # Chargement des données
