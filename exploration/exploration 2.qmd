@@ -3,6 +3,11 @@ title: "exploration 2"
 format: html
 ---
 
+**Note de lecture**
+
+Ce notebook retrace une étape exploratoire du projet. Il contient des tests, vérifications et pistes qui ont servi à orienter l'analyse finale. Certains périmètres, indicateurs ou résultats ont ensuite été ajustés lors de la préparation des données. Les scripts du dossier `R/` et l'application Dash constituent la version finale de la chaîne d'analyse.
+
+
 ```{r, echo=FALSE, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,
                       warning = FALSE,
@@ -30,14 +35,23 @@ library(sf)
 # Importation données
 
 ```{r}
-sante <-read.csv("~/projects/Odisse_Challenge26/data/raw/sante_generale_indicateurs_barometre_2024.csv",
-                 header = TRUE,
-                 sep = ",")
-diabete <- read.csv("~/projects/Odisse_Challenge26/data/raw/diabete-indicateurs-du-barometre-2024.csv",
-                 header = TRUE,
-                 sep = ",")
-view(diabete)
-view(sante)
+# Chemin vers les données brutes depuis le dossier exploration/
+raw_dir <- file.path("..", "data", "raw")
+```
+
+
+```{r}
+sante <- read.csv(
+  file.path(raw_dir, "sante_generale_indicateurs_barometre_2024.csv"),
+  header = TRUE,
+  sep = ","
+)
+
+diabete <- read.csv(
+  file.path(raw_dir, "diabete-indicateurs-du-barometre-2024.csv"),
+  header = TRUE,
+  sep = ","
+)
 ```
 
 # Sante VS diplome 
@@ -60,9 +74,10 @@ sante |>
     ic_sup
   )
 ```
-On observe donc un gradient très net selon le niveau de diplôme :
-+13,6 points entre « aucun diplôme ou inférieur au Bac » et « Bac »
-+6,0 points entre « Bac » et « supérieur au Bac »
+On observe un gradient très net selon le niveau de diplôme :
+- +13,6 points entre « aucun diplôme ou inférieur au Bac » et « Bac »
+- +6,0 points entre « Bac » et « supérieur au Bac »
+
 **+19,6 points entre les deux extrêmes**.
 
 **les inégalités de santé apparaissent déjà lorsque l'on regarde une caractéristique de position sociale.**
@@ -90,11 +105,12 @@ c’est **encore plus marqué que pour le diplôme**. On commence à voir une vr
 On observe un gradient presque parfaitement monotone : **plus la situation financière perçue est favorable, plus la proportion déclarant une bonne ou très bonne santé augmente**.
 
 L'écart entre les deux situations extrêmes est de 32,1 points :
-50,4 % → 82,5 %
+50,4 % à 82,5 %
 
 Conclusion :
 **La santé perçue présente un gradient social particulièrement marqué selon la situation financière.**
-**Mais attention à la formulation : on peut dire que la santé déclarée varie fortement selon la situation financière perçue dans l'enquête, pas que la situation financière « cause » directement l'état de santé.**
+
+**On peut dire que la santé déclarée varie fortement selon la situation financière perçue dans l'enquête** pas un effet causal
 
 # Sante VS CSP
 
@@ -117,9 +133,10 @@ sante |>
 ```
 
 On retrouve une opposition assez nette entre les catégories :
-Cadres : 77,9 %
-Ouvriers : 61,7 %
+- Cadres : 77,9 %
+- Ouvriers : 61,7 %
 soit 16,2 points d'écart.
+
 Les employés sont très proches des ouvriers, tandis que les professions intermédiaires se situent entre les deux.
 
 # vérifier si le gradient social se retrouve pour un autre indicateur (Limitation activité)
@@ -145,10 +162,9 @@ sante |>
     ic_sup
   )
 ```
-L'écart entre les deux situations extrêmes est de :
-40,1 − 16,3 = 23,8 points.
-Et surtout, les quatre catégories suivent encore une progression parfaitement ordonnée :
-16,3 → 20,7 → 28,4 → 40,1 %
+L'écart entre les deux situations extrêmes est de : 40,1 − 16,3 = 23,8 points.
+
+Les quatre catégories suivent encore une progression parfaitement ordonnée : 16,3 -> 20,7 -> 28,4 -> 40,1 %
 
 C'est très cohérent :
 **lorsque la situation financière déclarée est meilleure, la santé perçue est plus souvent déclarée bonne ou très bonne ; simultanément, les limitations d'activité sont moins fréquentes ; et dans les deux cas, l'écart entre les extrêmes est important.**
@@ -181,8 +197,6 @@ Les trois indicateurs racontent une histoire cohérente :
 - les limitations d'activité augmentent ;
 - le diabète déclaré augmente également.
 
-Attention !!!! Mais il faut bien distinguer les associations observées d'une relation causale. Par exemple, le diabète peut lui-même avoir des conséquences économiques ou professionnelles : on ne peut donc pas dire simplement « les difficultés financières provoquent le diabète ».
-
 # Les gradients sociaux sont-ils similaires selon les différents indicateurs de santé ?
 
 ## Diabète déclaré VS diplôme
@@ -208,7 +222,8 @@ diabete |>
 
 L'écart entre les deux extrêmes atteint 8,2 points : 11,5 % contre 3,3 %.
 Et surtout, on retrouve exactement la même logique que pour la santé perçue :
-niveau de diplôme plus élevé → indicateur de santé plus favorable, dans ces données.
+niveau de diplôme plus élevé -> indicateur de santé plus favorable.
+
 Mais il y a une nuance importante : pour le diabète, contrairement à la santé perçue, l'indicateur est une prévalence déclarée. On doit donc éviter d'interpréter directement ce gradient comme un effet du diplôme.
 
 ## Limitation d'activité VS diplôme
@@ -230,10 +245,8 @@ sante |>
   )
 ```
 
-L'écart entre les deux extrêmes est de 14 points :
-33,4 % − 19,4 % = 14,0 points.
-Et, encore une fois, on retrouve un gradient ordonné :
-19,4 → 22,5 → 33,4 %
+L'écart entre les deux extrêmes est de 14 points : 33,4 % − 19,4 %
+On retrouve un gradient ordonné : 19,4 -> 22,5 -> 33,4 %
 
 Les orientations sont remarquablement cohérentes :
 **Santé perçue** : les groupes socialement plus favorisés déclarent plus souvent une bonne santé.
@@ -259,7 +272,7 @@ sante |>
     ic_sup
   )
 ```
-cadre vs ouvrier : Limitation d'activité : 19,9 % vs 30,9 % → 11,0 points
+cadre vs ouvrier : Limitation d'activité : 19,9 % vs 30,9 % -> 11,0 points
 
 ## Diabète déclaré VS PCS
 
@@ -282,49 +295,20 @@ diabete |>
     ic_sup
   )
 ```
-cadres vs ouvriers : Diabète : 4,5 % vs 11,0 % → 6,5 points
+cadres vs ouvriers : Diabète : 4,5 % vs 11,0 % -> 6,5 points
 
 **Les trois dimensions de la position sociale disponibles dans le Baromètre sont associées à des écarts importants de santé, et ces écarts se retrouvent sur plusieurs indicateurs.**
 
 # Est-ce que ces inégalités sociales sont les mêmes partout sur le territoire ?
 
-Prenons la situation financière, puisqu'elle présente les écarts les plus importants.
-On pourrait regarder :
-Pour chaque région, quelle est la santé perçue des personnes déclarant une situation financière difficile ?
-Puis comparer avec les personnes « à l'aise ».
-Mais il faut vérifier que le fichier contient bien les croisements région × situation financière.
-
-```{r}
-sante |>
-  filter(
-    Indicateur == "Santé perçue bonne ou très bonne",
-    Sexe == "Tous",
-    Classe.d.âge == "Tous"
-  ) |>
-  count(
-    `Nouvelles.régions`,
-    Situation.financière.perçue
-  )
-```
-
-Donc la structure des données est plutôt :
-Région → indicateurs de santé globaux
-et séparément :
-France entière → indicateurs de santé selon la situation sociale
-On ne peut donc pas calculer proprement, avec ces données, par exemple :
-« En Bretagne, l'écart de santé entre les personnes à l'aise financièrement et celles en difficulté est de X points. »
-Ce serait une information que le fichier ne contient pas.
 
 # 3ème dimension : sexe / âge
 
-le fichier permet de faire quelque chose d'intéressant :
-- Sexe : On peut comparer Hommes vs Femmes
+le fichier permet de comparer Hommes vs Femmes et âge (classes)
 pour :
   santé perçue
   limitation d'activité
   éventuellement diabète si disponible.
-- Âge :On peut regarder l'évolution 18-29 → 30-39 → ... → 70-79
-pour les mêmes indicateurs.
 
 Ça pourrait nous donner une structure à 3 facettes :
 
@@ -364,8 +348,8 @@ sante |>
   )
 ```
 Soit 32 points d'écart entre les 18–29 ans et les 70–79 ans. (Sexe = Tous)
-Hommes : 70,3 %
-Femmes : 65,8 %
+- Hommes : 70,3 %
+- Femmes : 65,8 %
 Soit 4,5 points d'écart entre les hommes et les femmes (Âge = Tous).
 
 ```{r}
@@ -390,7 +374,7 @@ Soit 2.7 points d'écart entre les hommes et les femmes (Âge = Tous).
 
 **Donc l'âge est clairement une dimension structurante.**
 **Donc, descriptivement, le sexe présente des différences, mais les écarts sont nettement moins importants que ceux observés selon l'âge ou la position sociale.**
-Je ne dirais cependant pas que le sexe est « moins important » au sens causal : on compare ici simplement les amplitudes observées dans ces données.
+
 
 ## Conclusion : dimensions d'inégalités
 
@@ -427,29 +411,29 @@ diabete |>
 ```
 
 L'écart entre les 18–29 ans et les 70–79 ans est donc de 18,8 points. (Sexe = Tous)
-Et contrairement à la santé perçue, où la progression était assez régulière, on voit ici une accélération particulièrement marquée à partir de 50 ans :
-2,8 % → 8,1 % → 13,6 % → 19,5 %
+Et contrairement à la santé perçue, où la progression était assez régulière, on voit ici une accélération particulièrement marquée à partir de 50 ans : 2,8 % -> 8,1 % -> 13,6 % -> 19,5 %
 
 Globalement :
-Hommes : 8,6 %
-Femmes : 5,8 %
+- Hommes : 8,6 %
+- Femmes : 5,8 %
 Soit 2,8 points d'écart.
+
 Mais pour les classes d'âge, il faut regarder uniquement les estimations diffusables.
 Chez les hommes :
-30–39 : 1,2 %
-40–49 : 3,4 %
-50–59 : 9,7 %
-60–69 : 16,2 %
-70–79 : 26,0 %
+- 30–39 : 1,2 %
+- 40–49 : 3,4 %
+- 50–59 : 9,7 %
+- 60–69 : 16,2 %
+- 70–79 : 26,0 %
 Chez les femmes :
-30–39 : 1,6 %
-40–49 : 2,2 %
-50–59 : 6,6 %
-60–69 : 11,3 %
-70–79 : 14,0 %
+- 30–39 : 1,6 %
+- 40–49 : 2,2 %
+- 50–59 : 6,6 %
+- 60–69 : 11,3 %
+- 70–79 : 14,0 %
+
 Les deux catégories 18–29 ans sont -30, donc on ne doit surtout pas les transformer en 0 ni les utiliser pour calculer un écart.
-Le -30 signifie :
-effectif de répondants inférieur au seuil de diffusion de 30 → estimation non diffusée.
+Le -30 signifie : effectif de répondants inférieur au seuil de diffusion de 30 -> estimation non diffusée.
 
 # -30 en valeur manquante
 

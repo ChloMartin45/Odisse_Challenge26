@@ -1,7 +1,11 @@
 ---
-title: "Exploration données"
+title: "Exploration données — prise en main des données et de l’APL"
 format: html
 ---
+
+**Note de lecture**
+
+Ce notebook retrace une étape exploratoire du projet. Il contient des tests, vérifications et pistes qui ont servi à orienter l'analyse finale. Certains périmètres, indicateurs ou résultats ont ensuite été ajustés lors de la préparation des données. Les scripts du dossier `R/` et l'application Dash constituent la version finale de la chaîne d'analyse.
 
 ```{r, echo=FALSE, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,
@@ -27,24 +31,32 @@ library(sf)
 # Importation données
 
 ```{r}
-sante <-read.csv("~/projects/Odisse_Challenge26/data/raw/sante_generale_indicateurs_barometre_2024.csv",
-                 header = TRUE,
-                 sep = ",")
-diabete <- read.csv("~/projects/Odisse_Challenge26/data/raw/diabete-indicateurs-du-barometre-2024.csv",
-                 header = TRUE,
-                 sep = ",")
-view(diabete)
-view(sante)
+# Chemin vers les données brutes depuis le dossier exploration/
+raw_dir <- file.path("..", "data", "raw")
+```
+
+
+```{r}
+sante <- read.csv(
+  file.path(raw_dir, "sante_generale_indicateurs_barometre_2024.csv"),
+  header = TRUE,
+  sep = ","
+)
+
+diabete <- read.csv(
+  file.path(raw_dir, "diabete-indicateurs-du-barometre-2024.csv"),
+  header = TRUE,
+  sep = ","
+)
 
 # sas <- read.csv(
 #  "couverture-sas-infra-annuelle.csv",
 #  header = TRUE,
 #  sep = ";"
 #)
-#view(sas)
 
 apl <- read_excel(
-  "~/projects/Odisse_Challenge26/data/raw/apl.xlsx",
+  file.path(raw_dir, "apl.xlsx"),
   sheet = "Data",
   skip = 4
 )
@@ -63,14 +75,14 @@ apl <- apl %>%
     apl = as.numeric(apl)
   ) %>%
   filter(!is.na(apl))
-
-view(apl)
 ```
 
 ```{r}
-population_2023 <-read.csv("~/projects/Odisse_Challenge26/data/raw/donnees_communes.csv",
-                 header = TRUE,
-                 sep = ";")
+population_2023 <- read.csv(
+  file.path(raw_dir, "donnees_communes.csv"),
+  header = TRUE,
+  sep = ";"
+)
 
 population_2023 <- population_2023 %>%
   rename(
@@ -83,8 +95,6 @@ population_2023 <- population_2023 %>%
     commune = as.character(commune),
     population_totale = as.numeric(population_totale)
   )
-
-view(population_2023)
 ```
 
 # Explorations
@@ -399,8 +409,6 @@ apl_population <- apl %>%
     population_2023,
     by = "code_commune"
   )
-
-view(apl_population)
 ```
 
 ## Vérifications
@@ -635,15 +643,17 @@ apl_population |>
 ```{r}
 url <- "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson"
 
-download.file(
-  url,
-  destfile = "~/projects/Odisse_Challenge26/data/raw/communes.geojson",
-  mode = "wb"
-)
-```
+geojson_path <- file.path(raw_dir, "communes.geojson")
 
-```{r}
-communes <- st_read("~/projects/Odisse_Challenge26/data/raw/communes.geojson")
+if (!file.exists(geojson_path)) {
+  download.file(
+    url,
+    destfile = geojson_path,
+    mode = "wb"
+  )
+}
+
+communes <- st_read(geojson_path)
 ```
 
 ```{r}
@@ -872,9 +882,11 @@ apl_region
 ```
 La moyenne simple répond à :
 « Quelle est l'APL de la commune moyenne de cette région ? »
-**Pondérée avec la population c'est mieux**
+
 La moyenne pondérée répond plutôt à :
 « Quelle est l'APL moyenne en donnant davantage de poids aux communes où vivent davantage d'habitants ? »
+
+**Pondérée avec la population c'est mieux**
 
 ```{r}
 sante_region <- sante |>
@@ -951,8 +963,8 @@ analyse_region |>
   arrange(desc(ecart_pond_moy))
 ```
 
-APL moyenne → « Quelle est l'accessibilité moyenne des communes de la région ? »
-APL pondérée → « Quelle est l'accessibilité moyenne à laquelle est exposée la population de la région ? »
+APL moyenne : « Quelle est l'accessibilité moyenne des communes de la région ? »
+APL pondérée : « Quelle est l'accessibilité moyenne à laquelle est exposée la population de la région ? »
 
 # On veut savoir s'il existe une association visible entre APL régionale et santé perçue.
 
@@ -979,16 +991,16 @@ ggplot(analyse_region, aes(
 un niveau d'accessibilité comparable ne s'accompagne pas nécessairement du même niveau de santé perçue.
 La Réunion est un cas particulièrement intéressant
 Elle combine :
-APL très élevée : 5,46
-Santé perçue relativement faible : 56,2 %
+- APL très élevée : 5,46
+- Santé perçue relativement faible : 56,2 %
 
 La Guyane constitue un autre profil
 Avec :
-APL : 1,91
-Santé perçue : 61,8 %
+- APL : 1,91
+- Santé perçue : 61,8 %
 elle est effectivement isolée sur l'axe de l'APL, mais son niveau de santé perçue n'est pas aussi bas que celui des Antilles ou de La Réunion.
 
-Tes données d'APL sont de 2023, tandis que les indicateurs de santé sont de 2024. Il faudra donc présenter ça comme une mise en regard exploratoire de données régionales sur deux années, et non comme une relation causale ou temporelle.
+Les données d'APL sont de 2023, tandis que les indicateurs de santé sont de 2024 : mise en regard exploratoire de données régionales sur deux années, et non comme une relation causale ou temporelle.
 
 ```{r}
 ggplot(analyse_region, aes(
@@ -1012,13 +1024,13 @@ ggplot(analyse_region, aes(
 il n'y a pas de relation visuelle évidente entre l'APL et les limitations d'activité.
 
 Quelques profils ressortent :
-Corse, Martinique et Guadeloupe sont parmi les régions avec les niveaux les plus élevés de limitations d'activité, autour de 30 %.
-Île-de-France est à l'extrémité basse, avec environ 22 %.
-Bretagne et Pays de la Loire sont également relativement bas, autour de 24 %.
-Nouvelle-Aquitaine, Occitanie et PACA sont plutôt autour de 28 %.
-Guyane et La Réunion ont des niveaux proches, autour de 26–27 %, mais avec des niveaux d'APL très différents : environ 1,9 pour la Guyane contre 5,5 pour La Réunion.
+- Corse, Martinique et Guadeloupe sont parmi les régions avec les niveaux les plus élevés de limitations d'activité, autour de 30 %.
+- Île-de-France est à l'extrémité basse, avec environ 22 %.
+- Bretagne et Pays de la Loire sont également relativement bas, autour de 24 %.
+- Nouvelle-Aquitaine, Occitanie et PACA sont plutôt autour de 28 %.
+- Guyane et La Réunion ont des niveaux proches, autour de 26–27 %, mais avec des niveaux d'APL très différents : environ 1,9 pour la Guyane contre 5,5 pour La Réunion.
 
-Et ce dernier exemple est particulièrement parlant : deux territoires peuvent avoir une proportion assez similaire de personnes déclarant une limitation d'activité tout en ayant des niveaux d'accessibilité médicale très différents.
+Et ce dernier exemple est particulièrement parlant : **deux territoires peuvent avoir une proportion assez similaire de personnes déclarant une limitation d'activité tout en ayant des niveaux d'accessibilité médicale très différents.**
 
 **l'APL ne suffit pas à expliquer les disparités régionales de santé.**
 
@@ -1027,6 +1039,7 @@ Et ce dernier exemple est particulièrement parlant : deux territoires peuvent a
 # On cherche à savoir si le diabète apporte une troisième dimension régionale à notre analyse.
 
 Quel est le taux de diabète déclaré dans chaque région, sans sélectionner un groupe particulier de population ?
+
 ```{r}
 #On va isoler le diabète déclaré pour l'ensemble de la population
 diabete_region <- diabete |>
@@ -1050,9 +1063,10 @@ diabete_region <- diabete |>
 ```
 
 La Réunion possède l'APL régionale la plus élevée (5,46) mais présente simultanément :
-seulement 56,2 % de santé perçue bonne ou très bonne ;
-27,0 % de limitation d'activité ;
-12,6 % de diabète déclaré.
+- seulement 56,2 % de santé perçue bonne ou très bonne ;
+- 27,0 % de limitation d'activité ;
+- 12,6 % de diabète déclaré.
+
 Cela montre bien pourquoi il serait réducteur de faire de l'APL le seul facteur explicatif.
 
 ```{r}
@@ -1081,10 +1095,29 @@ analyse_region <- analyse_region |>
   )
 ```
 
-Bretagne / Pays de la Loire / Île-de-France : santé perçue autour de 71 %, limitations relativement faibles et diabète autour de 5–7 %.
-Guadeloupe / Martinique : APL autour de 3,5, mais santé perçue autour de 52–53 %, limitations autour de 30 % et diabète 12–13,5 %.
-La Réunion : APL 5,46, donc très élevée, mais santé perçue 56,2 %, limitations 27 % et diabète 12,6 %.
-Guyane : APL très faible (1,91), mais profil de santé différent : santé perçue 61,8 %, limitations 26,4 %, diabète 6,9 %.
+- Bretagne / Pays de la Loire / Île-de-France : 
+  - santé perçue autour de 71 %, 
+  - limitations relativement faibles 
+  - et diabète autour de 5–7 %.
+  
+- Guadeloupe / Martinique : 
+  - APL autour de 3,5, 
+  - mais santé perçue autour de 52–53 %, 
+  - limitations autour de 30 % 
+  - et diabète 12–13,5 %.
+  
+- La Réunion : 
+  - APL 5,46, donc très élevée, 
+  - mais santé perçue 56,2 %, 
+  - limitations 27 % 
+  - et diabète 12,6 %.
+
+- Guyane : 
+  - APL très faible (1,91), 
+  - mais profil de santé différent : 
+    - santé perçue 61,8 %, 
+    - limitations 26,4 %, 
+    - diabète 6,9 %.
 
 **Les différences régionales de santé ne semblent pas se résumer au seul niveau d'accessibilité aux médecins généralistes.**
 
@@ -1118,20 +1151,23 @@ cor(
 pour le diabète :
 C'est la relation la plus élevée des trois, mais elle reste modérée/faible et surtout ne permet absolument pas de conclure que l'APL augmente le diabète.
 
-**APL élevée ≠ systématiquement meilleure santé.**
+**APL élevée n'est pas égal systématiquement meilleure santé.**
+
 La Réunion est probablement l'exemple le plus parlant : elle possède l'APL la plus élevée (5,46) mais une santé perçue basse (56,2 %) et un diabète déclaré élevé (12,6 %).
+
 À l'inverse, l'Île-de-France a une APL de 3,26, mais une santé perçue de 71 % et un diabète de 6 %.
 
 **Mais attention à un point méthodologique important**
-Nous n'avons que **17 observations**.
-Donc je ne présenterais surtout pas ces corrélations comme des résultats statistiques définitifs. Elles sont utiles pour explorer les données et guider la dataviz, mais l'échantillon régional est petit et les territoires sont très différents les uns des autres.
-Et surtout, il y a une **différence de temporalité** :
-APL → 2023
-santé/diabète → 2024
-**Donc notre analyse est une mise en regard exploratoire de données régionales, pas une étude causale.**
+
+**17 observations** : ces corrélations ne sont pas des résultats statistiques définitifs. 
+
+Et surtout, il y a une **différence de temporalité** : APL (2023) et santé/diabète (2024)
+
+**Donc l'analyse est une mise en regard exploratoire de données régionales, pas une étude causale.**
 
 on peut poser :
 « Dans quelle mesure les disparités territoriales d'accès aux médecins généralistes se retrouvent-elles dans les disparités régionales de santé ? »
+
 Et notre résultat exploratoire serait :
 Les données montrent des profils territoriaux contrastés et aucune relation linéaire forte entre l'APL et les indicateurs de santé étudiés. Certains territoires présentent notamment des niveaux d'APL élevés tout en affichant des indicateurs de santé moins favorables.
 

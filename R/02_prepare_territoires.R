@@ -2,7 +2,6 @@
 # Construction de la base communale des indicateurs territoriaux
 
 # Packages
-
 library(tidyverse)
 library(readxl)
 
