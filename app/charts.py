@@ -281,6 +281,7 @@ def create_region_profile(regions, region_name):
     # ========================================================
 
     fig.update_layout(
+        dragmode=False,
 
         font=dict(
             family="Outfit, Arial, sans-serif",
@@ -319,7 +320,7 @@ def create_region_profile(regions, region_name):
     # ========================================================
 
     fig.update_xaxes(
-
+        fixedrange=True,
         range=[
             -limite,
             limite,
@@ -349,6 +350,7 @@ def create_region_profile(regions, region_name):
     # ========================================================
 
     fig.update_yaxes(
+        fixedrange=True,
 
         categoryorder="array",
 
@@ -580,7 +582,7 @@ def create_social_chart(data, variable):
     # ========================================================
 
     fig.update_layout(
-
+        dragmode=False,
         title=dict(
             text=config["titre"],
 
@@ -658,6 +660,9 @@ def create_social_chart(data, variable):
             ),
 
             bgcolor="rgba(0,0,0,0)",
+            
+            itemclick=False,
+            itemdoubleclick=False,
         ),
 
 
@@ -670,7 +675,7 @@ def create_social_chart(data, variable):
     # ========================================================
 
     fig.update_xaxes(
-
+    fixedrange=True,
     title=dict(
         text=config["axe"],
         font=dict(
@@ -711,6 +716,7 @@ def create_social_chart(data, variable):
     # ========================================================
 
     fig.update_yaxes(
+        fixedrange=True,
         title=dict(
             text="Part de la population (%)",
             font=dict(
@@ -927,7 +933,7 @@ def create_fdep_health_chart(regions, relations, indicateur):
     # --------------------------------------------------------
 
     fig.update_layout(
-
+        dragmode=False,
         title=dict(
             text=config["titre"],
             x=0,
@@ -975,6 +981,7 @@ def create_fdep_health_chart(regions, relations, indicateur):
     # --------------------------------------------------------
 
     fig.update_xaxes(
+        fixedrange=True,
         title=dict(
             text="Indice FDep",
             standoff=65,
@@ -1011,6 +1018,7 @@ def create_fdep_health_chart(regions, relations, indicateur):
     # --------------------------------------------------------
 
     fig.update_yaxes(
+        fixedrange=True,
         title=dict(
             text="Écart à la moyenne régionale (points de %)",
 
@@ -1376,6 +1384,7 @@ def create_apl_comparison_chart(relations):
     # ========================================================
 
     fig.update_layout(
+        dragmode=False,
         title=None,
 
         font=dict(
@@ -1432,6 +1441,7 @@ def create_apl_comparison_chart(relations):
     # ========================================================
 
     fig.update_xaxes(
+        fixedrange=True,
         title=dict(
             text="Coefficient de corrélation avec l'APL (r)",
             font=dict(
@@ -1471,6 +1481,7 @@ def create_apl_comparison_chart(relations):
     # ========================================================
 
     fig.update_yaxes(
+        fixedrange=True,
         title=None,
         
         categoryorder="array",

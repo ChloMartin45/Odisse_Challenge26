@@ -13,6 +13,8 @@ from charts import (
 GRAPH_CONFIG = {
     "displayModeBar": False,
     "responsive": True,
+    "scrollZoom": False,
+    "doubleClick": False,
 }
 
 MAP_CONFIG = {
