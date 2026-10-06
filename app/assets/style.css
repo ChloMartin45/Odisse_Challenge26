@@ -342,6 +342,13 @@ p {
         650 !important;
 }
 
+/* ==========================================================
+   Navigation mobile
+   ========================================================== */
+
+   .mobile-nav {
+    display: none;
+}
 
 /* ==========================================================
    6. BLOCS DE STORYTELLING
@@ -1005,8 +1012,8 @@ p {
     display: grid;
 
     grid-template-columns:
-        minmax(0, 1.45fr)
-        minmax(280px, 0.55fr);
+        minmax(0, 1fr)
+        clamp(300px, 31%, 350px);
 
     gap: 18px;
 
@@ -1047,12 +1054,12 @@ p {
     gap: var(--dashboard-gap);
 
     width: 100%;
-    height: var(--dashboard-height);
 
     min-width: 0;
-    min-height: 0;
-}
+    min-height: var(--dashboard-height);
 
+    height: auto;
+}
 
 /* ----------------------------------------------------------
    Cartes latérales
@@ -1991,34 +1998,28 @@ p {
    Explorateur régional
    ========================================================== */
 
-.profiles-explorer {
+   .profiles-explorer {
     display: grid;
 
     grid-template-columns:
-        minmax(0, 1.15fr)
-        minmax(390px, 0.85fr);
+        minmax(0, 1fr)
+        clamp(360px, 36%, 420px);
 
     gap: 22px;
 
-    /* Le dashboard s'adapte à la hauteur disponible */
-    height:
-        clamp(
-            520px,
-            calc(100vh - 190px),
-            610px
-        );
+    height: auto;
 
     margin:
         26px
         0
         38px;
 
-    align-items: stretch;
+    align-items: start;
 }
 
 .profiles-explorer-map {
     min-width: 0;
-    height: 100%;
+    height: 570px;
 
     background:
         var(--surface);
@@ -2039,25 +2040,31 @@ p {
 }
 
 
-.profiles-map,
-.region-profile-chart {
+.profiles-map {
     width: 100%;
     height: 100%;
     min-height: 0;
 }
 
+.region-profile-chart {
+    width: 100%;
+    height: 300px;
+    min-height: 300px;
+}
+
 
 .profiles-map .js-plotly-plot,
 .profiles-map .plot-container,
-.profiles-map .svg-container,
+.profiles-map .svg-container {
+    width: 100% !important;
+    height: 100% !important;
+}
+
 .region-profile-chart .js-plotly-plot,
 .region-profile-chart .plot-container,
 .region-profile-chart .svg-container {
-    width:
-        100% !important;
-
-    height:
-        100% !important;
+    width: 100% !important;
+    height: 300px !important;
 }
 
 
@@ -2066,21 +2073,15 @@ p {
    ========================================================== */
 
 .profiles-explorer-details {
-    display: grid;
+    display: flex;
 
-    /*
-       La fiche prend sa hauteur naturelle.
-       Le profil prend tout l'espace restant.
-    */
-    grid-template-rows:
-        auto
-        minmax(0, 1fr);
+    flex-direction: column;
 
     gap: 14px;
 
-    height: 100%;
+    width: 100%;
+
     min-width: 0;
-    min-height: 0;
 }
 
 /* ==========================================================
@@ -2448,28 +2449,24 @@ p {
    ========================================================== */
 
 #region-profile-container {
-    min-height: 0;
-    height: 100%;
+    width: 100%;
+    height: auto;
 }
 
 
 .region-profile-card {
-    display:
-        grid;
+    display: grid;
 
     grid-template-rows:
         auto
         auto
-        minmax(0, 1fr);
+        300px;
 
-    height:
-        100%;
+    width: 100%;
 
-    min-height:
-        0;
+    height: auto;
 
-    overflow:
-        hidden;
+    overflow: hidden;
 
     box-shadow:
         var(--shadow-soft);
@@ -2761,6 +2758,141 @@ a:hover {
    16. RESPONSIVE
    ========================================================== */
 
+/* ==========================================================
+   Explorateur régional — affichage ordinateur
+   ========================================================== */
+
+   @media (min-width: 981px) {
+
+    /*
+       L'explorateur prend la hauteur nécessaire au contenu.
+       La carte est centrée verticalement dans sa colonne.
+    */
+
+    .profiles-explorer {
+        height: auto;
+
+        align-items: center;
+    }
+
+
+    /*
+       Carte volontairement un peu plus compacte.
+    */
+
+    .profiles-explorer-map {
+        height: 550px;
+
+        align-self: center;
+    }
+
+
+    /*
+       La colonne droite suit la hauteur réelle
+       de la fiche et du graphique.
+    */
+
+    .profiles-explorer-details {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 14px;
+
+        width: 100%;
+
+        height: auto;
+
+        min-width: 0;
+    }
+
+
+    #region-profile-container {
+        width: 100%;
+
+        height: auto;
+    }
+
+
+    /*
+       Le graphique garde sa hauteur prévue.
+       Il n'est plus autorisé à être compressé.
+    */
+
+    .region-profile-card {
+        grid-template-rows:
+            auto
+            auto
+            300px;
+
+        width: 100%;
+
+        height: auto;
+    }
+
+
+    .region-profile-chart {
+        width: 100%;
+
+        height: 300px;
+
+        min-height: 300px;
+    }
+
+
+    .region-profile-chart .js-plotly-plot,
+    .region-profile-chart .plot-container,
+    .region-profile-chart .svg-container {
+        width: 100% !important;
+
+        height: 300px !important;
+    }
+
+
+    /*
+       Mise en page légèrement compacte sur ordinateur.
+    */
+
+    .region-header {
+        padding:
+            14px
+            20px
+            12px;
+    }
+
+
+    .region-metrics-grid {
+        padding:
+            12px
+            20px
+            13px;
+    }
+
+
+    .region-metric {
+        padding:
+            6px
+            0;
+    }
+
+
+    .region-profile-heading {
+        padding:
+            11px
+            18px
+            0;
+    }
+
+
+    .region-profile-note {
+        margin:
+            4px
+            18px
+            0;
+
+        line-height: 1.35;
+    }
+}
 
 /* ----------------------------------------------------------
    <= 1050 px
@@ -2796,6 +2928,88 @@ a:hover {
     }
 }
 
+/* ----------------------------------------------------------
+   <= 980 px
+   Dashboard tablette / fenêtre réduite
+   ---------------------------------------------------------- */
+
+@media (max-width: 980px) {
+
+    .dashboard-body {
+        grid-template-columns: 1fr;
+    }
+
+    /*
+        Le graphique conserve sa hauteur fixe.
+    */
+
+    .dashboard-visual,
+    .dashboard-chart {
+        height: var(--dashboard-height);
+    }
+
+    /*
+        Lecture et repères passent sous le graphique,
+        mais restent côte à côte tant qu'il y a assez de place.
+    */
+
+    .dashboard-side {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 14px;
+
+        min-height: 0;
+        height: auto;
+    }
+
+    .dashboard-reading-block,
+    .dashboard-info-block {
+        height: auto;
+    }
+
+
+    .profiles-explorer {
+        grid-template-columns:
+            1fr;
+
+        height:
+            auto;
+    }
+
+
+    .profiles-explorer-map {
+        height:
+            520px;
+    }
+
+
+    .profiles-explorer-details {
+        display:
+            flex;
+
+        flex-direction:
+            column;
+
+        height:
+            auto;
+    }
+
+
+    .region-profile-card {
+        height:
+            auto;
+    }
+
+
+    .region-profile-chart {
+        width: 100%;
+        height: 300px;
+        min-height: 300px;
+    }
+}
 
 /* ----------------------------------------------------------
    <= 900 px
@@ -2813,34 +3027,6 @@ a:hover {
         padding-top:
             48px;
     }
-
-
-    .dashboard-body {
-        grid-template-columns:
-            1fr;
-    }
-
-
-    .dashboard-visual,
-    .dashboard-chart {
-        height:
-            460px;
-    }
-
-
-    .dashboard-side {
-        height:
-            auto;
-    }
-
-
-    .dashboard-info-block {
-        flex:
-            0
-            0
-            auto;
-    }
-
 
     .steps,
     .indicator-grid,
@@ -2879,45 +3065,6 @@ a:hover {
         grid-template-columns:
             1fr;
     }
-
-
-    .profiles-explorer {
-        grid-template-columns:
-            1fr;
-
-        height:
-            auto;
-    }
-
-
-    .profiles-explorer-map {
-        height:
-            520px;
-    }
-
-
-    .profiles-explorer-details {
-        display:
-            flex;
-
-        flex-direction:
-            column;
-
-        height:
-            auto;
-    }
-
-
-    .region-profile-card {
-        height:
-            auto;
-    }
-
-
-    .region-profile-chart {
-        height:
-            300px;
-    }
 }
 
 
@@ -2930,6 +3077,14 @@ a:hover {
     .profiles-summary-section .profiles-grid {
         grid-template-columns:
             1fr;
+    }
+
+    .dashboard-side {
+        grid-template-columns: 1fr;
+    }
+    
+    .profiles-explorer-map {
+        height: 460px;
     }
 }
 
@@ -2965,9 +3120,307 @@ a:hover {
             22px;
     }
 
-
     .selector {
+        display: flex;
+    
+        width: 100%;
+    
+        border-radius:
+            var(--radius-medium);
+    }
+    
+    .selector label {
+        flex:
+            1
+            1
+            100%;
+    
+        padding:
+            10px
+            12px;
+    }
+
+    .dashboard-visual {
+        overflow-x: auto;
+    
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .dashboard-chart {
+        min-width: 520px;
+    
+        height: var(--dashboard-height);
+    }
+
+    .region-metrics-grid {
+        grid-template-columns:
+            1fr;
+    
+        gap: 0;
+    
+        padding:
+            16px
+            20px;
+    }
+    
+    .region-metrics-group
+    + .region-metrics-group {
+        margin-top: 12px;
+    
+        padding-top: 14px;
+        padding-left: 0;
+    
+        border-top:
+            1px solid var(--border);
+    
+        border-left:
+            0;
+    }
+
+    .region-header {
+        flex-direction:
+            column;
+    
+        gap: 12px;
+    
+        padding:
+            17px
+            20px;
+    }
+    
+    .region-population {
+        min-width: 0;
+    
+        text-align:
+            left;
+    }
+
+    .profiles-explorer-map {
+        height: 430px;
+    }
+
+    /* ==========================================================
+    Navigation mobile
+    ========================================================== */
+
+    .mobile-nav {
+        display: block;
+
+        position: sticky;
+        top: 0;
+
+        z-index: 200;
+
+        padding:
+            8px
+            12px;
+
+        background:
+            rgba(248, 250, 253, 0.96);
+
+        backdrop-filter:
+            blur(12px);
+
+        border-bottom:
+            1px solid var(--border);
+    }
+
+
+    /* ----------------------------------------------------------
+    Bouton principal
+    ---------------------------------------------------------- */
+
+    .mobile-nav > summary {
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        min-height: 46px;
+
+        padding:
+            9px
+            12px;
+
+        background:
+            var(--surface);
+
+        border:
+            1px solid var(--border);
+
         border-radius:
             var(--radius-small);
+
+        color:
+            var(--navy);
+
+        cursor: pointer;
+
+        box-shadow:
+            var(--shadow-soft);
+
+        list-style: none;
+    }
+
+
+    .mobile-nav > summary::-webkit-details-marker {
+        display: none;
+    }
+
+
+    .mobile-nav > summary::marker {
+        display: none;
+    }
+
+
+    /* ----------------------------------------------------------
+    Contenu du bouton
+    ---------------------------------------------------------- */
+
+    .mobile-nav-icon {
+        color:
+            var(--raspberry);
+
+        font-size:
+            1rem;
+
+        line-height:
+            1;
+    }
+
+
+    .mobile-nav-current {
+        flex: 1;
+
+        min-width: 0;
+
+        font-size:
+            0.88rem;
+
+        font-weight:
+            650;
+
+        white-space:
+            nowrap;
+
+        overflow:
+            hidden;
+
+        text-overflow:
+            ellipsis;
+    }
+
+
+    .mobile-nav-chevron {
+        color:
+            var(--text-muted);
+
+        font-size:
+            0.9rem;
+
+        transition:
+            transform var(--transition);
+    }
+
+
+    .mobile-nav[open] .mobile-nav-chevron {
+        transform:
+            rotate(180deg);
+    }
+
+
+    /* ----------------------------------------------------------
+    Menu déroulant
+    ---------------------------------------------------------- */
+
+    .mobile-nav-menu {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 4px;
+
+        margin-top: 7px;
+
+        padding:
+            6px;
+
+        background:
+            var(--surface);
+
+        border:
+            1px solid var(--border);
+
+        border-radius:
+            var(--radius-medium);
+
+        box-shadow:
+            0 10px 30px rgba(0, 43, 89, 0.10);
+    }
+
+
+    /* ----------------------------------------------------------
+    Liens du menu
+    ---------------------------------------------------------- */
+
+    .mobile-nav-item {
+        width: 100%;
+
+        padding:
+            11px
+            12px;
+
+        background:
+            transparent;
+
+        border:
+            0;
+
+        border-radius:
+            var(--radius-small);
+
+        color:
+            var(--text);
+
+        font:
+            inherit;
+
+        font-size:
+            0.86rem;
+
+        font-weight:
+            550;
+
+        line-height:
+            1.3;
+
+        text-align:
+            left;
+
+        cursor:
+            pointer;
+
+        transition:
+            background var(--transition),
+            color var(--transition);
+    }
+
+
+    .mobile-nav-item:hover {
+        background:
+            rgba(150, 187, 255, 0.10);
+
+        color:
+            var(--navy);
+    }
+
+    /*
+    Les onglets Dash restent fonctionnels,
+    mais leur barre de navigation est masquée.
+    */
+
+    .tabs-container {
+        display: none !important;
     }
 }

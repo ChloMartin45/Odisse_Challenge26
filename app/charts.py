@@ -388,7 +388,8 @@ def create_social_chart(data, variable):
             ],
 
             "titre": (
-                "La santé se dégrade avec les difficultés financières"
+                "La santé se dégrade avec "
+                "les difficultés financières"
             ),
 
             "axe": "Situation financière perçue",
@@ -405,7 +406,8 @@ def create_social_chart(data, variable):
             ],
 
             "titre": (
-                "Le niveau de diplôme s’accompagne d’écarts nets de santé"
+                "Le niveau de diplôme s’accompagne " 
+                "d’écarts nets de santé"
             ),
 
             "axe": "Niveau de diplôme",
@@ -424,7 +426,8 @@ def create_social_chart(data, variable):
             ],
 
             "titre": (
-                "Des écarts existent entre catégories, sans gradient social continu"
+                "Des écarts existent entre catégories, " 
+                "sans gradient social continu"
             ),
 
             "axe": "Catégorie socioprofessionnelle",
@@ -587,7 +590,7 @@ def create_social_chart(data, variable):
 
             font=dict(
                 family="Outfit, Arial, sans-serif",
-                size=20,
+                size=18,
                 color=COLOR_NAVY,
             ),
         ),
@@ -613,7 +616,7 @@ def create_social_chart(data, variable):
         margin=dict(
             l=70,
             r=30,
-            t=115,
+            t=160,
             b=145,
         ),
 
@@ -932,7 +935,7 @@ def create_fdep_health_chart(regions, relations, indicateur):
 
             font=dict(
                 family="Outfit, Arial, sans-serif",
-                size=20,
+                size=18,
                 color=COLOR_NAVY,
             ),
         ),

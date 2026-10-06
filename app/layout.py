@@ -2522,10 +2522,82 @@ def create_layout(
     return html.Div([
         
         dcc.Store(id="scroll-trigger"),
+        
+        dcc.Store(id="mobile-nav-close-trigger"),
+        # ----------------------------------------------------
+        # Navigation mobile
+        # ----------------------------------------------------
+
+        html.Details(
+            [
+                html.Summary(
+                    [
+                        html.Span(
+                            "☰",
+                            className="mobile-nav-icon",
+                            **{"aria-hidden": "true"},
+                        ),
+
+                        html.Span(
+                            "Accueil",
+                            id="mobile-nav-current",
+                            className="mobile-nav-current",
+                        ),
+
+                        html.Span(
+                            "⌄",
+                            className="mobile-nav-chevron",
+                            **{"aria-hidden": "true"},
+                        ),
+                    ]
+                ),
+
+                html.Div(
+                    [
+                        html.Button(
+                            "Accueil",
+                            id="mobile-go-accueil",
+                            className="mobile-nav-item",
+                            n_clicks=0,
+                        ),
+
+                        html.Button(
+                            "1 · Inégalités sociales",
+                            id="mobile-go-social",
+                            className="mobile-nav-item",
+                            n_clicks=0,
+                        ),
+
+                        html.Button(
+                            "2 · Territoires & soins",
+                            id="mobile-go-territoires",
+                            className="mobile-nav-item",
+                            n_clicks=0,
+                        ),
+
+                        html.Button(
+                            "3 · Profils territoriaux",
+                            id="mobile-go-profils",
+                            className="mobile-nav-item",
+                            n_clicks=0,
+                        ),
+                    ],
+                    className="mobile-nav-menu",
+                ),
+            ],
+            id="mobile-nav",
+            className="mobile-nav",
+            open=False,
+        ),
+        
+        # ----------------------------------------------------
+        # Onglets Dash + contenu de l'application
+        # ----------------------------------------------------
 
         dcc.Tabs(
             id="main-tabs",
             value="accueil",
+            mobile_breakpoint=0,
             className="tabs-container",
 
             children=[

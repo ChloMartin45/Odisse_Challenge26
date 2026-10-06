@@ -130,25 +130,91 @@ def register_callbacks(app, regions, finance, diplome, pcs, analyse_regions, rel
 
     @app.callback(
         Output("main-tabs", "value"),
+        Output("mobile-nav", "open"),
+        
         Input("go-to-social", "n_clicks"),
         Input("go-to-territoires", "n_clicks"),
         Input("go-to-profils", "n_clicks"),
+        
+        Input("mobile-go-accueil", "n_clicks"),
+        Input("mobile-go-social", "n_clicks"),
+        Input("mobile-go-territoires", "n_clicks"),
+        Input("mobile-go-profils", "n_clicks"),
+        
         prevent_initial_call=True,
     )
-    def navigate_tabs(go_social, go_territoires, go_profils):
-
-        triggered = ctx.triggered_id
+    def navigate_tabs(
+        go_social,
+        go_territoires,
+        go_profils,
+        mobile_accueil,
+        mobile_social,
+        mobile_territoires,
+        mobile_profils,
+    ):
         
-        if triggered == "go-to-social":
-            return "social"
+        navigation = {
+            "go-to-social": "social",
+            "go-to-territoires": "territoires",
+            "go-to-profils": "profils",
 
-        if triggered == "go-to-territoires":
-            return "territoires"
+            "mobile-go-accueil": "accueil",
+            "mobile-go-social": "social",
+            "mobile-go-territoires": "territoires",
+            "mobile-go-profils": "profils",
+        }
+        
+        target = navigation.get(ctx.triggered_id)
 
-        if triggered == "go-to-profils":
-            return "profils"
+        if target is None:
+            return no_update, no_update
 
-        return no_update
+        return target, False
+    
+    @app.callback(
+        Output("mobile-nav-current", "children"),
+        Input("main-tabs", "value"),
+    )
+    def update_mobile_nav_label(tab):
+
+        labels = {
+            "accueil": "Accueil",
+            "social": "1 · Inégalités sociales",
+            "territoires": "2 · Territoires & soins",
+            "profils": "3 · Profils territoriaux",
+        }
+
+        return labels.get(tab, "Navigation")
+    
+    app.clientside_callback(
+        """
+        function(accueil, social, territoires, profils) {
+
+            const ctx = dash_clientside.callback_context;
+
+            if (!ctx.triggered.length) {
+                return window.dash_clientside.no_update;
+            }
+
+            const menu = document.getElementById("mobile-nav");
+
+            if (menu) {
+                menu.removeAttribute("open");
+            }
+
+            return Date.now();
+        }
+        """,
+
+        Output("mobile-nav-close-trigger", "data"),
+
+        Input("mobile-go-accueil", "n_clicks"),
+        Input("mobile-go-social", "n_clicks"),
+        Input("mobile-go-territoires", "n_clicks"),
+        Input("mobile-go-profils", "n_clicks"),
+
+        prevent_initial_call=True,
+    )
 
     # ========================================================
     # 1. Inégalités sociales de santé
