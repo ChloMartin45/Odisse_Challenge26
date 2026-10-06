@@ -26,207 +26,288 @@ MAP_CONFIG = {
 
 def create_home_tab():
 
-    return html.Div([
+    return html.Div(
+        [
 
-        # ----------------------------------------------------
-        # Introduction
-        # ----------------------------------------------------
-
-        html.P(
-            "ODISSÉ DATAVIZ CHALLENGE 2026",
-            className="eyebrow",
-        ),
-
-        html.H1(
-            "Inégalités sociales et territoriales de santé"
-        ),
-
-        html.P(
-            "Selon notre situation sociale et notre territoire de vie, "
-            "nous ne sommes pas tous exposés aux mêmes conditions de santé. "
-            "Cette datavisualisation explore comment contexte social, "
-            "défavorisation territoriale, accessibilité aux soins et état "
-            "de santé se combinent en France.",
-            className="intro",
-        ),
-
-        # ----------------------------------------------------
-        # Problématique
-        # ----------------------------------------------------
-
-        html.Div([
+            # ----------------------------------------------------
+            # Introduction
+            # ----------------------------------------------------
 
             html.P(
-                "QUESTION DE DÉPART",
-                className="section-label",
+                "ODISSÉ DATAVIZ CHALLENGE 2026 · DÉFI 3",
+                className="eyebrow",
             ),
+
+            html.H1(
+                "La santé ne se résume pas à l’accès aux soins"
+            ),
+
+            html.P(
+                "En 2024, 68 % des adultes de 18 à 79 ans déclarent être en bonne ou très bonne "
+                "santé, tandis que 26 % déclarent être limités depuis au moins six mois dans leurs "
+                "activités habituelles à cause d’un problème de santé. Derrière ces moyennes se "
+                "cachent d’importants écarts sociaux et territoriaux. "
+                "Cette visualisation suit ces écarts depuis les groupes sociaux jusqu’aux territoires "
+                "pour comprendre comment contexte social, accessibilité aux médecins généralistes "
+                "et état de santé se combinent.",
+                className="intro",
+            ),
+            
+            html.P(
+                [
+                    "Source des chiffres d’introduction : ",
+                    html.A(
+                        "Santé publique France — Santé générale, Baromètre 2024",
+                        href=(
+                            "https://www.santepubliquefrance.fr/sites/default/files/"
+                            "rdd/document/907125_spf00006377.pdf"
+                        ),
+                        target="_blank",
+                    ),
+                    ".",
+                ],
+                className="source-note",
+            ),
+            
+            # ----------------------------------------------------
+            # Problématique
+            # ----------------------------------------------------
+
+            html.Div(
+                [
+                    html.P(
+                        "QUESTION DE DÉPART",
+                        className="section-label",
+                    ),
+
+                    html.H2(
+                        "Comment les inégalités sociales et territoriales de santé "
+                        "se combinent-elles avec l'accessibilité aux médecins généralistes pour "
+                        "caractériser différents profils régionaux en France métropolitaine ?"
+                    ),
+
+                ], 
+                className="question-block",
+            ),
+
+            # ----------------------------------------------------
+            # Parcours
+            # ----------------------------------------------------
 
             html.H2(
-                "Comment les inégalités sociales et territoriales de santé "
-                "se combinent-elles avec l'accessibilité aux soins pour "
-                "caractériser différents profils de territoires en France ?"
+                "Du constat social aux profils territoriaux"
             ),
 
-        ], className="question-block"),
-
-        # ----------------------------------------------------
-        # Parcours
-        # ----------------------------------------------------
-
-        html.H2(
-            "Du constat social aux profils territoriaux"
-        ),
-
-        html.Div([
-
-            html.Div([
-                html.P("01", className="step-number"),
-                html.H3("Inégalités sociales"),
-                html.P(
-                    "Observer comment plusieurs dimensions sociales — situation "
-                    "financière, diplôme et catégorie socioprofessionnelle — "
-                    "s'accompagnent de différences de santé."
-                ),
-            ], className="step-card"),
-
-            html.Div([
-                html.P("02", className="step-number"),
-                html.H3("Territoires & soins"),
-                html.P(
-                        "Examiner si la défavorisation des territoires et "
-                        "l'accessibilité aux médecins généralistes sont associées "
-                        "aux différences de santé observées entre régions."
+            html.Div(
+                [
+                    html.Div(
+                        [
+                            html.P("01", className="step-number"),
+                            html.H3("Inégalités sociales"),
+                            html.P(
+                                "Observer comment plusieurs dimensions sociales, notamment la situation "
+                                "financière, le diplôme et la catégorie socioprofessionnelle, "
+                                "s'accompagnent de différences de santé."
+                            ),
+                        ], 
+                        className="step-card",
                     ),
-            ], className="step-card"),
 
-            html.Div([
-                html.P("03", className="step-number"),
-                html.H3("Profils territoriaux"),
-                html.P(
-                    "Combiner six indicateurs pour faire émerger différentes "
-                    "configurations régionales et comprendre ce qui les distingue."
-                ),
-            ], className="step-card"),
+                    html.Div(
+                        [
+                            html.P("02", className="step-number"),
+                            html.H3("Territoires & soins"),
+                            html.P(
+                                    "Examiner si la défavorisation des territoires et "
+                                    "l'accessibilité aux médecins généralistes sont associées "
+                                    "aux différences de santé observées entre régions."
+                                ),
+                        ], 
+                        className="step-card",
+                    ),
 
-        ], className="steps"),
+                    html.Div(
+                        [
+                            html.P("03", className="step-number"),
+                            html.H3("Profils territoriaux"),
+                            html.P(
+                                "Combiner six indicateurs pour faire émerger différentes "
+                                "configurations régionales et comprendre ce qui les distingue."
+                            ),
+                        ], 
+                        className="step-card",
+                    ),
+                ], 
+                className="steps"
+            ),
 
-        # ----------------------------------------------------
-        # Données
-        # ----------------------------------------------------
+            # ----------------------------------------------------
+            # Détail Accueil
+            # ----------------------------------------------------
 
-        html.Div([
+            html.Details(
+                [
+                    html.Summary(
+                        "Voir les données et sources mobilisées"
+                    ),
+                    
+                    html.Div(
+                        [
+                            html.P(
+                                "Cette exploration croise plusieurs sources publiques "
+                                "portant sur la santé, la défavorisation sociale, "
+                                "l'accessibilité aux médecins généralistes et la population. "
+                                "Les données mobilisées couvrent principalement la période 2020–2024."
+                            ),
 
-            html.H2("Données mobilisées"),
+                            html.Ul(
+                                [
+                                    html.Li(
+                                        [
+                                            html.A(
+                                                "Santé générale — Baromètre 2024",
+                                                href=(
+                                                    "https://odisse.santepubliquefrance.fr/"
+                                                    "explore/assets/"
+                                                    "sante_generale_indicateurs_barometre_2024/"
+                                                ),
+                                                target="_blank",
+                                            ),
+                                            " · Santé publique France — Odissé",
+                                        ]
+                                    ),
+
+                                    html.Li(
+                                        [
+                                            html.A(
+                                                "Diabète — Baromètre 2024",
+                                                href=(
+                                                    "https://odisse.santepubliquefrance.fr/"
+                                                    "explore/assets/"
+                                                    "diabete-indicateurs-du-barometre-2024/"
+                                                ),
+                                                target="_blank", 
+                                            ),
+                                            " · Santé publique France — Odissé",
+                                        ]
+                                    ),
+
+                                    html.Li(
+                                        [
+                                            html.A(
+                                                "Indice de défavorisation sociale FDep",
+                                                href=(
+                                                    "https://odisse.santepubliquefrance.fr/"
+                                                    "explore/assets/"
+                                                    "indice-de-defavorisation-sociale-fdep-par-commune/"
+                                                ),
+                                                target="_blank",
+                                            ),
+                                            " · Santé publique France — Odissé",
+                                        ]
+                                    ),
+
+                                    html.Li(
+                                        [
+                                            html.A(
+                                                "French European Deprivation Index (F-EDI) 2021",
+                                                href=(
+                                                    "https://odisse.santepubliquefrance.fr/"
+                                                    "explore/assets/"
+                                                    "french-european-deprivation-index-f-edi-2021-par-commune/"
+                                                ),
+                                                target="_blank",
+                                            ),
+                                            " · Santé publique France — Odissé",
+                                            ]
+                                    ),
+                                    
+                                    html.Li(
+                                        [
+                                            html.A(
+                                                "Accessibilité potentielle localisée (APL) "
+                                                "aux médecins généralistes",
+                                                href=(
+                                                    "https://www.observatoire-des-territoires.gouv.fr/"
+                                                    "accessibilite-potentielle-localisee-apl-"
+                                                    "aux-medecins-generalistes"
+                                                ),
+                                                target="_blank",
+                                            ),
+                                            " · Observatoire des territoires",
+                                        ]
+                                    ),
+
+                                    html.Li(
+                                        [
+                                            html.A(
+                                                "Populations 2023",
+                                                href="https://www.insee.fr/fr/statistiques/8680726",
+                                                target="_blank",
+                                            ),
+                                            " · Insee",
+                                        ]
+                                    ),
+                            
+                                ],
+                                className="sources-list",
+                            ),
+                        
+                            html.P(
+                                [
+                                    html.Strong("Source de contexte : "),
+                                    "les chiffres nationaux présentés en introduction "
+                                    "proviennent de la synthèse Santé générale du Baromètre de "
+                                    "Santé publique France 2024."
+                                ],
+                                className="note",
+                            ),
+                        ],
+                        className="sources-block",
+                    ),
+                ],
+                className="home-details",
+            ),
+                            
+            # ----------------------------------------------------
+            # A propos du projet
+            # ----------------------------------------------------
 
             html.P(
-                "Cette exploration croise plusieurs sources publiques portant sur "
-                "la santé, la défavorisation sociale, l'accessibilité aux médecins "
-                "généralistes et la population. Les données mobilisées couvrent "
-                "principalement la période 2020–2024."
+                "Projet réalisé dans le cadre de l’Odissé Dataviz Challenge 2026 "
+                "à partir de données ouvertes de Santé publique France et de sources complémentaires.",
+                className="home-project-note",
             ),
-
-            html.Ul([
-
-                html.Li([
-                    html.A(
-                        "Santé générale — Baromètre 2024",
-                        href=(
-                            "https://odisse.santepubliquefrance.fr/"
-                            "explore/assets/"
-                            "sante_generale_indicateurs_barometre_2024/"
-                        ),
-                        target="_blank",
+                                        
+            # ----------------------------------------------------
+            # Transition
+            # ----------------------------------------------------
+                                            
+            html.Div(
+                [
+                    html.P(
+                        "Commençons par regarder si les écarts de santé apparaissent "
+                        "déjà entre groupes sociaux."
                     ),
-                    " · Santé publique France — Odissé",
-                ]),
 
-                html.Li([
-                    html.A(
-                        "Diabète — Baromètre 2024",
-                        href=(
-                            "https://odisse.santepubliquefrance.fr/"
-                            "explore/assets/"
-                            "diabete-indicateurs-du-barometre-2024/"
-                        ),
-                        target="_blank",
+                    html.Button(
+                        [
+                            html.Span(
+                                className="transition-arrow",
+                                **{"aria-hidden": "true"},
+                            ),
+                            html.Span("Commencer l'exploration"),
+                        ],
+                        id="go-to-social",
+                        className="transition-link",
+                        n_clicks=0,
                     ),
-                    " · Santé publique France — Odissé",
-                ]),
-
-                html.Li([
-                    html.A(
-                        "Indice de défavorisation sociale FDep",
-                        href=(
-                            "https://odisse.santepubliquefrance.fr/"
-                            "explore/assets/"
-                            "indice-de-defavorisation-sociale-fdep-par-commune/"
-                        ),
-                        target="_blank",
-                    ),
-                    " · Santé publique France — Odissé",
-                ]),
-
-                html.Li([
-                    html.A(
-                        "French European Deprivation Index (F-EDI) 2021",
-                        href=(
-                            "https://odisse.santepubliquefrance.fr/"
-                            "explore/assets/"
-                            "french-european-deprivation-index-f-edi-2021-par-commune/"
-                        ),
-                        target="_blank",
-                    ),
-                    " · Santé publique France — Odissé",
-                ]),
-
-                html.Li([
-                    html.A(
-                        "Accessibilité potentielle localisée (APL) "
-                        "aux médecins généralistes",
-                        href=(
-                            "https://www.observatoire-des-territoires.gouv.fr/"
-                            "accessibilite-potentielle-localisee-apl-"
-                            "aux-medecins-generalistes"
-                        ),
-                        target="_blank",
-                    ),
-                    " · Observatoire des territoires",
-                ]),
-
-                html.Li([
-                    html.A(
-                        "Populations 2023",
-                        href="https://www.insee.fr/fr/statistiques/8680726",
-                        target="_blank",
-                    ),
-                    " · Insee",
-                ]),
-
-            ], className="sources-list"),
-
-        ], className="sources-block"),
-
-        # ----------------------------------------------------
-        # Challenge
-        # ----------------------------------------------------
-
-        html.Div([
-
-            html.H2(
-                "À propos du projet"
+                ],
+                className="transition",
             ),
-
-            html.P(
-                "Cette datavisualisation a été réalisée dans le cadre de "
-                "l'Odissé Dataviz Challenge 2026. Elle propose une exploration "
-                "des inégalités sociales et territoriales de santé à partir "
-                "de données ouvertes françaises."
-            ),
-
-        ], className="about-challenge"),
-
-    ], className="tab-content")
-
+        ],
+        className="tab-content",
+    )
 
 # ============================================================
 # 01 — INÉGALITÉS SOCIALES
@@ -248,8 +329,8 @@ def create_social_summary(synthese_sociale):
 
     labels_indicateurs = {
         "Santé perçue bonne ou très bonne": "Santé perçue",
-        "Limitation d'activité": "Limitation",
-        "Diabète déclaré": "Diabète",
+        "Limitation d'activité": "Limitations habituelles",
+        "Diabète déclaré": "Diabète déclaré",
     }
 
     def format_number(value):
@@ -295,10 +376,24 @@ def create_social_summary(synthese_sociale):
                 "groupe_comparaison"
             ]
 
-            sous_titre = (
-                f"{groupe_comparaison} "
-                f"par rapport à {groupe_reference}"
-            )
+            if dimension == "finance":
+
+                sous_titre = (
+                    "Difficultés financières comparées à une situation « à l'aise »"
+                )
+
+            elif dimension == "diplome":
+
+                sous_titre = (
+                    "Aucun diplôme ou diplôme inférieur au Bac comparé "
+                    "à un diplôme supérieur au Bac"
+                )
+
+            else:
+
+                sous_titre = (
+                    "Écart entre les catégories présentant les valeurs extrêmes"
+                )
 
         else:
 
@@ -344,16 +439,36 @@ def create_social_summary(synthese_sociale):
                     f"{format_number(abs(ecart))} pts"
                 )
 
-                detail = (
-                    f"{groupe_comparaison} "
-                    f"{format_number(valeur_comparaison)} % "
-                    f"↔ {groupe_reference} "
-                    f"{format_number(valeur_reference)} %"
+                valeurs_groupes = {
+                    groupe_comparaison: valeur_comparaison,
+                    groupe_reference: valeur_reference,
+                }
+
+                groupe_cadres = next(
+                    g for g in valeurs_groupes
+                    if "Cadres" in g
                 )
+
+                groupe_ouvriers = next(
+                    g for g in valeurs_groupes
+                    if "Ouvriers" in g
+                )
+
+                detail = [
+                    html.Span(
+                        f"{groupe_cadres} : "
+                        f"{format_number(valeurs_groupes[groupe_cadres])} %"
+                    ),
+                    html.Br(),
+                    html.Span(
+                        f"{groupe_ouvriers} : "
+                        f"{format_number(valeurs_groupes[groupe_ouvriers])} %"
+                    ),
+                ]
 
             else:
 
-                signe = "+" if ecart > 0 else "−"
+                signe = "+" if ecart > 0 else "−" if ecart < 0 else ""
 
                 valeur_ecart = (
                     f"{signe}{format_number(abs(ecart))} pts"
@@ -435,15 +550,15 @@ def create_social_summary(synthese_sociale):
     )
 
 def create_social_tab(finance, synthese_sociale):
+    
+    # ----------------------------------------------------
+    # Introduction
+    # ----------------------------------------------------
 
     return html.Div([
-
-        # ----------------------------------------------------
-        # Introduction
-        # ----------------------------------------------------
-
+        
         html.P(
-            "01 — INÉGALITÉS SOCIALES",
+            "01 · INÉGALITÉS SOCIALES",
             className="section-label",
         ),
 
@@ -462,60 +577,144 @@ def create_social_tab(finance, synthese_sociale):
         ),
 
         # ----------------------------------------------------
-        # Repères de lecture
+        # Présentation des données
         # ----------------------------------------------------
 
-        html.Div([
+        html.Div(
+            [
+                html.P(
+                    "COMPRENDRE LES DONNÉES",
+                    className="dashboard-eyebrow",
+                ),
 
-            html.H3("Trois indicateurs de santé"),
+                html.H3(
+                    "Le Baromètre de Santé publique France 2024"
+                ),
 
-            html.P(
-                "Ces trois indicateurs décrivent des dimensions complémentaires "
-                "de l'état de santé déclaré.",
-                className="reading-guide-intro",
-            ),
+                html.P(
+                    "Le Baromètre est une enquête nationale menée auprès de "
+                    "34 940 personnes âgées de 18 à 79 ans. Les répondants ont été "
+                    "interrogés par internet ou téléphone. Les estimations sont pondérées "
+                    "afin de tenir compte du plan d'échantillonnage, de la participation "
+                    "et de la structure de la population."
+                ),
 
-            html.Div([
+                html.P(
+                    "Les estimations nationales sont accompagnées d'intervalles de confiance à 95 %. "
+                    "Les indicateurs présentés ici sont déclaratifs : ils correspondent "
+                    "aux réponses fournies par les personnes interrogées."
+                ),
 
-                html.Div([
-                    html.Strong("Santé perçue"),
-                    html.P(
-                        "Part de la population déclarant un état de santé "
-                        "bon ou très bon."
-                    ),
-                    html.P(
-                        "Une valeur élevée correspond à une situation plus favorable.",
-                        className="indicator-direction indicator-direction-positive",
-                    ),
-                ], className="indicator-card"),
+                html.Div(
+                    [
+                        html.Span(
+                            "2024",
+                            className="context-tag",
+                        ),
+                        html.Span(
+                            "34 940 répondants",
+                            className="context-tag",
+                        ),
+                        html.Span(
+                            "18–79 ans",
+                            className="context-tag",
+                        ),
+                        html.Span(
+                            "Estimations pondérées · IC 95 %",
+                            className="context-tag",
+                        ),
+                    ],
+                    className="context-tags",
+                ),
+            ],
+            className="learning-card",
+        ),
+    
 
-                html.Div([
-                    html.Strong("Limitation d'activité"),
-                    html.P(
-                        "Part de la population déclarant être limitée "
-                        "dans ses activités."
-                    ),
-                    html.P(
-                        "Une valeur élevée correspond à une situation plus défavorable.",
-                        className="indicator-direction indicator-direction-negative",
-                    ),
-                ], className="indicator-card"),
+        # ----------------------------------------------------
+        # Définitions
+        # ----------------------------------------------------
 
-                html.Div([
-                    html.Strong("Diabète déclaré"),
-                    html.P(
-                        "Part de la population déclarant être atteinte "
-                        "de diabète."
-                    ),
-                    html.P(
-                        "Une valeur élevée correspond à une situation plus défavorable.",
-                        className="indicator-direction indicator-direction-negative",
-                    ),
-                ], className="indicator-card"),
+        html.Div(
+            [
+                html.P(
+                    "COMPRENDRE LES INDICATEURS",
+                    className="dashboard-eyebrow",
+                ),
+                
+                html.H3(
+                    "Trois dimensions complémentaires de l'état de santé"
+                ),
 
-            ], className="indicator-grid"),
+                html.P(
+                    "Les trois indicateurs ne décrivent pas exactement la même chose : "
+                    "ils renseignent respectivement sur la perception générale de la santé, "
+                    "les conséquences durables d'un problème de santé dans la vie quotidienne "
+                    "et la présence déclarée d'un diabète.",
+                ),
 
-        ], className="reading-guide"),
+                html.Div(
+                    [
+
+                        html.Div(
+                            [
+                                html.Strong("Bonne ou très bonne santé perçue"),
+
+                                html.P(
+                                    "Part des personnes répondant « bon » ou « très bon » "
+                                    "à la question sur leur état de santé général."
+                                ),
+
+                                html.P(
+                                    "Une valeur élevée correspond à une situation plus favorable.",
+                                    className="indicator-direction",
+                                ),
+                            ],
+                            className="indicator-card",
+                        ),
+
+                        html.Div(
+                            [
+                                html.Strong(
+                                    "Limitation dans les activités habituelles"
+                                ),
+
+                                html.P(
+                                    "Part des adultes déclarant être limités ou fortement limités, "
+                                    "depuis au moins six mois et à cause d'un problème de santé, "
+                                    "dans les activités que les gens font habituellement."
+                                ),
+
+                                html.P(
+                                    "Une valeur élevée correspond à une situation plus défavorable.",
+                                    className="indicator-direction",
+                                ),
+                            ],
+                            className="indicator-card",
+                        ),
+
+                        html.Div(
+                            [
+                                html.Strong("Diabète déclaré"),
+
+                                html.P(
+                                    "Part des personnes déclarant être atteintes de diabète."
+                                ),
+
+                                html.P(
+                                    "Une valeur élevée correspond à une situation plus défavorable.",
+                                    className="indicator-direction",
+                                ),
+                            ],
+                            className="indicator-card",
+                        ),
+
+                    ],
+                    className="indicator-grid",
+                ),
+            ],
+            className="reading-guide",
+        ),
 
        # ----------------------------------------------------
         # Exploration
@@ -557,7 +756,7 @@ def create_social_tab(finance, synthese_sociale):
                             ],
                             value="finance",
                             inline=True,
-                            className="selector social-dashboard-selector",
+                            className="selector",
                         ),
                     ],
                     className="dashboard-header",
@@ -634,21 +833,6 @@ def create_social_tab(finance, synthese_sociale):
                                     ],
                                     className="dashboard-info-block",
                                 ),
-
-                                html.Div(
-                                    [
-                                        html.P(
-                                            "SOURCE",
-                                            className="dashboard-eyebrow",
-                                        ),
-
-                                        html.P(
-                                            "Baromètre de Santé publique France 2024."
-                                        ),
-                                    ],
-                                    className="dashboard-source-block",
-                                ),
-
                             ],
                             className="dashboard-side",
                         ),
@@ -668,8 +852,9 @@ def create_social_tab(finance, synthese_sociale):
         html.Div([
 
             html.H2(
-                "Des écarts qui concernent plusieurs "
-                "dimensions de santé"
+                "Les écarts les plus marqués concernent la situation financière "
+                "et le diplôme",
+                className="section-heading",
             ),
 
             html.P(
@@ -680,7 +865,7 @@ def create_social_tab(finance, synthese_sociale):
             create_social_summary(synthese_sociale),
 
             html.P(
-                "* Pour la catégorie socioprofessionnelle, les valeurs "
+                "Note : pour la catégorie socioprofessionnelle, les valeurs "
                 "correspondent à l'écart entre les catégories présentant "
                 "les valeurs extrêmes observées. Les PCS ne constituent "
                 "pas une échelle sociale continue.",
@@ -693,21 +878,27 @@ def create_social_tab(finance, synthese_sociale):
         # À retenir
         # ----------------------------------------------------
 
-        html.Div([
+        html.Div(
+            [
+                html.P(
+                    "À RETENIR",
+                    className="section-label",
+                ),
 
-            html.P(
-                "À RETENIR",
-                className="section-label",
-            ),
-
-            html.P(
-                "Les écarts de santé apparaissent selon plusieurs dimensions sociales. "
-                "Ils sont particulièrement marqués selon la situation financière et le niveau de diplôme : "
-                "les situations les moins favorables s'accompagnent d'une moins bonne santé perçue et de niveaux plus élevés de limitation d'activité et de diabète déclaré. "
-                "Les différences entre catégories socioprofessionnelles vont également dans ce sens, sans constituer un gradient social continu."
-            ),
-
-        ], className="takeaway"),
+                html.P(
+                    [
+                        html.Strong(
+                            "Les écarts de santé sont déjà visibles entre groupes sociaux. "
+                        ),
+                        "La situation financière, le niveau de diplôme et la catégorie "
+                        "socioprofessionnelle s'accompagnent de différences sur les trois "
+                        "indicateurs étudiés. Les écarts sont particulièrement marqués "
+                        "pour la situation financière et le diplôme."
+                    ]
+                ),
+            ],
+            className="takeaway",
+        ),
 
         # ----------------------------------------------------
         # Précautions
@@ -725,40 +916,51 @@ def create_social_tab(finance, synthese_sociale):
             ),
 
         ], className="method-note"),
+    
 
         # ----------------------------------------------------
         # Sources
         # ----------------------------------------------------
 
-        html.Div([
+        html.Div(
+            [
+                html.Strong("Sources : "),
 
-            html.Strong("Sources : "),
-
-            html.A(
-                "Santé générale — Baromètre 2024",
-                href=(
-                    "https://odisse.santepubliquefrance.fr/"
-                    "explore/assets/"
-                    "sante_generale_indicateurs_barometre_2024/"
+                html.A(
+                    "Santé générale — Baromètre 2024",
+                    href=(
+                        "https://odisse.santepubliquefrance.fr/"
+                        "explore/assets/"
+                        "sante_generale_indicateurs_barometre_2024/"
+                    ),
+                    target="_blank",
                 ),
-                target="_blank",
-            ),
 
-            html.Span(" · "),
+                html.Span(" · "),
 
-            html.A(
-                "Diabète — Baromètre 2024",
-                href=(
-                    "https://odisse.santepubliquefrance.fr/"
-                    "explore/assets/"
-                    "diabete-indicateurs-du-barometre-2024/"
+                html.A(
+                    "Diabète — Baromètre 2024",
+                    href=(
+                        "https://odisse.santepubliquefrance.fr/"
+                        "explore/assets/"
+                        "diabete-indicateurs-du-barometre-2024/"
+                    ),
+                    target="_blank",
                 ),
-                target="_blank",
-            ),
 
-            html.Span(" — Santé publique France, Odissé."),
-
-        ], className="sources"),
+                html.Span(
+                    " — Santé publique France, Odissé."
+                ),
+            ], 
+            className="sources"
+        ),
+        
+        html.P(
+            "Les comparaisons présentées dans cet onglet portent sur les estimations "
+            "nationales du Baromètre 2024. L’analyse territoriale suivante se concentre "
+            "ensuite sur les 13 régions de France métropolitaine.",
+            className="note",
+        ),
 
         # ----------------------------------------------------
         # Transition
@@ -767,9 +969,9 @@ def create_social_tab(finance, synthese_sociale):
         html.Div(
             [
                 html.P(
-                    "Ces différences apparaissent entre groupes sociaux. "
-                    "Mais observe-t-on également des écarts de santé entre "
-                    "territoires aux caractéristiques sociales différentes ?"
+                    "Ces écarts apparaissent entre groupes sociaux. "
+                    "Mais les retrouve-t-on également lorsque l'on change d'échelle "
+                    "pour comparer les territoires ?"
                 ),
                 
                 html.Button(
@@ -806,22 +1008,21 @@ def create_territorial_tab(
         # ----------------------------------------------------
 
         html.P(
-            "02 — TERRITOIRES & SOINS",
+            "02 · TERRITOIRES & SOINS",
             className="section-label",
         ),
 
         html.H1(
-            "Les inégalités de santé se retrouvent-elles "
-            "à l'échelle des territoires ?"
+            "Le contexte social des territoires est lié à la santé, "
+            "mais l'accessibilité aux médecins généralistes ne raconte pas toute l'histoire"
         ),
 
         html.P(
-            "Après avoir mis en évidence des écarts de santé entre groupes sociaux, "
-            "l'analyse change d'échelle pour examiner si ces différences se retrouvent "
-            "également entre territoires. Deux dimensions sont étudiées successivement : "
-            "la défavorisation territoriale, puis l'accessibilité aux médecins généralistes. "
-            "L'objectif est d'observer si elles apportent des informations complémentaires "
-            "pour caractériser les écarts de santé entre les 13 régions métropolitaines.",
+            "Après avoir observé des écarts entre groupes sociaux, l'analyse change "
+            "d'échelle. Les 13 régions métropolitaines sont comparées selon "
+            "leur contexte social, puis selon leur accessibilité aux médecins "
+            "généralistes. L'objectif est de déterminer si ces deux dimensions racontent "
+            "la même géographie des inégalités de santé ou, au contraire, des réalités différentes.",
             className="intro",
         ),
 
@@ -842,8 +1043,8 @@ def create_territorial_tab(
                 ),
 
                 html.P(
-                    "Première étape : observer si les régions relativement plus défavorisées "
-                    "présentent également des indicateurs de santé moins favorables."
+                    "Avant d’examiner l’accessibilité aux médecins, regardons si le contexte social "
+                    "des territoires est déjà associé aux différences de santé observées entre régions."
                 ),
 
                 html.Div(
@@ -861,6 +1062,13 @@ def create_territorial_tab(
                             "Le FDep20 synthétise quatre dimensions socio-économiques : "
                             "revenu médian, niveau de diplôme, part d'ouvriers et chômage. "
                             "Une valeur plus élevée correspond à un territoire plus défavorisé."
+                        ),
+                        
+                        html.P(
+                            "Pour cette analyse, les valeurs communales ont été ramenées à l'échelle "
+                            "régionale par une moyenne pondérée selon la population communale. "
+                            "La valeur présentée caractérise donc le contexte moyen de la région ; "
+                            "elle ne décrit pas la situation individuelle de chacun de ses habitants."
                         ),
 
                         html.Div(
@@ -895,7 +1103,7 @@ def create_territorial_tab(
                 html.Div(
                     [
                         html.H2(
-                            "Explorez la relation"
+                            "Comment la santé varie-t-elle avec la défavorisation territoriale ?",
                         ),
 
                         html.P(
@@ -911,7 +1119,7 @@ def create_territorial_tab(
                                     "value": "sante",
                                 },
                                 {
-                                    "label": "Limitation d'activité",
+                                    "label": "Limitation dans les activités habituelles",
                                     "value": "limitation",
                                 },
                                 {
@@ -989,11 +1197,6 @@ def create_territorial_tab(
                                         ),
 
                                         html.P(
-                                            "Le FDep augmente de gauche à droite : les régions situées à droite "
-                                            "sont relativement plus défavorisées."
-                                        ),
-
-                                        html.P(
                                             "La ligne pointillée représente la tendance linéaire observée entre "
                                             "la défavorisation territoriale et l’indicateur de santé."
                                         ),
@@ -1024,14 +1227,17 @@ def create_territorial_tab(
                 # ====================================================
 
                 html.H2(
-                    "Accessibilité aux soins",
+                    "Une meilleure accessibilité aux médecins va-t-elle toujours "
+                    "avec de meilleurs indicateurs de santé ?",
                     className="section-heading",
                 ),
 
                 html.P(
-                    "Deuxième étape : examiner si l'accessibilité aux médecins généralistes "
-                    "apporte une information supplémentaire sur les écarts de santé, une fois "
-                    "prise en compte la relation avec la défavorisation territoriale."
+                    "Le premier constat est clair : la défavorisation territoriale est associée "
+                    "à plusieurs dimensions de santé, avec une relation particulièrement marquée "
+                    "pour la santé perçue et le diabète déclaré. Mais le contexte social ne suffit "
+                    "pas à caractériser un territoire. L’accessibilité aux médecins généralistes "
+                    "apporte-t-elle une autre lecture ?"
                 ),
 
                 html.Div(
@@ -1090,9 +1296,8 @@ def create_territorial_tab(
                                 ),
 
                                 html.P(
-                                    "Pour examiner si la relation entre accessibilité "
-                                    "et santé reste visible une fois prise en compte "
-                                    "la relation linéaire avec la défavorisation territoriale."
+                                    "Pour vérifier si la relation entre accessibilité et santé subsiste "
+                                    "une fois prise en compte son association avec la défavorisation territoriale."
                                 ),
                             ],
                             className="learning-subnote",
@@ -1110,13 +1315,13 @@ def create_territorial_tab(
                 html.Div(
                     [
                         html.H2(
-                            "Comparez les relations avant et après prise en compte du FDep"
+                            "Que reste-t-il de la relation avec l’APL après prise en compte du contexte social ?"
                         ),
 
                         html.P(
-                            "Pour chaque indicateur de santé, comparez la relation brute "
-                            "avec l’APL à celle observée après prise en compte de la "
-                            "défavorisation territoriale."
+                            "Pour chacun des trois indicateurs de santé, comparez la relation avec l’APL "
+                            "avant et après prise en compte du FDep afin de distinguer ce qui est associé "
+                            "à l’accessibilité de ce qui est déjà lié au contexte social du territoire."
                         ),
 
                     ],
@@ -1165,17 +1370,16 @@ def create_territorial_tab(
                                         ),
 
                                         html.H3(
-                                            "La limitation d’activité reste la relation "
-                                            "la plus marquée avec l’APL",
+                                            "La prise en compte du contexte social modifie peu "
+                                            "les relations avec l'APL",
                                             className="dashboard-reading-title",
                                         ),
 
                                         html.P(
-                                            "Après prise en compte du FDep, la relation "
-                                            "avec la limitation d’activité reste proche de "
-                                            "celle observée initialement. "
-                                            "Les relations avec la santé perçue "
-                                            "et le diabète déclaré restent plus faibles.",
+                                            "Les relations avec la santé perçue et le diabète déclaré restent faibles. "
+                                            "La relation la plus marquée concerne les limitations dans les activités habituelles "
+                                            "et varie peu après prise en compte du FDep. Avec seulement 13 régions, "
+                                            "elle reste toutefois incertaine.",
                                             className="dashboard-reading-text",
                                         ),
 
@@ -1196,20 +1400,13 @@ def create_territorial_tab(
                                         ),
 
                                         html.P(
-                                            "Le cercle représente la relation brute avec l’APL ; "
-                                            "le losange la relation après prise en compte du FDep."
+                                            "Plus le coefficient r est éloigné de 0, "
+                                            "plus la relation linéaire est marquée."
                                         ),
 
                                         html.P(
-                                            "Plus le coefficient r est proche de −1 ou de +1, "
-                                            "plus la relation linéaire est marquée. "
-                                            "Une valeur proche de 0 traduit une relation faible."
-                                        ),
-
-                                        html.P(
-                                            "Le déplacement entre les deux symboles montre "
-                                            "comment la relation évolue après prise en compte "
-                                            "de la défavorisation territoriale."
+                                            "L’écart entre les deux symboles montre comment la relation évolue "
+                                            "après prise en compte du contexte social."
                                         ),
 
                                     ],
@@ -1231,24 +1428,29 @@ def create_territorial_tab(
         # À retenir
         # ----------------------------------------------------
 
-        html.Div([
+        html.Div(
+            [
+                html.P(
+                    "À RETENIR",
+                    className="section-label",
+                ),
 
-            html.P(
-                "À RETENIR",
-                className="section-label",
-            ),
+                html.P(
+                    [
+                        html.Strong(
+                            "À l'échelle régionale, l'accessibilité aux médecins généralistes "
+                            "ne suffit pas à résumer les inégalités de santé. "
+                        ),
+                        "La défavorisation territoriale présente des associations nettes "
+                        "avec la santé perçue et le diabète déclaré, tandis qu'une meilleure "
+                        "accessibilité aux médecins généralistes ne s'accompagne pas systématiquement "
+                        "de meilleurs indicateurs de santé."
+                    ]
+                ),
 
-            html.P(
-                "La défavorisation territoriale est nettement associée à "
-                "plusieurs indicateurs de santé, notamment la santé perçue "
-                "et le diabète déclaré. L'accessibilité aux médecins "
-                "généralistes apporte une lecture différente : après prise "
-                "en compte du FDep, la relation la plus marquée concerne "
-                "la limitation d'activité, mais elle reste incertaine compte "
-                "tenu du faible nombre de régions étudiées."
-            ),
-
-        ], className="takeaway"),
+            ],
+            className="takeaway",
+        ),
 
         # ----------------------------------------------------
         # Précautions
@@ -1339,10 +1541,8 @@ def create_territorial_tab(
         html.Div(
             [
                 html.P(
-                    "Les territoires ne se distinguent donc pas selon une seule "
-                    "dimension. Que se passe-t-il lorsque défavorisation, "
-                    "accessibilité aux soins et état de santé sont considérés "
-                    "simultanément ?"
+                    "Aucune dimension prise isolément ne suffit donc à caractériser "
+                    "les territoires. Que révèle leur combinaison ?"
                 ),
                 
                 html.Button(
@@ -1531,440 +1731,91 @@ def create_profiles_tab(
         # ====================================================
 
         html.P(
-            "03 — PROFILS TERRITORIAUX",
+            "03 · PROFILS TERRITORIAUX",
             className="section-label",
         ),
 
         html.H1(
-            "Comment ces dimensions se combinent-elles "
-            "selon les régions ?"
+            "Quatre profils montrent qu'il n'existe pas "
+            "une seule géographie des inégalités de santé"
         ),
 
         html.P(
-            "Les analyses précédentes ont étudié séparément les écarts sociaux, "
-            "la défavorisation territoriale et l'accessibilité aux médecins généralistes. "
-            "Cette dernière étape change de perspective : il ne s'agit plus d'isoler "
-            "une relation, mais d'observer comment plusieurs dimensions se combinent "
-            "au sein d'un même territoire. L'objectif est d'identifier des configurations "
-            "régionales récurrentes, sans établir de classement des régions.",
+            "Lorsqu'on combine défavorisation territoriale, accessibilité aux médecins "
+            "généralistes et trois indicateurs de santé, les 13 régions métropolitaines "
+            "ne s'ordonnent pas simplement des plus aux moins favorisées. "
+            "Quatre configurations distinctes apparaissent.",
             className="intro",
         ),
-
-        # ====================================================
-        # MÉTHODE
-        # ====================================================
-
-        html.Div(
-            [
-
-                # ----------------------------------------------------
-                # Introduction de la méthode
-                # ----------------------------------------------------
-
-                html.Div(
-                    [
-                        html.P(
-                            "COMMENT SONT CONSTRUITS LES PROFILS ?",
-                            className="method-flow-eyebrow",
-                        ),
-
-                        html.H2(
-                            "De six indicateurs à quatre profils territoriaux"
-                        ),
-
-                        html.P(
-                            "Les régions sont comparées simultanément selon leur contexte "
-                            "social, leur accessibilité aux médecins généralistes et leurs "
-                            "indicateurs de santé. L'objectif est de faire apparaître des "
-                            "configurations territoriales similaires, et non d'établir "
-                            "un classement.",
-                            className="method-flow-intro",
-                        ),
-                    ],
-                    className="method-flow-header",
-                ),
-
-
-                # ----------------------------------------------------
-                # FDep / F-EDI
-                # ----------------------------------------------------
-
-                html.Div(
-                    [
-                        html.P(
-                            "POURQUOI DEUX INDICES DE DÉFAVORISATION ?",
-                            className="dashboard-eyebrow",
-                        ),
-
-                        html.H3(
-                            "FDep et F-EDI apportent deux lectures complémentaires"
-                        ),
-
-                        html.P([
-                            html.Span(
-                                "FDep20 — ",
-                                className="text-accent",
-                            ),
-                            "un indice synthétique de défavorisation socio-économique fondé sur "
-                            "quatre dimensions : revenu médian, niveau de diplôme, part d'ouvriers "
-                            "et chômage."
-                        ]),
-
-                        html.P([
-                            html.Span(
-                                "F-EDI — ",
-                                className="text-accent",
-                            ),
-                            "un indice écologique de défavorisation sociale construit à partir de "
-                            "l'enquête européenne EU-SILC et du recensement. Il mobilise dix "
-                            "caractéristiques liées notamment à l'emploi, au diplôme, au logement, "
-                            "à l'équipement automobile, à la propriété du logement et à la composition "
-                            "des ménages."
-                        ]),
-                        
-                        html.P([
-                            html.Span(
-                                "Point de vigilance — ",
-                                className="text-accent-blue",
-                            ),
-                            "ces deux indices caractérisent le contexte social d'un territoire. "
-                            "Ils ne mesurent pas la situation sociale individuelle de ses habitants."
-                        ]),
-
-                        html.Div(
-                            [
-                                html.Span(
-                                    "FDep : 4 dimensions socio-économiques",
-                                    className="context-tag",
-                                ),
-
-                                html.Span(
-                                    "F-EDI : 10 dimensions sociales et matérielles",
-                                    className="context-tag",
-                                ),
-
-                                html.Span(
-                                    "F-EDI 2021",
-                                    className="context-tag",
-                                ),
-
-                                html.Span(
-                                    "Indices écologiques territoriaux",
-                                    className="context-tag",
-                                ),
-                                
-                                html.Span(
-                                    "Agrégation régionale pondérée par la population",
-                                    className="context-tag",
-                                ),
-                            ],
-                            className="context-tags",
-                        ),
-
-                        html.Div(
-                            [
-                                html.Strong(
-                                    "Pourquoi le F-EDI apparaît-il seulement ici ?"
-                                ),
-
-                                html.P([
-                                    "Dans l'onglet précédent, le FDep a été retenu comme indicateur principal "
-                                    "pour étudier des relations territoriales simples et lisibles. Ici, ",
-                                    html.Span(
-                                        "la question change : plusieurs dimensions sont considérées simultanément",
-                                        className="text-accent-blue",
-                                    ),
-                                    " pour construire les profils. Le F-EDI complète donc le FDep par une "
-                                    "mesure plus large du contexte social et matériel."
-                                ]),
-
-                                html.P([
-                                    html.Span(
-                                        "Contrôle de robustesse — ",
-                                        className="text-accent",
-                                    ),
-                                    "le retrait du F-EDI ne modifie pas les quatre regroupements obtenus."
-                                ]),
-                            ],
-                            className="learning-subnote",
-                        ),
-
-                    ],
-                    className="learning-card",
-                ),
-
-
-                # ----------------------------------------------------
-                # Parcours méthodologique
-                # ----------------------------------------------------
-
-                html.Div(
-                    [
-
-                        # ------------------------------------------------
-                        # Étape 1
-                        # ------------------------------------------------
-
-                        html.Div(
-                            [
-                                html.Span(
-                                    "01",
-                                    className="method-step-number",
-                                ),
-
-                                html.Strong(
-                                    "Décrire plusieurs dimensions"
-                                ),
-
-                                html.Div(
-                                    [
-                                        html.P([
-                                            html.B("Contexte social"),
-                                            html.Br(),
-                                            "FDep · F-EDI",
-                                        ]),
-
-                                        html.P([
-                                            html.B("Accessibilité"),
-                                            html.Br(),
-                                            "APL médecins généralistes",
-                                        ]),
-
-                                        html.P([
-                                            html.B("Santé"),
-                                            html.Br(),
-                                            "Santé perçue · limitation · diabète",
-                                        ]),
-                                    ],
-                                    className="method-dimensions",
-                                ),
-                            ],
-                            className="method-step",
-                        ),
-
-
-                        html.Div(
-                            "→",
-                            className="method-arrow",
-                        ),
-
-
-                        # ------------------------------------------------
-                        # Étape 2
-                        # ------------------------------------------------
-
-                        html.Div(
-                            [
-                                html.Span(
-                                    "02",
-                                    className="method-step-number",
-                                ),
-
-                                html.Strong(
-                                    "Rendre les indicateurs comparables"
-                                ),
-
-                                html.P([
-                                    "Les six indicateurs sont standardisés afin de comparer la position "
-                                    "relative de chaque région malgré des unités différentes. Leur sens est "
-                                    "ensuite harmonisé : ",
-                                    html.Span(
-                                        "score positif = situation relativement plus défavorable",
-                                        className="text-accent-blue",
-                                    ),
-                                    " ; ",
-                                    html.Span(
-                                        "score négatif = situation relativement plus favorable",
-                                        className="text-accent-blue",
-                                    ),
-                                    "."
-                                ]),
-
-                            ],
-                            className="method-step",
-                        ),
-
-                        html.Div(
-                            "→",
-                            className="method-arrow",
-                        ),
-
-
-                        # ------------------------------------------------
-                        # Étape 3
-                        # ------------------------------------------------
-
-                        html.Div(
-                            [
-                                html.Span(
-                                    "03",
-                                    className="method-step-number",
-                                ),
-
-                                html.Strong(
-                                    "Rapprocher les régions qui se ressemblent"
-                                ),
-
-                                html.P([
-                                    "Une classification hiérarchique considère les six indicateurs "
-                                    "simultanément et rapproche ",
-                                    html.Span(
-                                        "les régions présentant les configurations les plus similaires",
-                                        className="text-accent-blue",
-                                    ),
-                                    "."
-                                ]),
-
-                                html.P(
-                                    "Chaque indicateur intervient individuellement dans "
-                                    "la construction des groupes.",
-                                    className="method-step-note",
-                                ),
-                            ],
-                            className="method-step",
-                        ),
-
-
-                        html.Div(
-                            "→",
-                            className="method-arrow",
-                        ),
-
-
-                        # ------------------------------------------------
-                        # Étape 4
-                        # ------------------------------------------------
-
-                        html.Div(
-                            [
-                                html.Span(
-                                    "04",
-                                    className="method-step-number",
-                                ),
-
-                                html.Strong(
-                                    "Retenir quatre profils interprétables"
-                                ),
-
-                                html.P([
-                                    "La structure de la classification isole d'abord fortement l'Île-de-France. "
-                                    "Avec trois groupes, les autres régions commencent à se différencier. ",
-                                    html.Span(
-                                        "Quatre groupes sont finalement retenus",
-                                        className="text-highlight",
-                                    ),
-                                    " pour obtenir une lecture plus fine tout en conservant des profils interprétables."
-                                ]),
-
-                            ],
-                            className="method-step method-step-result",
-                        ),
-
-                    ],
-                    className="method-flow",
-                ),
-                
-                # ----------------------------------------------------
-                # Données et échelles
-                # ----------------------------------------------------
-                
-                html.Div(
-                    [
-                        html.P(
-                            "DONNÉES ET ÉCHELLES",
-                            className="dashboard-eyebrow",
-                        ),
-
-                        html.P([
-                            html.Span(
-                                "FDep, F-EDI et APL — ",
-                                className="text-accent",
-                            ),
-                            "ces indicateurs proviennent de données territoriales plus fines "
-                            "et sont ramenés à l'échelle régionale par moyenne pondérée selon "
-                            "la population communale 2023. Les communes les plus peuplées "
-                            "contribuent donc davantage à la valeur régionale."
-                        ]),
-
-                        html.P([
-                            html.Span(
-                                "Santé perçue, limitation d'activité et diabète — ",
-                                className="text-accent-blue",
-                            ),
-                            "ces indicateurs sont déjà disponibles à l'échelle régionale dans "
-                            "le Baromètre 2024 et sont utilisés tels que fournis, sans nouvelle "
-                            "agrégation communale."
-                        ]),
-                    ],
-                    className="method-data-note",
-                ),
-
-                # ----------------------------------------------------
-                # Robustesse
-                # ----------------------------------------------------
-
-                html.Div(
-                    [
-                        html.P(
-                            "TESTER LA ROBUSTESSE",
-                            className="dashboard-eyebrow",
-                        ),
-
-                        html.H3([
-                            "Les profils ont été confrontés à ",
-                            html.Span(
-                                "plusieurs scénarios",
-                                className="text-accent",
-                            ),
-                        ]),
-
-                        html.P(
-                            "La classification a été recalculée avec trois groupes, "
-                            "puis à quatre groupes en retirant successivement le F-EDI "
-                            "et l'APL. Ces tests servent à vérifier la stabilité générale "
-                            "de la typologie, et non à rechercher a posteriori le découpage "
-                            "le plus favorable."
-                        ),
-
-                        html.Div(
-                            [
-                                html.Span(
-                                    "3 groupes : structure plus agrégée",
-                                    className="context-tag",
-                                ),
-
-                                html.Span(
-                                    "Sans F-EDI : mêmes 4 regroupements",
-                                    className="context-tag",
-                                ),
-
-                                html.Span(
-                                    "Sans APL : certaines régions changent de profil",
-                                    className="context-tag",
-                                ),
-                            ],
-                            className="context-tags",
-                        ),
-                    ],
-                    className="learning-card",
-                ),
-            ],
-            className="method-flow-block",
-        ),
         
+        
+        # ----------------------------------------------------
+        # Données et échelles
+        # ----------------------------------------------------
+                                
         html.Div(
             [
                 html.P(
-                    "La typologie retenue ne repose donc pas sur un seul indicateur : "
-                    "elle résulte de la combinaison de plusieurs dimensions territoriales "
-                    "et reste globalement stable lorsque certains choix méthodologiques "
-                    "sont modifiés."
+                    "DONNÉES ET ÉCHELLES",
+                    className="dashboard-eyebrow",
+                ),
+                
+                html.H3(
+                    "Six indicateurs pour caractériser les régions"
+                ),
+                
+                html.P(
+                    "La typologie combine deux indices de défavorisation territoriale "
+                    "(FDep et F-EDI), l'accessibilité aux médecins généralistes (APL) "
+                    "et trois indicateurs de santé : santé perçue, limitation dans les "
+                    "activités habituelles et diabète déclaré."
+                ),
+
+                html.P(
+                    [
+                        html.Strong("Indicateurs territoriaux : "),
+                        "FDep, F-EDI et APL proviennent de données territoriales plus fines "
+                        "et sont ramenés à l'échelle régionale par moyenne pondérée selon "
+                        "la population communale 2023."
+                    ]
+                ),
+                
+                html.P(
+                     [
+                        html.Strong("Indicateurs de santé : "),
+                        "les estimations du Baromètre 2024 sont déjà disponibles à l'échelle "
+                        "régionale et sont utilisées telles que fournies."
+                    ]
+                ),
+
+                html.Div(
+                    [
+                        html.Span("FDep : 2020", className="context-tag"),
+                        html.Span("F-EDI : 2021", className="context-tag"),
+                        html.Span("APL : 2023", className="context-tag"),
+                        html.Span("Santé : 2024", className="context-tag"),
+                    ],
+                    className="context-tags",
+                ),
+
+                html.Div(
+                    [
+                        html.Strong(
+                            "Point de vigilance"
+                        ),
+
+                        html.P(
+                            "Les indices FDep et F-EDI décrivent le contexte social "
+                            "des territoires et non la situation individuelle de leurs habitants."
+                        ),
+                    ],
+                    className="learning-subnote",
                 ),
             ],
-            className="result-note",
+            className="learning-card",
         ),
-
-       # ====================================================
+        
+        # ====================================================
         # LES QUATRE PROFILS
         # ====================================================
 
@@ -1986,10 +1837,15 @@ def create_profiles_tab(
                 html.Div(
                     [
                         html.P(
-                            "Une meilleure accessibilité aux médecins généralistes ne coïncide "
-                            "pas systématiquement avec des indicateurs de santé plus favorables : "
-                            "l'accès aux soins ne suffit donc pas, à lui seul, à résumer les "
-                            "inégalités territoriales de santé."
+                            [
+                                "Les régions ne s’ordonnent pas simplement des plus aux moins favorisées : "
+                                "les mêmes niveaux d’accessibilité peuvent coexister avec des contextes sociaux "
+                                "et des états de santé différents. La combinaison des six indicateurs fait ainsi apparaître ",
+
+                                html.Strong(
+                                    "quatre configurations territoriales distinctes.",
+                                ),
+                            ]
                         ),
                     ],
                     className="result-note",
@@ -2103,32 +1959,427 @@ def create_profiles_tab(
 
             className="profiles-explorer",
         ),
+        
+        # ====================================================
+        # MÉTHODE
+        # ====================================================
 
+
+        html.Details(
+            [
+                html.Summary(
+                    "Voir comment les quatre profils ont été construits"
+                ),
+
+                html.Div(
+                    [
+                        # ----------------------------------------------------
+                        # Introduction de la méthode
+                        # ----------------------------------------------------
+
+                        html.Div(
+                            [
+                                html.P(
+                                    "COMMENT SONT CONSTRUITS LES PROFILS ?",
+                                    className="method-flow-eyebrow",
+                                ),
+
+                                html.H2(
+                                    "De six indicateurs à quatre profils territoriaux"
+                                ),
+
+                                html.P(
+                                    "Les régions sont comparées simultanément selon leur contexte "
+                                    "social, leur accessibilité aux médecins généralistes et leurs "
+                                    "indicateurs de santé. L'objectif est de faire apparaître des "
+                                    "configurations territoriales similaires, et non d'établir "
+                                    "un classement.",
+                                    className="method-flow-intro",
+                                ),
+                            ],
+                            className="method-flow-header",
+                        ),
+
+                        # ----------------------------------------------------
+                        # FDep / F-EDI
+                        # ----------------------------------------------------
+
+                        html.Div(
+                            [
+                                html.P(
+                                    "POURQUOI DEUX INDICES DE DÉFAVORISATION ?",
+                                    className="dashboard-eyebrow",
+                                ),
+
+                                html.H3(
+                                    "FDep et F-EDI apportent deux lectures complémentaires"
+                                ),
+
+                                html.P([
+                                    html.Span(
+                                        "FDep20 — ",
+                                        className="text-accent",
+                                    ),
+                                    "un indice synthétique de défavorisation socio-économique fondé sur "
+                                    "quatre dimensions : revenu médian, niveau de diplôme, part d'ouvriers "
+                                    "et chômage."
+                                ]),
+
+                                html.P([
+                                    html.Span(
+                                        "F-EDI — ",
+                                        className="text-accent",
+                                    ),
+                                    "un indice écologique de défavorisation sociale construit à partir de "
+                                    "l'enquête européenne EU-SILC et du recensement. Il mobilise dix "
+                                    "caractéristiques liées notamment à l'emploi, au diplôme, au logement, "
+                                    "à l'équipement automobile, à la propriété du logement et à la composition "
+                                    "des ménages."
+                                ]),
+                                        
+                                html.P([
+                                    html.Span(
+                                        "Point de vigilance : ",
+                                        className="text-accent-blue",
+                                    ),
+                                    "ces deux indices caractérisent le contexte social d'un territoire. "
+                                    "Ils ne mesurent pas la situation sociale individuelle de ses habitants."
+                                ]),
+
+                                html.Div(
+                                    [
+                                        html.Span(
+                                            "FDep : 4 dimensions socio-économiques",
+                                            className="context-tag",
+                                        ),
+
+                                        html.Span(
+                                            "F-EDI : 10 dimensions sociales et matérielles",
+                                            className="context-tag",
+                                        ),
+                                        
+                                        html.Span(
+                                            "F-EDI 2021",
+                                            className="context-tag",
+                                        ),
+
+                                        html.Span(
+                                            "Indices écologiques territoriaux",
+                                            className="context-tag",
+                                        ),
+                                            
+                                        html.Span(
+                                            "Agrégation régionale pondérée par la population",
+                                            className="context-tag",
+                                        ),
+                                    ],
+                                    className="context-tags",
+                                ),
+                                
+                                html.Div(
+                                    [
+                                        html.Strong(
+                                            "Pourquoi le F-EDI apparaît-il seulement ici ?"
+                                        ),
+
+                                        html.P([
+                                            "Dans l'onglet précédent, le FDep a été retenu comme indicateur principal "
+                                            "pour étudier des relations territoriales simples et lisibles. Ici, ",
+                                            html.Span(
+                                                "la question change : plusieurs dimensions sont considérées simultanément",
+                                                className="text-accent-blue",
+                                            ),
+                                            " pour construire les profils. Le F-EDI complète donc le FDep par une "
+                                            "mesure plus large du contexte social et matériel."
+                                        ]),
+
+                                        html.P([
+                                            html.Span(
+                                                "Contrôle de robustesse : ",
+                                                className="text-accent",
+                                            ),
+                                            "le retrait du F-EDI ne modifie pas les quatre regroupements obtenus."
+                                        ]),
+                                    ],
+                                    className="learning-subnote",
+                                ),
+
+                            ],
+                            className="learning-card",
+                        ),
+
+                        # ----------------------------------------------------
+                        # Parcours méthodologique
+                        # ----------------------------------------------------
+
+                        html.Div(
+                            [
+                                # ------------------------------------------------
+                                # Étape 1
+                                # ------------------------------------------------
+
+                                html.Div(
+                                    [
+                                        html.Span(
+                                            "01",
+                                            className="method-step-number",
+                                        ),
+
+                                        html.Strong(
+                                            "Décrire plusieurs dimensions"
+                                        ),
+
+                                        html.Div(
+                                            [
+                                                html.P([
+                                                    html.B("Contexte social"),
+                                                    html.Br(),
+                                                    "FDep · F-EDI",
+                                                ]),
+
+                                                html.P([
+                                                    html.B("Accessibilité"),
+                                                    html.Br(),
+                                                    "APL médecins généralistes",
+                                                ]),
+
+                                                html.P([
+                                                    html.B("Santé"),
+                                                    html.Br(),
+                                                    "Santé perçue · limitation · diabète",
+                                                ]),
+                                            ],
+                                            className="method-dimensions",
+                                        ),
+                                    ],
+                                    className="method-step",
+                                ),
+
+
+                                html.Div(
+                                    "→",
+                                    className="method-arrow",
+                                ),
+
+                                # ------------------------------------------------
+                                # Étape 2
+                                # ------------------------------------------------
+
+                                html.Div(
+                                    [
+                                        html.Span(
+                                            "02",
+                                            className="method-step-number",
+                                        ),
+
+                                        html.Strong(
+                                            "Rendre les indicateurs comparables"
+                                        ),
+
+                                        html.P([
+                                            "Les six indicateurs sont standardisés afin de comparer la position "
+                                            "relative de chaque région malgré des unités différentes. Leur sens est "
+                                            "ensuite harmonisé : ",
+                                            html.Span(
+                                                "score positif = situation relativement plus défavorable",
+                                                className="text-accent-blue",
+                                            ),
+                                            " ; ",
+                                            html.Span(
+                                                "score négatif = situation relativement plus favorable",
+                                                className="text-accent-blue",
+                                            ),
+                                                    "."
+                                        ]),
+
+                                    ],
+                                    className="method-step",
+                                ),
+
+                                html.Div(
+                                    "→",
+                                    className="method-arrow",
+                                ),
+
+                                # ------------------------------------------------
+                                # Étape 3
+                                # ------------------------------------------------
+
+                                html.Div(
+                                    [
+                                        html.Span(
+                                            "03",
+                                            className="method-step-number",
+                                        ),
+
+                                        html.Strong(
+                                            "Rapprocher les régions qui se ressemblent"
+                                        ),
+
+                                        html.P([
+                                            "Une classification hiérarchique considère les six indicateurs "
+                                            "simultanément et rapproche ",
+                                            html.Span(
+                                                "les régions présentant les configurations les plus similaires",
+                                                className="text-accent-blue",
+                                            ),
+                                            "."
+                                        ]),
+
+                                        html.P(
+                                            "Chaque indicateur intervient individuellement dans "
+                                            "la construction des groupes.",
+                                        ),
+                                    ],
+                                    className="method-step",
+                                ),
+
+
+                                html.Div(
+                                    "→",
+                                    className="method-arrow",
+                                ),
+
+                                # ------------------------------------------------
+                                # Étape 4
+                                # ------------------------------------------------
+
+                                html.Div(
+                                    [
+                                        html.Span(
+                                            "04",
+                                            className="method-step-number",
+                                        ),
+                                        
+                                        html.Strong(
+                                            "Retenir quatre profils interprétables"
+                                        ),
+
+                                        html.P([
+                                            "La structure de la classification isole d'abord fortement l'Île-de-France. "
+                                            "Avec trois groupes, les autres régions commencent à se différencier. ",
+                                            html.Span(
+                                                "Quatre groupes sont finalement retenus",
+                                                className="text-highlight",
+                                            ),
+                                            " pour obtenir une lecture plus fine tout en conservant des profils interprétables."
+                                        ]),
+
+                                    ],
+                                    className="method-step method-step-result",
+                                ),
+
+                            ],
+                            className="method-flow",
+                        ),
+
+                        # ----------------------------------------------------
+                        # Robustesse
+                        # ----------------------------------------------------
+
+                        html.Div(
+                            [
+                                html.P(
+                                    "TESTER LA ROBUSTESSE",
+                                    className="dashboard-eyebrow",
+                                ),
+
+                                html.H3([
+                                    "Les profils ont été confrontés à ",
+                                    html.Span(
+                                        "plusieurs scénarios",
+                                        className="text-accent",
+                                    ),
+                                ]),
+
+                                html.P(
+                                    "La classification a été recalculée avec trois groupes, "
+                                    "puis à quatre groupes en retirant successivement le F-EDI "
+                                    "et l'APL. Ces tests servent à vérifier la stabilité générale "
+                                    "de la typologie, et non à rechercher a posteriori le découpage "
+                                    "le plus favorable."
+                                ),
+                                
+                                html.Div(
+                                    [
+                                        html.Span(
+                                            "3 groupes : structure plus agrégée",
+                                            className="context-tag",
+                                        ),
+
+                                        html.Span(
+                                            "Sans F-EDI : mêmes 4 regroupements",
+                                            className="context-tag",
+                                        ),
+
+                                        html.Span(
+                                            "Sans APL : certaines régions changent de profil",
+                                            className="context-tag",
+                                        ),
+                                    ],
+                                    className="context-tags",
+                                ),
+                            ],
+                            className="learning-card",
+                        ),
+                        
+                        html.Div(
+                            [
+                                html.P(
+                                    "La typologie retenue ne repose donc pas sur un seul indicateur : "
+                                    "elle résulte de la combinaison de plusieurs dimensions territoriales "
+                                    "et reste globalement stable lorsque certains choix méthodologiques "
+                                    "sont modifiés."
+                                ),
+                            ],
+                            className="result-note",
+                        ),
+                    ],
+                    className="method-flow-block",
+                ),
+            ],
+            className="method-details",
+        ),
 
         # ====================================================
-        # À RETENIR
+        # RÉPONSE À LA QUESTION DE DÉPART
         # ====================================================
 
-        html.Div([
+        html.Div(
+            [
+                html.P(
+                    "RÉPONSE À LA QUESTION DE DÉPART",
+                    className="section-label",
+                ),
 
-            html.P(
-                "À RETENIR",
-                className="section-label",
-            ),
+                html.P(
+                    [
+                        html.Strong(
+                            "Les inégalités territoriales de santé ne suivent pas un axe unique. "
+                        ),
 
-            html.P(
-                "Les régions ne se différencient pas selon une seule "
-                "dimension. Certains territoires associent une situation "
-                "sociale et sanitaire globalement plus favorable, tandis "
-                "que d'autres présentent des configurations plus contrastées. "
-                "Surtout, une meilleure accessibilité aux médecins généralistes "
-                "ne va pas systématiquement de pair avec des indicateurs "
-                "de santé plus favorables. L'accès aux soins contribue donc "
-                "à caractériser les territoires sans résumer, à lui seul, "
-                "les inégalités territoriales de santé."
-            ),
+                        "Les 13 régions étudiées combinent différemment contexte social, "
+                        "accessibilité aux médecins généralistes et état de santé. Certaines "
+                        "cumulent défavorisation et faible accessibilité, tandis que d'autres "
+                        "présentent des indicateurs de santé plus fragiles malgré une meilleure "
+                        "accessibilité. ",
 
-        ], className="takeaway"),
+                        html.Strong(
+                            "L'accessibilité aux médecins généralistes contribue donc à caractériser les territoires, "
+                            "mais ne suffit pas à elle seule à résumer leurs inégalités de santé."
+                        ),
+
+                        html.Br(),
+                        html.Br(),
+
+                        "Comprendre ces inégalités suppose ainsi de considérer simultanément le "
+                        "contexte social, l'accessibilité aux médecins généralistes "
+                        "et l'état de santé des populations."
+                    ]
+                ),
+            ],
+            className="takeaway",
+        ),
 
 
         # ====================================================
@@ -2164,24 +2415,22 @@ def create_profiles_tab(
                 html.Div(
                     [
                         html.H3(
-                            "Données et robustesse"
+                            "Temporalités et limites des données"
                         ),
 
                         html.P(
                             "Les sources mobilisées ne portent pas toutes sur la même période : "
                             "FDep à partir de données socio-économiques 2020, F-EDI 2021, "
                             "APL et population 2023, indicateurs de santé du Baromètre 2024. "
+                             "La typologie décrit donc des configurations territoriales proches "
+                            "dans le temps, et non une photographie strictement simultanée."
+                        ),
+                        
+                        html.P(
                             "FDep, F-EDI et APL sont agrégés à l'échelle régionale en pondérant "
                             "les valeurs communales par la population, tandis que les indicateurs "
                             "de santé correspondent directement aux estimations régionales du "
                             "Baromètre 2024."
-                        ),
-
-                        html.P(
-                            "Des analyses de sensibilité ont été réalisées. "
-                            "Le retrait du F-EDI ne modifie pas les regroupements. "
-                            "Le retrait de l'APL modifie en revanche le classement "
-                            "du Grand Est et des Hauts-de-France."
                         ),
                     ],
                     className="method-note",

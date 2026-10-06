@@ -15,9 +15,9 @@ SOCIAL_MESSAGES = {
         "texte": (
             "À mesure que la situation financière déclarée devient plus "
             "difficile, la santé perçue diminue tandis que les limitations "
-            "d’activité et le diabète déclaré augmentent. Le gradient est "
+            "dans les activités habituelles et le diabète déclaré augmentent. Le gradient est "
             "particulièrement marqué pour la santé perçue et les limitations "
-            "d’activité."
+            "dans les activités habituelles."
         ),
     },
 
@@ -27,7 +27,7 @@ SOCIAL_MESSAGES = {
         ),
         "texte": (
             "Les personnes les plus diplômées déclarent plus souvent une "
-            "bonne santé, et moins souvent une limitation d’activité ou un "
+            "bonne santé, et moins souvent des limitations dans les activités habituelles ou un "
             "diabète. Les trois indicateurs évoluent ici dans une direction "
             "cohérente."
         ),
@@ -56,33 +56,34 @@ FDEP_INDICATOR_LABELS = {
 FDEP_MESSAGES = {
     "sante": {
         "titre": (
-            "La santé perçue diminue avec la défavorisation territoriale"
+            "La santé perçue diminue nettement avec la défavorisation territoriale"
         ),
         "texte": (
-            "Les régions présentant "
-            "un FDep plus élevé tendent à compter une part plus faible "
-            "de personnes déclarant une bonne ou très bonne santé."
+            "Les régions les plus défavorisées tendent à présenter une part "
+            "plus faible de personnes déclarant une bonne ou très bonne santé. "
+            "C'est la relation la plus marquée observée avec le FDep."
         ),
     },
 
     "limitation": {
         "titre": (
-            "La relation avec la limitation d'activité est plus modérée"
+            "Les limitations augmentent aussi, mais la relation est moins nette"
         ),
         "texte": (
-            "Les limitations d'activité tendent à être plus fréquentes "
-            "dans les régions plus défavorisées, mais la relation observée "
-            "est moins marquée à cette échelle."
+            "Les limitations dans les activités habituelles tendent à être "
+            "plus fréquentes dans les régions les plus défavorisées. "
+            "L'association est toutefois plus modérée et plus incertaine."
         ),
     },
 
     "diabete": {
         "titre": (
-            "Le diabète déclaré augmente avec la défavorisation territoriale"
+            "Le diabète déclaré est plus fréquent dans les régions défavorisées"
         ),
         "texte": (
-            "Les régions présentant un FDep plus élevé tendent également "
-            "à présenter une fréquence plus importante de diabète déclaré."
+            "Les régions présentant un FDep plus élevé tendent à afficher "
+            "une fréquence plus importante de diabète déclaré. "
+            "La relation est nette, même si elle est moins forte que pour la santé perçue."
         ),
     },
 }
@@ -129,13 +130,17 @@ def register_callbacks(app, regions, finance, diplome, pcs, analyse_regions, rel
 
     @app.callback(
         Output("main-tabs", "value"),
+        Input("go-to-social", "n_clicks"),
         Input("go-to-territoires", "n_clicks"),
         Input("go-to-profils", "n_clicks"),
         prevent_initial_call=True,
     )
-    def navigate_tabs(go_territoires, go_profils):
+    def navigate_tabs(go_social, go_territoires, go_profils):
 
         triggered = ctx.triggered_id
+        
+        if triggered == "go-to-social":
+            return "social"
 
         if triggered == "go-to-territoires":
             return "territoires"
@@ -382,7 +387,7 @@ def register_callbacks(app, regions, finance, diplome, pcs, analyse_regions, rel
                             ),
 
                             create_region_metric(
-                                "Limitation d'activité",
+                                "Limitation durable dans les activités habituelles",
                                 f"{region['limitation_activite']:.1f} %",
                             ),
 

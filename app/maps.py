@@ -145,12 +145,14 @@ def create_map(regions):
             customdata=regions[
                 [
                     "clust",
+                    "profil",
                 ]
             ].values,
 
             hovertemplate=(
                 "<b>%{location}</b><br>"
-                "%{customdata[0]}<br><br>"
+                "Profil %{customdata[0]}<br>"
+                "%{customdata[1]}<br><br>"
                 "<i>Cliquez pour explorer cette région</i>"
                 "<extra></extra>"
             ),

@@ -45,7 +45,7 @@ INDICATEURS_STANDARDISES = {
     "z_fedi": "Défavorisation (F-EDI)",
     "z_apl": "Faible accessibilité aux soins",
     "z_sante": "Santé perçue défavorable",
-    "z_limitation": "Limitation d'activité",
+    "z_limitation": "Limitation d'activités",
     "z_diabete": "Diabète déclaré",
 }
 
@@ -94,8 +94,8 @@ def create_region_profile(regions, region_name):
         },
         {
             "colonne": "z_limitation",
-            "label": "Limitation",
-            "label_complet": "Limitation d'activité",
+            "label": "Limitations habituelles",
+            "label_complet": "Limitation durable dans les activités habituelles",
             "color": COLOR_RASPBERRY,
         },
         {
@@ -379,7 +379,7 @@ def create_social_chart(data, variable):
             ],
 
             "titre": (
-                "Les indicateurs de santé varient selon le niveau de diplôme"
+                "Le niveau de diplôme s’accompagne d’écarts nets de santé"
             ),
 
             "axe": "Niveau de diplôme",
@@ -398,7 +398,7 @@ def create_social_chart(data, variable):
             ],
 
             "titre": (
-                "Les indicateurs de santé varient selon la catégorie socioprofessionnelle"
+                "Des écarts existent entre catégories, sans gradient social continu"
             ),
 
             "axe": "Catégorie socioprofessionnelle",
@@ -422,7 +422,12 @@ def create_social_chart(data, variable):
     # ========================================================
     # Séries
     # ========================================================
-
+    display_names = {
+        "Santé perçue bonne ou très bonne": "Bonne ou très bonne santé perçue",
+        "Limitation d'activité": "Limitation dans les activités habituelles",
+        "Diabète déclaré": "Diabète déclaré",
+    }
+    
     for indicateur in [
         "Santé perçue bonne ou très bonne",
         "Limitation d'activité",
@@ -481,7 +486,7 @@ def create_social_chart(data, variable):
 
                 mode=mode,
 
-                name=indicateur,
+                name=display_names[indicateur],
 
                 line=dict(
                     color=style["color"],
@@ -730,7 +735,7 @@ def create_fdep_health_chart(regions, relations, indicateur):
             "libelle": "Santé perçue bonne ou très bonne",
             "axe_y": "Population en bonne ou très bonne santé perçue (%)",
             "titre": (
-                "Une défavorisation plus élevée est associée "
+                "Une plus forte défavorisation est associée "
                 "à une moins bonne santé perçue"
             ),
             "color": COLOR_HEALTH,
@@ -739,10 +744,10 @@ def create_fdep_health_chart(regions, relations, indicateur):
         "limitation": {
             "colonne": "limitation_activite",
             "libelle": "Limitation d'activité",
-            "axe_y": "Population déclarant une limitation d'activité (%)",
+            "axe_y": "Population limitée dans ses activités habituelles (%)",
             "titre": (
-                "La relation entre défavorisation et limitation "
-                "d'activité est moins nette"
+                "Les limitations progressent avec la défavorisation, "
+                "mais de façon moins régulière"
             ),
             "color": COLOR_RASPBERRY,
         },
@@ -753,7 +758,7 @@ def create_fdep_health_chart(regions, relations, indicateur):
             "axe_y": "Population déclarant un diabète (%)",
             "titre": (
                 "Le diabète déclaré est plus fréquent "
-                "dans les territoires plus défavorisés"
+                "dans les régions plus défavorisées"
             ),
             "color": COLOR_ORANGE,
         },
@@ -934,29 +939,6 @@ def create_fdep_health_chart(regions, relations, indicateur):
                 color=COLOR_TEXT,
             ),
         ),
-
-        annotations=[
-            dict(
-                x=0,
-                y=1.10,
-                xref="paper",
-                yref="paper",
-
-                text=(
-                    f"<b>r = {correlation:.2f}</b>"
-                    f"   ·   p = {p_value:.3f}"
-                    "   ·   13 régions"
-                ),
-
-                showarrow=False,
-                xanchor="left",
-
-                font=dict(
-                    size=12,
-                    color=COLOR_MUTED,
-                ),
-            ),
-        ],
     )
 
     # --------------------------------------------------------
@@ -1183,7 +1165,7 @@ def create_apl_comparison_chart(relations):
 
     labels = {
         "Santé perçue bonne ou très bonne": "Santé perçue",
-        "Limitation d'activité": "Limitation d'activité",
+        "Limitation d'activité": "Limitations dans les activités habituelles",
         "Diabète déclaré": "Diabète déclaré",
     }
 
@@ -1192,7 +1174,7 @@ def create_apl_comparison_chart(relations):
 
     ordre = [
         "Santé perçue",
-        "Limitation d'activité",
+        "Limitations dans les activités habituelles",
         "Diabète déclaré",
     ]
 
@@ -1240,7 +1222,7 @@ def create_apl_comparison_chart(relations):
             x=data["correlation_apl"],
             y=data["label"],
             mode="markers+text",
-            name="Association brute",
+            name="Association brute avec l'APL",
             marker=dict(
                 size=12,
                 symbol="circle",

@@ -348,7 +348,7 @@ p {
    ========================================================== */
 
 /* ==========================================================
-   6. Blocs de questionnement
+    Blocs de questionnement
    ========================================================== */
 
 .question-block {
@@ -411,6 +411,70 @@ p {
 
     line-height: 1.35;
 }
+
+/* ==========================================================
+   Détails acceuil
+   ========================================================== */
+
+.home-details {
+    margin-top: 40px;
+    margin-bottom: 12px;
+}
+
+.home-details > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    width: fit-content;
+    padding: 11px 16px;
+
+    background: #ffffff;
+    border: 1px solid #d8e1ef;
+    border-radius: 10px;
+
+    color: var(--blue);
+    font-weight: 600;
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.home-details > summary:hover {
+    border-color: var(--raspberry);
+    color: var(--raspberry);
+    transform: translateY(-1px);
+}
+
+.home-details > summary::marker {
+    display: none;
+}
+
+.home-details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.home-details > summary::before {
+    content: "＋";
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.home-details[open] > summary::before {
+    content: "−";
+}
+
+.home-details[open] > summary {
+    margin-bottom: 24px;
+}
+
+.home-project-note {
+    margin: 0 0 12px;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
 
 /* ==========================================================
    Blocs pédagogiques
@@ -645,7 +709,6 @@ p {
 .dashboard-visual,
 .dashboard-reading-block,
 .dashboard-info-block,
-.dashboard-source-block,
 .summary-card,
 .profile-card,
 .region-details,
@@ -767,13 +830,6 @@ p {
         30px;
 }
 
-
-.reading-guide > h2:first-child,
-.reading-guide > h3:first-child {
-    margin-top: 0;
-}
-
-
 .method-note {
     margin:
         30px
@@ -819,29 +875,26 @@ p {
     margin: 0;
 }
 
-.method-data-note {
-    margin-top: 20px;
-    padding: 18px 20px;
-
-    background: rgba(255, 255, 255, 0.72);
-
-    border: 1px solid var(--border);
-
-    border-radius: var(--radius-medium);
+.method-details {
+    margin: 28px 0 48px;
 }
 
-.method-data-note p {
-    margin-bottom: 10px;
+.method-details > summary {
+    width: fit-content;
 
-    color: var(--text-muted);
+    color: var(--blue);
 
-    font-size: 0.82rem;
+    font-weight: 650;
 
-    line-height: 1.5;
+    cursor: pointer;
 }
 
-.method-data-note p:last-child {
-    margin-bottom: 0;
+.method-details > summary:hover {
+    color: var(--raspberry);
+}
+
+.method-details[open] > summary {
+    margin-bottom: 20px;
 }
 
 
@@ -935,8 +988,6 @@ p {
 
 
 .dashboard-header h2 {
-    position: relative;
-
     margin-top: 0;
     margin-bottom: 8px;
 }
@@ -1008,8 +1059,7 @@ p {
    ---------------------------------------------------------- */
 
 .dashboard-reading-block,
-.dashboard-info-block,
-.dashboard-source-block {
+.dashboard-info-block {
     min-width: 0;
 
     padding:
@@ -1019,11 +1069,10 @@ p {
 
 
 /*
-   Lecture et Source gardent leur hauteur naturelle.
+   Lecture garde la hauteur naturelle.
 */
 
-.dashboard-reading-block,
-.dashboard-source-block {
+.dashboard-reading-block {
     flex:
         0
         0
@@ -1033,12 +1082,7 @@ p {
 
 /*
    Repères occupe l'espace restant.
-
-   Cela fonctionne aussi bien avec :
-   Lecture + Repères
-   que
-   Lecture + Repères + Source.
-*/
+   */
 
 .dashboard-info-block {
     flex:
@@ -1100,8 +1144,7 @@ p {
 }
 
 
-.dashboard-info-block p,
-.dashboard-source-block p {
+.dashboard-info-block p {
     margin:
         0
         0
@@ -1115,8 +1158,7 @@ p {
 }
 
 
-.dashboard-info-block p:last-child,
-.dashboard-source-block p:last-child {
+.dashboard-info-block p:last-child {
     margin-bottom: 0;
 }
 
@@ -1142,7 +1184,11 @@ p {
    12. SYNTHÈSE SOCIALE
    ========================================================== */
 
-   .summary-cards {
+.social-summary {
+    margin-top: 72px;
+}
+
+.summary-cards {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
 
@@ -1628,24 +1674,6 @@ p {
     margin-bottom: 18px;
 
     font-size: 1rem;
-
-    line-height: 1.55;
-}
-
-
-/* Résultat principal */
-
-.profiles-key-result {
-    margin:
-        18px
-        0
-        28px;
-
-    padding:
-        17px
-        22px;
-
-    font-size: 0.92rem;
 
     line-height: 1.55;
 }
@@ -2544,27 +2572,6 @@ p {
         1px solid var(--border);
 }
 
-
-.about-challenge {
-    margin:
-        40px
-        0;
-
-    padding:
-        26px
-        30px;
-
-    background:
-        rgba(232, 189, 249, 0.08);
-
-    border:
-        1px solid rgba(17, 75, 138, 0.08);
-
-    border-radius:
-        var(--radius-medium);
-}
-
-
 .sources {
     margin-top:
         44px;
@@ -2635,7 +2642,7 @@ a:hover {
 
     position: relative;
 
-    margin-top: 64px;
+    margin-top: 44px;
 
     padding:
         22px
@@ -2736,6 +2743,18 @@ a:hover {
 
     line-height:
         1.65;
+}
+
+.source-note {
+    margin-top: -18px;
+    margin-bottom: 44px;
+
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.source-note a {
+    color: var(--blue);
 }
 
 /* ==========================================================
@@ -2941,7 +2960,6 @@ a:hover {
 
     .question-block,
     .takeaway,
-    .social-summary,
     .reading-guide {
         padding:
             22px;
