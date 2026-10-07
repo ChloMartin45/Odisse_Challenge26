@@ -79,3 +79,27 @@ def load_profils_clusters():
     return pd.read_csv(
         DATA_DIR / "profils_clusters.csv"
     )
+
+# ============================================================
+# 4. Focus diabète
+# ============================================================
+
+def load_diabete_age_sexe():
+    """Charge les estimations du diabète déclaré selon l'âge et le sexe."""
+
+    return pd.read_csv(
+        DATA_DIR / "focus_diabete_age_sexe.csv"
+    )
+    
+def load_diabete_ecart_sexe_age():
+    """Charge l'écart hommes-femmes du diabète déclaré selon l'âge."""
+
+    return pd.read_csv(
+        DATA_DIR / "focus_diabete_ecart_sexe_age.csv"
+    )
+
+def load_diabete_residus_regions():
+    """Charge les écarts régionaux au modèle FDep -> diabète."""
+    return pd.read_csv(
+        DATA_DIR / "focus_diabete_residus_regions.csv"
+    )

@@ -559,6 +559,140 @@ bind_rows(
     .groups = "drop"
   )
 
+# Partie bonus pour le diabète
+
+# Diabète déclaré selon l'âge et le sexe
+
+# Cette base est préparée pour le focus diabète de l'application.
+# Les estimations sont nationales et les autres dimensions sociales
+# sont maintenues à la modalité « Tous ».
+
+diabete_age_sexe <- diabete_declare |>
+  filter(
+    `Classe d'âge` != "Tous",
+    Diplôme == "Tous",
+    PCS == "Tous",
+    `Situation financière perçue` == "Tous",
+    `Nouvelles régions` == "Tous",
+    Sexe %in% c(
+      "Tous",
+      "Hommes",
+      "Femmes"
+    )
+  ) |>
+  select(
+    Sexe,
+    `Classe d'âge`,
+    Estimation,
+    ic_inf,
+    ic_sup,
+    Effectif.Brut
+  )
+
+
+# Contrôle de la base diabète âge × sexe
+
+controle_diabete_age_sexe <- diabete_age_sexe |>
+  summarise(
+    nb_observations = n(),
+    nb_sexes = n_distinct(Sexe),
+    nb_classes_age = n_distinct(`Classe d'âge`),
+    
+    nb_estimations_manquantes =
+      sum(is.na(Estimation)),
+    
+    nb_ic_inf_manquants =
+      sum(is.na(ic_inf)),
+    
+    nb_ic_sup_manquants =
+      sum(is.na(ic_sup)),
+    
+    nb_effectifs_manquants =
+      sum(is.na(Effectif.Brut))
+  )
+
+print(controle_diabete_age_sexe)
+
+controle_doublons_diabete_age_sexe <- diabete_age_sexe |>
+  count(
+    Sexe,
+    `Classe d'âge`
+  ) |>
+  filter(n != 1)
+
+print(controle_doublons_diabete_age_sexe)
+
+# D'où viennent les 2 valeurs manquantes
+diabete_age_sexe |>
+  filter(
+    is.na(Estimation) |
+      is.na(ic_inf) |
+      is.na(ic_sup) |
+      is.na(Effectif.Brut)
+  ) |>
+  arrange(
+    Sexe,
+    `Classe d'âge`
+  ) |>
+  print(n = Inf)
+
+
+diabete_age_sexe |>
+  arrange(
+    factor(
+      `Classe d'âge`,
+      levels = c(
+        "18-29 ans",
+        "30-39 ans",
+        "40-49 ans",
+        "50-59 ans",
+        "60-69 ans",
+        "70-79 ans"
+      )
+    ),
+    Sexe
+  ) |>
+  print(n = Inf, width = Inf)
+
+
+controle_manquants_age_sexe <- diabete_age_sexe |>
+  filter(is.na(Estimation)) |>
+  select(
+    Sexe,
+    `Classe d'âge`
+  )
+
+print(controle_manquants_age_sexe)
+
+# Les 2 valeurs manquantes concernent bien les 2 -30 qu'on a enlevé plus haut (=estimations non diffusées)
+
+# Table pour les écarts hommes-femmes
+
+ecart_diabete_sexe_age <- diabete_age_sexe |>
+  filter(
+    Sexe %in% c(
+      "Hommes",
+      "Femmes"
+    )
+  ) |>
+  select(
+    Sexe,
+    `Classe d'âge`,
+    Estimation
+  ) |>
+  pivot_wider(
+    names_from = Sexe,
+    values_from = Estimation
+  ) |>
+  mutate(
+    ecart_hommes_femmes =
+      Hommes - Femmes
+  )
+
+print(
+  ecart_diabete_sexe_age,
+  n = Inf
+)
 
 # Export des données préparées 
 
@@ -595,3 +729,18 @@ write_csv(
   file.path(processed_dir, "synthese_sociale.csv")
 )
 
+write_csv(
+  diabete_age_sexe,
+  file.path(
+    processed_dir,
+    "diabete_age_sexe.csv"
+  )
+)
+
+write_csv(
+  ecart_diabete_sexe_age,
+  file.path(
+    processed_dir,
+    "ecart_diabete_sexe_age.csv"
+  )
+)

@@ -358,3 +358,139 @@ def create_map(regions):
     )
     
     return fig
+
+
+
+# ========================================================
+# 5. Carte diabète
+# ========================================================
+
+def create_diabetes_residuals_map(data):
+    """
+    Crée une carte analytique simple des écarts entre le diabète
+    observé et la valeur associée au FDep.
+    """
+
+    regions_geojson = rewind(
+        load_geojson(REGIONS_GEOJSON_PATH),
+        rfc7946=False,
+    )
+
+    data_plot = data.copy()
+
+    max_abs = max(
+        abs(data_plot["residu_diabete"]).max(),
+        0.5,
+    )
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Choropleth(
+            geojson=regions_geojson,
+            locations=data_plot["region"],
+            featureidkey="properties.region",
+            z=data_plot["residu_diabete"],
+            zmin=-max_abs,
+            zmax=max_abs,
+            zmid=0,
+
+            # Palette divergente douce
+            colorscale=[
+                [0.00, "#8B6FC0"],   # violet FDep
+                [0.40, "#CBBCE7"],
+                [0.50, "#F6F8FB"],   # neutre
+                [0.60, "#F8D6B7"],
+                [1.00, "#EC9955"],   # orange diabète
+            ],
+
+            marker_line_color="white",
+            marker_line_width=1.4,
+
+            customdata=data_plot[
+                [
+                    "diabete_declare",
+                    "diabete_attendu",
+                    "residu_diabete",
+                ]
+            ].values,
+
+            hovertemplate=(
+                "<b>%{location}</b><br><br>"
+                "Diabète déclaré : <b>%{customdata[0]:.1f} %</b><br>"
+                "Valeur associée au FDep : <b>%{customdata[1]:.1f} %</b><br>"
+                "Écart à la tendance : <b>%{customdata[2]:+.1f} point(s)</b>"
+                "<extra></extra>"
+            ),
+
+            colorbar=dict(
+                title=dict(
+                    text="Écart à la<br>tendance (pt)",
+                    side="top",
+                    font=dict(
+                        size=11,
+                        color="#17324A",
+                    ),
+                ),
+                thickness=12,
+                len=0.62,
+                x=0.98,
+                y=0.5,
+                outlinewidth=0,
+                tickfont=dict(
+                    size=10,
+                    color="#627487",
+                ),
+            ),
+        )
+    )
+
+    fig.update_geos(
+        visible=False,
+        projection_type="mercator",
+        lonaxis_range=[
+            -5.3,
+            9.8,
+        ],
+        lataxis_range=[
+            41.2,
+            51.2,
+        ],
+        bgcolor="rgba(0,0,0,0)",
+    )
+
+    fig.update_layout(
+        autosize=True,
+        height=470,
+        dragmode=False,
+        hovermode="closest",
+
+        margin=dict(
+            l=8,
+            r=24,
+            t=10,
+            b=8,
+        ),
+
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+
+        font=dict(
+            family="Outfit, Arial, sans-serif",
+            color="#17324A",
+            size=12,
+        ),
+
+        hoverlabel=dict(
+            bgcolor="white",
+            bordercolor="#D5DEE8",
+            font=dict(
+                family="Outfit, Arial, sans-serif",
+                color="#17324A",
+                size=11,
+            ),
+            align="left",
+        ),
+    )
+
+    return fig

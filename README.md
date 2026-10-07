@@ -1,25 +1,30 @@
 # Odissé Dataviz Challenge 2026 - Inégalités sociales et territoriales de santé
 
 **Équipe :** Chloé Martin  
-**Mail de contact :** [chloe_martin45@outlook.com](mailto:chloe_martin45@outlook.com) 
-**Défi :** Défi 3 — Inégalités sociales et territoriales de santé
+**Mail de contact :** mailto:chloe_martin45@outlook.com   
+**Défi :** Défi 3 — Inégalités sociales et territoriales de santé  
 
 ## Notre question
 
-**Comment les inégalités sociales et territoriales de santé se combinent-elles avec l’accessibilité aux médecins généralistes pour caractériser différents profils de territoires en France ?**
+**Comment les inégalités sociales et territoriales de santé se combinent-elles avec l’accessibilité aux médecins généralistes pour caractériser différents profils régionaux en France métropolitaine ?**
 
 La visualisation propose un parcours en trois étapes : 
 - partir des écarts de santé observés selon plusieurs caractéristiques sociales, 
 - changer ensuite d’échelle pour étudier les différences entre territoires, 
 - puis combiner plusieurs dimensions afin de faire émerger différents profils régionaux.
 
+Un **focus complémentaire sur le diabète** prolonge ce parcours sous la forme d’un cas d’étude. Il suit un même indicateur de santé à travers plusieurs angles d’analyse, social, démographique et territorial, afin d’illustrer concrètement le caractère multidimensionnel des inégalités de santé.
 ## Notre visualisation
 
-**Lien vers l’application :** [à compléter]
+**Lien vers l’application :** https://odisse-dataviz-challenge26-sante.onrender.com
+
+L’application est hébergée gratuitement via Render. Un léger temps de chargement peut être nécessaire lors de la première ouverture après une période d’inactivité. 
+
+La version mobile est fonctionnelle, mais l’affichage est plus confortable sur ordinateur.
 
 La production prend la forme d’une **application web interactive développée avec Dash et Plotly**.
 
-Elle est organisée en trois parties :
+Elle est organisée autour de trois parties principales, complétées par un cas d’étude sur le diabète :
 
 1. **Inégalités sociales**  
    Exploration des différences de santé selon la situation financière perçue, le niveau de diplôme et la catégorie socioprofessionnelle.
@@ -30,7 +35,10 @@ Elle est organisée en trois parties :
 3. **Profils territoriaux**  
    Combinaison de six indicateurs afin d’identifier quatre configurations régionales, puis exploration interactive de chaque région à travers une carte et un profil standardisé.
 
-L’objectif n’est pas d’établir un classement des régions, mais de montrer que les inégalités territoriales de santé résultent de configurations multidimensionnelles. Une meilleure accessibilité aux médecins généralistes ne coïncide notamment pas systématiquement avec des indicateurs de santé plus favorables.
+**Focus · Diabète — cas d’étude complémentaire**  
+Le diabète déclaré est suivi selon plusieurs dimensions : niveau de diplôme, âge, sexe et contexte territorial. Une analyse régionale compare également le niveau observé de diabète à la valeur suggérée par la tendance avec le FDep afin de repérer les régions qui s’en écartent davantage.
+
+L’objectif n’est pas d’établir un classement des régions, mais de montrer que les inégalités de santé résultent de configurations multidimensionnelles. Une meilleure accessibilité aux médecins généralistes ne coïncide notamment pas systématiquement avec des indicateurs de santé plus favorables, et un même indicateur comme le diabète peut faire apparaître des écarts différents selon l’angle d’analyse retenu.
 
 ## Les données utilisées
 
@@ -47,10 +55,10 @@ L’objectif n’est pas d’établir un classement des régions, mais de montre
 https://www.santepubliquefrance.fr/sites/default/files/rdd/document/907125_spf00006377.pdf
 
 Les données mobilisées ne correspondent pas toutes exactement à la même année : 
-- FDep repose sur des données socio-économiques 2020,
-- F-EDI sur 2021, 
-- l’APL et la population sur 2023 
-- et les indicateurs de santé sur le Baromètre 2024.
+- FDep repose sur des données socio-économiques 2020 ;
+- F-EDI sur 2021 ;
+- l’APL et la population sur 2023 ;
+- les indicateurs de santé sur le Baromètre 2024.
 
 Pour les analyses régionales, le FDep, le F-EDI et l’APL sont agrégés à l’échelle régionale par **moyenne pondérée par la population communale 2023**. Les indicateurs du Baromètre 2024 sont utilisés directement à leur échelle régionale.
 
@@ -80,7 +88,8 @@ R/
 ├── 01_prepare_social.R
 ├── 02_prepare_territoire.R
 ├── 03_prepare_region.R
-└── 04_analyses.R
+├── 04_analyses.R
+└── 05_focus_diabete.R
 ```
 Ces scripts assurent notamment :
 
@@ -92,7 +101,9 @@ Ces scripts assurent notamment :
 - les analyses de corrélation ;
 - la standardisation des variables ;
 - la construction des profils territoriaux ;
-- les analyses de sensibilité.
+- les analyses de sensibilité ;
+- la préparation du focus diabète selon l’âge et le sexe ;
+- l’estimation d’un modèle linéaire exploratoire entre FDep régional et diabète déclaré, puis le calcul des résidus régionaux.
   
 Les fichiers utilisés par l’application Python sont exclusivement des exports produits à l’issue de cette chaîne de préparation sous R.
 
@@ -146,6 +157,19 @@ Une **classification hiérarchique** permet ensuite de rapprocher les régions p
 
 Des analyses de sensibilité ont également été réalisées en faisant varier le nombre de groupes et en retirant successivement le F-EDI et l’APL.
 
+### Focus diabète : lecture complémentaire
+
+Le focus diabète reprend un seul indicateur de santé afin d’observer comment les écarts varient selon plusieurs dimensions.
+
+Deux analyses complémentaires sont proposées :
+
+- une comparaison du diabète déclaré selon **l’âge et le sexe**, avec les intervalles de confiance à 95 % fournis par le Baromètre 2024 ;
+- une analyse territoriale exploratoire reliant le **FDep régional** au **diabète déclaré** à l’aide d’un modèle linéaire simple.
+
+Pour chaque région, l’écart entre la valeur observée et la valeur estimée par cette tendance est calculé. Un résidu positif correspond à davantage de diabète déclaré que ne le suggère la tendance générale, tandis qu’un résidu négatif correspond à une valeur plus faible.
+
+Cette analyse porte sur seulement 13 régions métropolitaines. Elle sert à décrire des écarts à une tendance générale et ne constitue ni un classement des régions ni une démonstration causale.
+
 Ces analyses restent exploratoires : les relations observées ne permettent pas d’établir de causalité et les indices de défavorisation utilisés sont des indicateurs écologiques caractérisant les territoires, et non la situation individuelle de leurs habitants.
 
 Les définitions des indicateurs, leurs unités et leur sens de lecture, ainsi que les principales précautions d’interprétation et la méthode de construction des profils territoriaux, sont également présentés directement dans l’interface de l’application. La partie consacrée aux profils détaille notamment la standardisation des indicateurs, la classification hiérarchique, le choix des quatre groupes et les analyses de sensibilité réalisées.
@@ -194,7 +218,8 @@ Odisse_Challenge26/
 │   ├── 01_prepare_social.R
 │   ├── 02_prepare_territoire.R
 │   ├── 03_prepare_region.R
-│   └── 04_analyses.R
+│   ├── 04_analyses.R
+│   └── 05_focus_diabete.R
 │
 ├── data/
 │   ├── raw/
@@ -222,7 +247,7 @@ Odisse_Challenge26/
 - `layout.py` : structure et contenu de l’interface ;
 - `callbacks.py` : gestion des interactions ;
 - `charts.py` : construction des graphiques Plotly ;
-- `maps.py` : construction de la carte des profils territoriaux ;
+- `maps.py` : construction des cartes des profils territoriaux et du focus diabète ;
 - `assets/style.css` : mise en forme de l’application.
 
 Cette organisation permet de conserver une séparation entre **traitement des données**, **analyse statistique**, **visualisation** et **interface**.
