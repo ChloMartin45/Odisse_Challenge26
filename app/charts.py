@@ -1802,6 +1802,9 @@ def create_apl_comparison_chart(relations):
             bgcolor="rgba(255,255,255,0.88)",
             bordercolor="#D5DEE8",
             borderwidth=1,
+            
+            itemclick=False,
+            itemdoubleclick=False,
         ),
 
         hoverlabel=dict(

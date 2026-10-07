@@ -148,8 +148,7 @@ modele_fdep_diabete <- lm(
   data = analyse_regions
 )
 
-
-# Valeurs attendues et résidus
+# Résidus régionaux
 
 diabete_residus_regions <- analyse_regions |>
   mutate(
@@ -159,25 +158,114 @@ diabete_residus_regions <- analyse_regions |>
       ),
     
     residu_diabete =
-      resid(
-        modele_fdep_diabete
-      )
+      diabete_declare - diabete_attendu,
+    
+    position = case_when(
+      residu_diabete > 0 ~
+        "Au-dessus de la tendance",
+      
+      residu_diabete < 0 ~
+        "En dessous de la tendance",
+      
+      TRUE ~
+        "Proche de la tendance"
+    ),
+    
+    importance_ecart =
+      abs(residu_diabete)
   ) |>
   select(
     region,
     fdep_pondere,
     diabete_declare,
     diabete_attendu,
-    residu_diabete
+    residu_diabete,
+    importance_ecart,
+    position
   ) |>
   arrange(
-    desc(residu_diabete)
+    residu_diabete
   )
 
 print(
   diabete_residus_regions,
   n = 13
 )
+
+# ============================================================
+# Statistiques du modèle
+# ============================================================
+
+resume_modele_fdep <- summary(
+  modele_fdep_diabete
+)
+
+stats_modele_fdep <- tibble(
+  pente = coef(modele_fdep_diabete)[["fdep_pondere"]],
+  constante = coef(modele_fdep_diabete)[["(Intercept)"]],
+  r2 = resume_modele_fdep$r.squared,
+  r2_ajuste = resume_modele_fdep$adj.r.squared,
+  p_value_fdep = resume_modele_fdep$coefficients[
+    "fdep_pondere",
+    "Pr(>|t|)"
+  ]
+)
+
+print(
+  stats_modele_fdep
+)
+
+# ============================================================
+# Test de sensibilité du modèle
+# ============================================================
+
+modele_sans_idf_bretagne <- lm(
+  diabete_declare ~ fdep_pondere,
+  data = analyse_regions |>
+    filter(
+      !region %in% c(
+        "Île-de-France",
+        "Bretagne"
+      )
+    )
+)
+
+resume_sans_idf_bretagne <- summary(
+  modele_sans_idf_bretagne
+)
+
+sensibilite_modele <- tibble(
+  scenario = c(
+    "Toutes les régions",
+    "Sans Île-de-France et Bretagne"
+  ),
+  
+  pente = c(
+    coef(modele_fdep_diabete)[["fdep_pondere"]],
+    coef(modele_sans_idf_bretagne)[["fdep_pondere"]]
+  ),
+  
+  r2 = c(
+    resume_modele_fdep$r.squared,
+    resume_sans_idf_bretagne$r.squared
+  ),
+  
+  p_value = c(
+    resume_modele_fdep$coefficients[
+      "fdep_pondere",
+      "Pr(>|t|)"
+    ],
+    resume_sans_idf_bretagne$coefficients[
+      "fdep_pondere",
+      "Pr(>|t|)"
+    ]
+  )
+)
+
+print(
+  sensibilite_modele
+)
+
 
 # 5. Exports pour Dash
 
@@ -205,6 +293,13 @@ write_csv(
   )
 )
 
+write_csv(
+  stats_modele_fdep,
+  file.path(
+    processed_dir,
+    "focus_diabete_modele_fdep.csv"
+  )
+)
 
 
 

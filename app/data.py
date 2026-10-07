@@ -97,3 +97,9 @@ def load_diabete_ecart_sexe_age():
     return pd.read_csv(
         DATA_DIR / "focus_diabete_ecart_sexe_age.csv"
     )
+
+def load_diabete_residus_regions():
+    """Charge les écarts régionaux au modèle FDep -> diabète."""
+    return pd.read_csv(
+        DATA_DIR / "focus_diabete_residus_regions.csv"
+    )

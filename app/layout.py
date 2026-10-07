@@ -7,6 +7,8 @@ from charts import (
     create_diabetes_age_sex_chart,
 )
 
+from maps import create_diabetes_residuals_map
+
 # ============================================================
 # CONFIGURATION COMMUNES POUR SOULAGER LE CODE
 # ============================================================
@@ -2581,6 +2583,7 @@ def create_diabetes_focus(
     diabete_age_sexe,
     diabete_ecart_sexe_age,
     synthese_sociale,
+    diabete_residus_regions,
 ):
     # ========================================================
     # Lecture dynamique — âge et sexe
@@ -2616,6 +2619,26 @@ def create_diabetes_focus(
     
     def format_number(value):
         return f"{value:.1f}".replace(".", ",")
+    
+    region_plus = (
+        diabete_residus_regions
+        .sort_values("residu_diabete", ascending=False)
+        .iloc[0]
+    )
+
+    region_moins = (
+        diabete_residus_regions
+        .sort_values("residu_diabete", ascending=True)
+        .iloc[0]
+    )
+
+    nb_proches_tendance = (
+        diabete_residus_regions["residu_diabete"]
+        .abs()
+        .lt(1)
+        .sum()
+    )
+    
 
     return html.Div(
         [
@@ -2635,25 +2658,65 @@ def create_diabetes_focus(
             
             html.P(
                 [
-                    "L’analyse des inégalités sociales a déjà montré que le diabète déclaré "
-                    "varie selon la situation financière, le niveau de diplôme et la catégorie "
-                    "socioprofessionnelle. Parmi ces dimensions, le niveau de diplôme présente "
-                    "l’écart le plus marqué : ",
-                    html.Strong(
-                        f"{format_number(abs(diplome_focus['ecart']))} points"
-                    ),
-                    " séparent ",
-                    html.Strong(
-                        diplome_focus["groupe_comparaison"]
-                    ),
-                    " de ",
-                    html.Strong(
-                        diplome_focus["groupe_reference"]
-                    ),
-                    ". Ce focus prolonge cette lecture en examinant maintenant une autre "
-                    "dimension : l’âge et le sexe.",
+                    "L’analyse précédente a montré que le diabète déclaré varie selon plusieurs "
+                    "caractéristiques sociales. Mais ces écarts sociaux ne constituent qu’une partie "
+                    "de l’histoire. Ce focus conserve un même indicateur, le diabète déclaré, "
+                    "et change successivement de regard pour observer comment les inégalités "
+                    "se manifestent selon ",
+                    html.Strong("le niveau de diplôme, l’âge, le sexe et le contexte territorial"),
+                    "."
                 ],
                 className="intro",
+            ),
+            
+            html.Div(
+                [
+                    html.P(
+                        "POINT DE DÉPART · DIMENSION SOCIALE",
+                        className="dashboard-eyebrow",
+                    ),
+
+                    html.H3(
+                        "Le niveau de diplôme fait déjà apparaître un écart marqué"
+                    ),
+
+                    html.P(
+                        [
+                            "Dans le Baromètre 2024, ",
+                            html.Strong(
+                                f"{format_number(abs(diplome_focus['ecart']))} points"
+                            ),
+                            " séparent ",
+                            html.Strong(
+                                diplome_focus["groupe_comparaison"]
+                            ),
+                            " de ",
+                            html.Strong(
+                                diplome_focus["groupe_reference"]
+                            ),
+                            " pour le diabète déclaré."
+                        ]
+                    ),
+
+                    html.Div(
+                        [
+                            html.Span(
+                                "Dimension sociale",
+                                className="context-tag",
+                            ),
+                            html.Span(
+                                "Baromètre 2024",
+                                className="context-tag",
+                            ),
+                            html.Span(
+                                "Écart en points de %",
+                                className="context-tag",
+                            ),
+                        ],
+                        className="context-tags",
+                    ),
+                ],
+                className="learning-card",
             ),
             
             # ====================================================
@@ -2667,13 +2730,12 @@ def create_diabetes_focus(
                         [
 
                             html.H2(
-                                "Le diabète déclaré augmente avec l’âge, "
-                                "mais pas de la même manière chez les femmes et les hommes"
+                                "Avec l’âge, l’écart de diabète déclaré se creuse entre femmes et hommes"
                             ),
 
                             html.P(
-                                "Le Baromètre 2024 permet d'observer comment la fréquence "
-                                "du diabète déclaré évolue selon l'âge et le sexe."
+                                "Le Baromètre 2024 permet de suivre la fréquence du diabète déclaré "
+                                "selon l’âge et le sexe et de comparer l’évolution des deux trajectoires."
                             ),
 
                         ],
@@ -2709,12 +2771,17 @@ def create_diabetes_focus(
                                             ),
 
                                             html.H3(
-                                                "L’écart entre femmes et hommes "
-                                                "s’accentue avec l’âge",
+                                                [
+                                                    "L’écart apparaît à partir de ",
+                                                    html.Strong(
+                                                        premier_ecart_positif["classe_age"]
+                                                    ),
+                                                    " et atteint son maximum aux âges les plus élevés",
+                                                ],
                                                 className="dashboard-reading-title",
                                             ),
 
-                                                                                        html.P(
+                                            html.P(
                                                 [
                                                     "À partir de ",
                                                     html.Strong(
@@ -2788,10 +2855,190 @@ def create_diabetes_focus(
                 className="dashboard-section",
             ),
             
+            html.Div(
+                [
+                    html.P(
+                        "L’âge et le sexe montrent ainsi que les écarts de diabète ne sont pas uniformes "
+                        "au sein de la population. Changeons maintenant d’échelle : retrouve-t-on cette "
+                        "hétérogénéité lorsque l’on compare les régions ?"
+                    ),
+                ],
+                className="transition",
+            ),
+            
             # ====================================================
-            # 2. TERRITOIRES ?
+            # 2. TERRITOIRES
             # ====================================================
             
+            html.Div(
+                [
+                    html.Div(
+                        [
+                            html.H2(
+                                "La défavorisation suffit-elle à expliquer "
+                                "les différences régionales de diabète ?"
+                            ),
+
+                            html.P(
+                                "À l’échelle régionale, une défavorisation plus élevée est associée "
+                                "à davantage de diabète déclaré. Pour aller plus loin, on peut observer "
+                                "si chaque région se situe au niveau attendu compte tenu de cette tendance générale."
+                            ),
+                        ],
+                        className="dashboard-header",
+                    ),
+                    
+                    html.Details(
+                        [
+                            html.Summary(
+                                "Comprendre comment les écarts à la tendance sont calculés"
+                            ),
+
+                            html.Div(
+                                [
+                                    html.P(
+                                        "COMPRENDRE LA CARTE",
+                                        className="dashboard-eyebrow",
+                                    ),
+
+                                    html.H3(
+                                        "Comparer chaque région à la tendance générale"
+                                    ),
+
+                                    html.P(
+                                        "Un modèle linéaire exploratoire relie le niveau régional "
+                                        "de défavorisation FDep au diabète déclaré. Pour chaque région, "
+                                        "on calcule ensuite l’écart entre la valeur observée et la valeur "
+                                        "estimée par cette tendance."
+                                    ),
+
+                                    html.P(
+                                        [
+                                            html.Strong("Résidu positif : "),
+                                            "davantage de diabète déclaré que ne le suggère la tendance générale. "
+                                        ]
+                                    ),
+                                    
+                                    html.P(
+                                        [
+                                            html.Strong("Résidu négatif : "),
+                                            "moins de diabète déclaré que ne le suggère cette tendance."
+                                        ]
+                                    ),
+
+                                    html.Div(
+                                        [
+                                            html.Span(
+                                                "13 régions métropolitaines",
+                                                className="context-tag",
+                                            ),
+
+                                            html.Span(
+                                                "Régression linéaire exploratoire",
+                                                className="context-tag",
+                                            ),
+
+                                            html.Span(
+                                                "Résidus en points de %",
+                                                className="context-tag",
+                                            ),
+                                        ],
+                                        className="context-tags",
+                                    ),
+                                ],
+                                className="learning-card",
+                            ),
+                        ],
+                        className="method-details",
+                    ),
+
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                    dcc.Graph(
+                                        id="diabetes-residuals-map",
+                                        figure=create_diabetes_residuals_map(
+                                            diabete_residus_regions
+                                        ),
+                                        config=GRAPH_CONFIG,
+                                        className="dashboard-chart",
+                                    ),
+                                ],
+                                className="dashboard-visual",
+                            ),
+                            html.Div(
+                                [
+                                    html.Div(
+                                        [
+                                            html.P(
+                                                "LECTURE",
+                                                className="dashboard-eyebrow",
+                                            ),
+
+                                            html.H3(
+                                                "La tendance générale ne décrit pas "
+                                                "toutes les régions de la même manière",
+                                                className="dashboard-reading-title",
+                                            ),
+
+                                            html.P(
+                                                f"{nb_proches_tendance} régions sur 13 présentent un écart "
+                                                "inférieur à 1 point par rapport à la valeur associée à leur "
+                                                "niveau de FDep. Deux régions s'en écartent davantage : "
+                                                f"{region_moins['region']} "
+                                                f"({region_moins['residu_diabete']:.1f} points) "
+                                                "se situe en dessous de cette tendance, tandis que "
+                                                f"{region_plus['region']} "
+                                                f"({region_plus['residu_diabete']:.1f} points) "
+                                                "se situe au-dessus.",
+                                                className="dashboard-reading-text",
+                                            ),
+                                        ],
+                                        className="dashboard-reading-block",
+                                    ),
+
+                                    html.Div(
+                                        [
+                                            html.P(
+                                                "REPÈRES",
+                                                className="dashboard-eyebrow",
+                                            ),
+
+                                            html.P(
+                                                "La carte représente l’écart entre le diabète déclaré observé "
+                                                "et la valeur suggérée par la tendance avec le FDep."
+                                            ),
+
+                                            html.P(
+                                                [
+                                                    html.Strong("Violet : "),
+                                                    "moins de diabète déclaré que ne le suggère la tendance."
+                                                ]
+                                            ),
+
+                                            html.P(
+                                                [
+                                                    html.Strong("Orange : "),
+                                                    "davantage de diabète déclaré que ne le suggère la tendance."
+                                                ]
+                                            ),
+
+                                            html.P(
+                                                "Il ne s’agit pas d’un classement des régions."
+                                            ),
+                                        ],
+                                        className="dashboard-info-block",
+                                    ),
+                                ],
+                                className="dashboard-side",
+                            ),
+                        ],
+                        className="dashboard-body",
+                    ),
+                ],
+                className="dashboard-section",
+            ),
             
             # ====================================================
             # À RETENIR
@@ -2808,23 +3055,50 @@ def create_diabetes_focus(
                     html.P(
                         [
                             html.Strong(
-                                "Le diabète déclaré cumule plusieurs dimensions d’inégalités. "
+                                "Un même indicateur de santé révèle plusieurs formes d’inégalités selon l’angle depuis lequel on l’observe. "
                             ),
-                            "Les écarts sociaux observés précédemment se prolongent par des différences "
-                            "démographiques nettes : avec l’âge, le diabète déclaré augmente fortement "
-                            "et l’écart entre femmes et hommes devient particulièrement marqué dans "
-                            "les classes d’âge les plus élevées."
+                            "Le diabète déclaré présente des écarts sociaux, notamment selon le niveau de diplôme ; "
+                            "des différences démographiques qui s’accentuent avec l’âge entre femmes et hommes ; "
+                            "et une géographie régionale associée à la défavorisation, sans que celle-ci explique "
+                            "à elle seule toutes les situations observées."
                         ]
                     ),
 
                     html.P(
-                        "Ces résultats restent descriptifs. Ils ne permettent pas, à eux seuls, "
-                        "d’isoler un effet propre de chaque caractéristique.",
-                        className="note",
+                        [
+                            html.Strong(
+                                "Ce cas d’étude renforce ainsi le constat général de l’exploration : "
+                            ),
+                            "les inégalités de santé sont multidimensionnelles et ne peuvent être résumées "
+                            "par une seule caractéristique sociale, démographique ou territoriale."
+                        ]
                     ),
-
                 ],
                 className="takeaway",
+            ),
+            
+            # ====================================================
+            # PRÉCAUTIONS DE LECTURE
+            # ====================================================
+            html.Div(
+                [
+                    html.H3(
+                        "Précautions de lecture"
+                    ),
+
+                    html.P(
+                        "Ces analyses sont descriptives et exploratoires. Elles montrent des différences "
+                        "et des associations observées dans les données mais ne permettent pas d’isoler "
+                        "un effet causal propre du diplôme, de l’âge, du sexe ou du contexte territorial."
+                    ),
+
+                    html.P(
+                        "L’analyse territoriale porte sur 13 régions métropolitaines. Le FDep caractérise "
+                        "le contexte social d’un territoire et ne mesure pas la situation sociale "
+                        "individuelle de ses habitants."
+                    ),
+                ],
+                className="method-note",
             ),
             
             # ====================================================
@@ -2833,10 +3107,7 @@ def create_diabetes_focus(
 
             html.Div(
                 [
-
-                    html.Strong(
-                        "Source : "
-                    ),
+                    html.Strong("Sources : "),
 
                     html.A(
                         "Diabète — Baromètre 2024",
@@ -2848,10 +3119,21 @@ def create_diabetes_focus(
                         target="_blank",
                     ),
 
+                    html.Span(" · "),
+
+                    html.A(
+                        "Indice de défavorisation sociale FDep",
+                        href=(
+                            "https://odisse.santepubliquefrance.fr/"
+                            "explore/assets/"
+                            "indice-de-defavorisation-sociale-fdep-par-commune/"
+                        ),
+                        target="_blank",
+                    ),
+
                     html.Span(
                         " — Santé publique France, Odissé."
                     ),
-
                 ],
                 className="sources",
             ),
@@ -2902,6 +3184,7 @@ def create_layout(
     map_figure,
     diabete_age_sexe,
     diabete_ecart_sexe_age,
+    diabete_residus_regions,
 ):
 
     return html.Div([
@@ -2968,7 +3251,7 @@ def create_layout(
                         ),
                         
                         html.Button(
-                            "Bonus · Focus diabète",
+                            "Focus · diabète",
                             id="mobile-go-diabete",
                             className="mobile-nav-item",
                             n_clicks=0,
@@ -3041,7 +3324,7 @@ def create_layout(
                 ),
                 
                 dcc.Tab(
-                    label="Bonus · Focus diabète",
+                    label="Focus · diabète",
                     value="diabete",
                     className="app-tab",
                     selected_className="app-tab app-tab--selected",
@@ -3050,6 +3333,7 @@ def create_layout(
                         diabete_age_sexe,
                         diabete_ecart_sexe_age,
                         synthese_sociale,
+                        diabete_residus_regions,
                     ),
                 ),
 

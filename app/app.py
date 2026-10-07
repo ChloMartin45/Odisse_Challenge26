@@ -11,10 +11,12 @@ from data import (
     load_profils_clusters,
     load_diabete_age_sexe,
     load_diabete_ecart_sexe_age,
+    load_diabete_residus_regions,
 )
 
-from layout import create_layout
 from maps import create_map
+
+from layout import create_layout
 from callbacks import register_callbacks
 
 
@@ -46,6 +48,8 @@ profils_clusters = load_profils_clusters()
 diabete_age_sexe = load_diabete_age_sexe()
 diabete_ecart_sexe_age = load_diabete_ecart_sexe_age()
 
+diabete_residus_regions = load_diabete_residus_regions()
+
 # ============================================================
 # Carte
 # ============================================================
@@ -67,6 +71,7 @@ app.layout = create_layout(
     map_figure,
     diabete_age_sexe,
     diabete_ecart_sexe_age,
+    diabete_residus_regions,
 )
 
 

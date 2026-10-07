@@ -3122,10 +3122,6 @@ a:hover {
         grid-template-columns:
             1fr;
     }
-
-    .dashboard-side {
-        grid-template-columns: 1fr;
-    }
     
     .profiles-explorer-map {
         height: 460px;
