@@ -97,17 +97,3 @@ def load_diabete_ecart_sexe_age():
     return pd.read_csv(
         DATA_DIR / "focus_diabete_ecart_sexe_age.csv"
     )
-
-def load_diabete_social():
-    """Charge les estimations du diabète déclaré selon les dimensions sociales."""
-
-    return pd.read_csv(
-        DATA_DIR / "focus_diabete_social.csv"
-    )
-
-def load_diabete_ecarts_sociaux():
-    """Charge la synthèse des écarts sociaux du diabète déclaré."""
-
-    return pd.read_csv(
-        DATA_DIR / "focus_diabete_ecarts_sociaux.csv"
-    )

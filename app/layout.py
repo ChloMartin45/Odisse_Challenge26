@@ -555,7 +555,7 @@ def create_social_summary(synthese_sociale):
 def create_social_tab(
     finance,
     synthese_sociale,
-    diabete_age_sexe,):
+    ):
     
     # ----------------------------------------------------
     # Introduction
@@ -2579,9 +2579,8 @@ def create_profiles_tab(
 
 def create_diabetes_focus(
     diabete_age_sexe,
-    diabete_social,
     diabete_ecart_sexe_age,
-    diabete_ecarts_sociaux,
+    synthese_sociale,
 ):
     # ========================================================
     # Lecture dynamique — âge et sexe
@@ -2607,12 +2606,13 @@ def create_diabetes_focus(
     # Lecture dynamique — dimensions sociales
     # ========================================================
 
-    ecarts_sociaux = (
-        diabete_ecarts_sociaux
-        .set_index("dimension")
+    diplome_focus = (
+        synthese_sociale.loc[
+            (synthese_sociale["dimension"] == "diplome")
+            & (synthese_sociale["indicateur"] == "Diabète déclaré")
+        ]
+        .iloc[0]
     )
-
-    diplome_focus = ecarts_sociaux.loc["diplome"]
     
     def format_number(value):
         return f"{value:.1f}".replace(".", ",")
@@ -2901,9 +2901,7 @@ def create_layout(
     profils_clusters,
     map_figure,
     diabete_age_sexe,
-    diabete_social,
     diabete_ecart_sexe_age,
-    diabete_ecarts_sociaux,
 ):
 
     return html.Div([
@@ -3014,7 +3012,6 @@ def create_layout(
                     children=create_social_tab(
                         finance,
                         synthese_sociale,
-                        diabete_age_sexe,
                     ),
                 ),
 
@@ -3051,9 +3048,8 @@ def create_layout(
 
                     children=create_diabetes_focus(
                         diabete_age_sexe,
-                        diabete_social,
                         diabete_ecart_sexe_age,
-                        diabete_ecarts_sociaux,
+                        synthese_sociale,
                     ),
                 ),
 

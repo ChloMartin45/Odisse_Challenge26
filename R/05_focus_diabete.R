@@ -27,38 +27,6 @@ diabete_age_sexe <- read_csv(
   show_col_types = FALSE
 )
 
-indicateurs_finance <- read_csv(
-  file.path(
-    processed_dir,
-    "indicateurs_finance.csv"
-  ),
-  show_col_types = FALSE
-)
-
-indicateurs_diplome <- read_csv(
-  file.path(
-    processed_dir,
-    "indicateurs_diplome.csv"
-  ),
-  show_col_types = FALSE
-)
-
-indicateurs_pcs <- read_csv(
-  file.path(
-    processed_dir,
-    "indicateurs_pcs.csv"
-  ),
-  show_col_types = FALSE
-)
-
-synthese_sociale <- read_csv(
-  file.path(
-    processed_dir,
-    "synthese_sociale.csv"
-  ),
-  show_col_types = FALSE
-)
-
 analyse_regions <- read_csv(
   file.path(
     processed_dir,
@@ -80,97 +48,98 @@ ordre_age <- c(
   "70-79 ans"
 )
 
-
-diabete_age_sexe <- diabete_age_sexe |>
+focus_diabete_age_sexe <- diabete_age_sexe |>
   mutate(
     classe_age = factor(
       `Classe d'âge`,
       levels = ordre_age
+    ),
+    
+    ordre_age = match(
+      as.character(`Classe d'âge`),
+      ordre_age
+    ),
+    
+    Sexe = factor(
+      Sexe,
+      levels = c(
+        "Tous",
+        "Femmes",
+        "Hommes"
+      )
     )
   ) |>
   arrange(
-    classe_age,
+    ordre_age,
     Sexe
+  ) |>
+  select(
+    sexe = Sexe,
+    classe_age,
+    ordre_age,
+    estimation = Estimation,
+    ic_inf,
+    ic_sup,
+    effectif_brut = Effectif.Brut
   )
 
 print(
-  diabete_age_sexe,
-  n = Inf
+  focus_diabete_age_sexe,
+  n = 18
 )
 
-# 2. Extraction des dimensions sociales du diabète
-
-# Situation financière
-
-diabete_finance <- indicateurs_finance |>
-  filter(
-    Indicateur == "Diabète déclaré"
-  ) |>
-  transmute(
-    dimension = "finance",
-    dimension_label = "Situation financière",
-    groupe = situation_financiere,
-    Estimation,
-    ic_inf,
-    ic_sup,
-    Effectif.Brut
+controle_focus_age_sexe <- focus_diabete_age_sexe |>
+  summarise(
+    nb_observations = n(),
+    nb_sexes = n_distinct(sexe),
+    nb_classes_age = n_distinct(classe_age),
+    nb_estimations_manquantes =
+      sum(is.na(estimation))
   )
 
+print(controle_focus_age_sexe)
 
-# Niveau de diplôme
+# Calcul de l'écart hommes-femmes
 
-diabete_diplome <- indicateurs_diplome |>
+ecart_diabete_sexe_age <- focus_diabete_age_sexe |>
   filter(
-    Indicateur == "Diabète déclaré"
+    sexe %in% c(
+      "Hommes",
+      "Femmes"
+    )
   ) |>
-  transmute(
-    dimension = "diplome",
-    dimension_label = "Niveau de diplôme",
-    groupe = Diplôme,
-    Estimation,
-    ic_inf,
-    ic_sup,
-    Effectif.Brut
-  )
-
-
-# Catégorie socioprofessionnelle
-
-diabete_pcs <- indicateurs_pcs |>
-  filter(
-    Indicateur == "Diabète déclaré"
+  mutate(
+    sexe = as.character(sexe),
+    classe_age = as.character(classe_age)
   ) |>
-  transmute(
-    dimension = "pcs",
-    dimension_label = "Catégorie socioprofessionnelle",
-    groupe = PCS,
-    Estimation,
-    ic_inf,
-    ic_sup,
-    Effectif.Brut
-  )
-
-diabete_social <- bind_rows(
-  diabete_finance,
-  diabete_diplome,
-  diabete_pcs
-)
-
-# 3. Réutilisation de la synthèse
-
-diabete_ecarts_sociaux <- synthese_sociale |>
-  filter(
-    indicateur == "Diabète déclaré"
+  select(
+    sexe,
+    classe_age,
+    estimation
+  ) |>
+  pivot_wider(
+    names_from = sexe,
+    values_from = estimation
+  ) |>
+  mutate(
+    ordre_age = match(
+      classe_age,
+      ordre_age
+    ),
+    
+    ecart_hommes_femmes =
+      Hommes - Femmes
   ) |>
   arrange(
-    desc(abs(ecart))
+    ordre_age
   )
 
 print(
-  diabete_ecarts_sociaux
+  ecart_diabete_sexe_age,
+  n = 6
 )
 
-# 4. Bonus territorial
+# 2. Bonus territorial
 
 # Modèle exploratoire FDep -> diabète
 
@@ -213,7 +182,7 @@ print(
 # 5. Exports pour Dash
 
 write_csv(
-  diabete_age_sexe,
+  focus_diabete_age_sexe,
   file.path(
     processed_dir,
     "focus_diabete_age_sexe.csv"
@@ -221,18 +190,10 @@ write_csv(
 )
 
 write_csv(
-  diabete_social,
+  ecart_diabete_sexe_age,
   file.path(
     processed_dir,
-    "focus_diabete_social.csv"
-  )
-)
-
-write_csv(
-  diabete_ecarts_sociaux,
-  file.path(
-    processed_dir,
-    "focus_diabete_ecarts_sociaux.csv"
+    "focus_diabete_ecart_sexe_age.csv"
   )
 )
 

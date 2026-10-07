@@ -11,8 +11,6 @@ from data import (
     load_profils_clusters,
     load_diabete_age_sexe,
     load_diabete_ecart_sexe_age,
-    load_diabete_social,
-    load_diabete_ecarts_sociaux,
 )
 
 from layout import create_layout
@@ -47,9 +45,6 @@ profils_clusters = load_profils_clusters()
 
 diabete_age_sexe = load_diabete_age_sexe()
 diabete_ecart_sexe_age = load_diabete_ecart_sexe_age()
-diabete_social = load_diabete_social()
-diabete_ecarts_sociaux = load_diabete_ecarts_sociaux()
-
 
 # ============================================================
 # Carte
@@ -71,9 +66,7 @@ app.layout = create_layout(
     profils_clusters,
     map_figure,
     diabete_age_sexe,
-    diabete_social,
     diabete_ecart_sexe_age,
-    diabete_ecarts_sociaux,
 )
 
 
