@@ -1,0 +1,19 @@
+sexe,classe_age,ordre_age,estimation,ic_inf,ic_sup,effectif_brut
+Tous,18-29 ans,1,0.7,0.4,1,6152
+Femmes,18-29 ans,1,NA,NA,NA,3308
+Hommes,18-29 ans,1,NA,NA,NA,2844
+Tous,30-39 ans,2,1.4,1,1.8,5794
+Femmes,30-39 ans,2,1.6,1.1,2.2,3250
+Hommes,30-39 ans,2,1.2,0.7,1.8,2544
+Tous,40-49 ans,3,2.8,2.3,3.3,6234
+Femmes,40-49 ans,3,2.2,1.7,3,3367
+Hommes,40-49 ans,3,3.4,2.6,4.3,2867
+Tous,50-59 ans,4,8.1,7.3,9,6559
+Femmes,50-59 ans,4,6.6,5.5,7.9,3509
+Hommes,50-59 ans,4,9.7,8.4,11,3050
+Tous,60-69 ans,5,13.6,12.5,14.8,6116
+Femmes,60-69 ans,5,11.3,9.8,12.9,3313
+Hommes,60-69 ans,5,16.2,14.5,18.1,2803
+Tous,70-79 ans,6,19.5,17.9,21.1,4085
+Femmes,70-79 ans,6,14,12.2,16.1,2147
+Hommes,70-79 ans,6,26,23.5,28.6,1938

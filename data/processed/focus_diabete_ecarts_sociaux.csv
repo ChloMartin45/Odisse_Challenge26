@@ -1,0 +1,4 @@
+dimension,dimension_label,indicateur,groupe_reference,valeur_reference,groupe_comparaison,valeur_comparaison,ecart,type_comparaison,ecart_absolu
+diplome,Niveau de diplôme,Diabète déclaré,Supérieur au Bac,3.3,Aucun diplôme ou inférieur au Bac,11.5,8.2,categories_ordonnees,8.2
+pcs,Catégorie socioprofessionnelle,Diabète déclaré,Cadres et professions intellectuelles supérieures,4.5,Ouvriers,11,6.5,extremes_observes,6.5
+finance,Situation financière,Diabète déclaré,À l'aise,4.5,Difficultés financières,9.3,4.800000000000001,categories_ordonnees,4.800000000000001

@@ -9,17 +9,38 @@
 
    :root {
 
-    /* Charte Odissé */
+    /* Charte Odissé - couleurs pincipales */
     --navy: #002B59;
     --blue: #114B8A;
     --raspberry: #CA1C60;
 
+    /* Charte Odissé - couleurs secondaires pastel */
     --blue-light: #96BBFF;
     --purple-light: #E8BDF9;
     --pink-light: #FFC1D0;
     --orange-light: #FFD7B6;
     --yellow-light: #F9EECA;
     --green-light: #BAF4D5;
+
+    /* Indicateurs de santé */
+    --health-perceived: #4A84C2;
+    --health-limitation: #CA1C60;
+    --health-diabetes: #EC9955;
+
+    /* Indicateurs territoriaux */
+    --territorial-fdep: #8B6FC0;
+    --territorial-fedi: #C392D8;
+    --territorial-apl: #3EA36D;
+
+    /* Dimensions sociales */
+    --social-finance: #357F57;
+    --social-diplome: #C9A426;
+    --social-pcs: #BD7A44;
+
+    /* Sexe */
+    --sex-all: #7C8DA1;
+    --sex-women: #C74E6C;
+    --sex-men: #114B8A;
 
     /* Couleurs fonctionnelles */
     --background: #F8FAFD;
@@ -783,19 +804,19 @@ p {
     width: 4px;
 
     background:
-        var(--blue-light);
+        var(--health-perceived);
 }
 
 
 .indicator-card:nth-child(2)::before {
     background:
-        var(--purple-light);
+        var(--health-limitation);
 }
 
 
 .indicator-card:nth-child(3)::before {
     background:
-        var(--green-light);
+        var(--health-diabetes);
 }
 
 
@@ -1383,19 +1404,19 @@ p {
 
 .summary-card-finance {
     border-top:
-        4px solid var(--pink-light);
+        4px solid var(--social-finance);
 }
 
 
 .summary-card-diplome {
     border-top:
-        4px solid var(--blue-light);
+        4px solid var(--social-diplome);
 }
 
 
 .summary-card-pcs {
     border-top:
-        4px solid var(--purple-light);
+        4px solid var(--social-pcs);
 }
 
 /* ==========================================================
@@ -2726,6 +2747,21 @@ a:hover {
         translateX(3px);
 }
 
+.transition-section {
+    margin-top: 58px;
+}
+
+.transition-choices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.transition-choice {
+    height: 100%;
+    margin-top: 0;
+}
+
 
 /* ==========================================================
    Notes
@@ -3067,6 +3103,14 @@ a:hover {
     }
 }
 
+/* ----------------------------------------------------------
+   <= 768 px
+   ---------------------------------------------------------- */
+@media (max-width: 768px) {
+    .transition-choices {
+        grid-template-columns: 1fr;
+    }
+}
 
 /* ----------------------------------------------------------
    <= 650 px

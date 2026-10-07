@@ -135,11 +135,14 @@ def register_callbacks(app, regions, finance, diplome, pcs, analyse_regions, rel
         Input("go-to-social", "n_clicks"),
         Input("go-to-territoires", "n_clicks"),
         Input("go-to-profils", "n_clicks"),
+        Input("go-to-diabete", "n_clicks"),
+        Input("go-to-territoires-from-diabete", "n_clicks"),
         
         Input("mobile-go-accueil", "n_clicks"),
         Input("mobile-go-social", "n_clicks"),
         Input("mobile-go-territoires", "n_clicks"),
         Input("mobile-go-profils", "n_clicks"),
+        Input("mobile-go-diabete", "n_clicks"),
         
         prevent_initial_call=True,
     )
@@ -147,21 +150,27 @@ def register_callbacks(app, regions, finance, diplome, pcs, analyse_regions, rel
         go_social,
         go_territoires,
         go_profils,
+        go_diabete,
+        go_territoires_from_diabete,
         mobile_accueil,
         mobile_social,
         mobile_territoires,
         mobile_profils,
+        mobile_diabete,
     ):
         
         navigation = {
             "go-to-social": "social",
             "go-to-territoires": "territoires",
             "go-to-profils": "profils",
+            "go-to-diabete": "diabete",
+            "go-to-territoires-from-diabete": "territoires",
 
             "mobile-go-accueil": "accueil",
             "mobile-go-social": "social",
             "mobile-go-territoires": "territoires",
             "mobile-go-profils": "profils",
+            "mobile-go-diabete": "diabete",
         }
         
         target = navigation.get(ctx.triggered_id)
@@ -182,13 +191,14 @@ def register_callbacks(app, regions, finance, diplome, pcs, analyse_regions, rel
             "social": "1 · Inégalités sociales",
             "territoires": "2 · Territoires & soins",
             "profils": "3 · Profils territoriaux",
+            "diabete" : "Bonus · Focus diabète",
         }
 
         return labels.get(tab, "Navigation")
     
     app.clientside_callback(
         """
-        function(accueil, social, territoires, profils) {
+        function(accueil, social, territoires, profils, diabete) {
 
             const ctx = dash_clientside.callback_context;
 
@@ -212,6 +222,7 @@ def register_callbacks(app, regions, finance, diplome, pcs, analyse_regions, rel
         Input("mobile-go-social", "n_clicks"),
         Input("mobile-go-territoires", "n_clicks"),
         Input("mobile-go-profils", "n_clicks"),
+        Input("mobile-go-diabete", "n_clicks"),
 
         prevent_initial_call=True,
     )

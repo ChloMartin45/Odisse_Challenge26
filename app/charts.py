@@ -6,18 +6,54 @@ import math
 # Identité graphique
 # ============================================================
 
-COLOR_NAVY = "#0B3C5D"        # Structure / titres
-COLOR_HEALTH = "#3A75C4"      # Santé perçue
-COLOR_RASPBERRY = "#C2185B"   # Limitation d'activité
-COLOR_ORANGE = "#F28E2B"      # Diabète déclaré
+    # ============================================================
+    # Indicateurs de santé
+    # ============================================================
 
-COLOR_DEPRIVATION = "#8B6FC0"
+COLOR_HEALTH = "#4A84C2"       # Santé perçue
+COLOR_LIMITATION = "#CA1C60"   # limitation activité
+COLOR_DIABETE = "#EC9955"      # Diabète déclaré
 
+    # ============================================================
+    # Indicateurs territoriaux
+    # ============================================================
+
+COLOR_FDEP = "#884AA0"          # Défavorisation territoriale principale
+COLOR_FEDI = "#C392D8"          # Même famille, plus clair
+COLOR_APL = "#3EA36D"           # Accessibilité aux soins
+
+    # ============================================================
+    # Sexe
+    # ============================================================
+
+COLOR_SEX_ALL = "#7C8DA1"
+COLOR_SEX_WOMEN = "#C74E6C"
+COLOR_SEX_MEN = "#114B8A"
+
+    # ============================================================
+    # Autres dimensions
+    # ============================================================
+
+COLOR_FINANCE = "#357F57"       # Vert
+COLOR_DIPLOME = "#C9A426"       # Ocre
+COLOR_PCS = "#BD7A44"           # Brun
+
+SYMBOL_FINANCE = "circle"
+SYMBOL_DIPLOME = "diamond"
+SYMBOL_PCS = "square"
+
+
+    # ============================================================
+    # Couleurs fonctionnelles
+    # ============================================================
+
+COLOR_NAVY = "#002B59"       # Structure / titres
+COLOR_BLUE = "#114B8A"
 COLOR_GRID = "#E8EDF3"
 COLOR_TEXT = "#17324A"
 COLOR_MUTED = "#627487"
-
 PLOT_BACKGROUND = "rgba(0,0,0,0)"
+
 
 SOCIAL_STYLES = {
     "Santé perçue bonne ou très bonne": {
@@ -26,12 +62,12 @@ SOCIAL_STYLES = {
     },
 
     "Limitation d'activité": {
-        "color": COLOR_RASPBERRY,
+        "color": COLOR_LIMITATION,
         "symbol": "diamond",
     },
 
     "Diabète déclaré": {
-        "color": COLOR_ORANGE,
+        "color": COLOR_DIABETE,
         "symbol": "square",
     },
 }
@@ -72,19 +108,19 @@ def create_region_profile(regions, region_name):
             "colonne": "z_fdep",
             "label": "FDep",
             "label_complet": "Défavorisation territoriale — FDep",
-            "color": COLOR_DEPRIVATION,
+            "color": COLOR_FDEP,
         },
         {
             "colonne": "z_fedi",
             "label": "F-EDI",
             "label_complet": "Défavorisation territoriale — F-EDI",
-            "color": COLOR_DEPRIVATION,
+            "color": COLOR_FEDI,
         },
         {
             "colonne": "z_apl",
             "label": "Accessibilité faible",
             "label_complet": "Faible accessibilité aux médecins généralistes",
-            "color": COLOR_NAVY,
+            "color": COLOR_APL,
         },
         {
             "colonne": "z_sante",
@@ -96,13 +132,13 @@ def create_region_profile(regions, region_name):
             "colonne": "z_limitation",
             "label": "Limitations habituelles",
             "label_complet": "Limitation dans les activités habituelles",
-            "color": COLOR_RASPBERRY,
+            "color": COLOR_LIMITATION,
         },
         {
             "colonne": "z_diabete",
             "label": "Diabète déclaré",
             "label_complet": "Diabète déclaré",
-            "color": COLOR_ORANGE,
+            "color": COLOR_DIABETE,
         },
     ]
 
@@ -758,6 +794,348 @@ def create_social_chart(data, variable):
 
     return fig
 
+# ============================================================
+# Focus diabète — âge et sexe
+# ============================================================
+
+def create_diabetes_age_sex_chart(data):
+    """
+    Visualise la part de personnes déclarant un diabète
+    selon l'âge et le sexe.
+
+    Les estimations non diffusées restent manquantes
+    et ne sont pas représentées.
+    """
+
+    data_plot = data.copy()
+
+    # ========================================================
+    # Ordre des classes d'âge
+    # ========================================================
+
+    data_plot = data_plot.sort_values(
+        [
+            "ordre_age",
+            "sexe",
+        ]
+    )
+
+    ordre_age = (
+        data_plot[
+            ["classe_age", "ordre_age"]
+        ]
+        .drop_duplicates()
+        .sort_values("ordre_age")
+        ["classe_age"]
+        .tolist()
+    )
+
+
+    # ========================================================
+    # Configuration des trois séries
+    # ========================================================
+
+    styles = {
+
+        "Tous": {
+            "label": "Ensemble",
+            "color": COLOR_SEX_ALL,
+            "symbol": "circle",
+            "dash": "dot",
+            "width": 1.8,
+            "opacity": 0.75,
+        },
+
+        "Femmes": {
+            "label": "Femmes",
+            "color": COLOR_SEX_WOMEN,
+            "symbol": "diamond",
+            "dash": "solid",
+            "width": 2.7,
+            "opacity": 1,
+        },
+
+        "Hommes": {
+            "label": "Hommes",
+            "color": COLOR_SEX_MEN,
+            "symbol": "circle",
+            "dash": "solid",
+            "width": 2.7,
+            "opacity": 1,
+        },
+    }
+
+
+    # ========================================================
+    # Figure
+    # ========================================================
+
+    fig = go.Figure()
+
+
+    # ========================================================
+    # Séries
+    # ========================================================
+
+    for sexe in [
+        "Tous",
+        "Femmes",
+        "Hommes",
+    ]:
+
+        subset = data_plot[
+            data_plot["sexe"] == sexe
+        ].copy()
+
+        if subset.empty:
+            continue
+
+        style = styles[sexe]
+
+        fig.add_trace(
+            go.Scatter(
+
+                x=subset["classe_age"],
+
+                y=subset["estimation"],
+
+                mode="lines+markers",
+
+                name=style["label"],
+
+                connectgaps=False,
+
+                line=dict(
+                    color=style["color"],
+                    width=style["width"],
+                    dash=style["dash"],
+                ),
+
+                marker=dict(
+                    color=style["color"],
+                    symbol=style["symbol"],
+                    size=10,
+
+                    line=dict(
+                        color="white",
+                        width=1.5,
+                    ),
+                ),
+
+                opacity=style["opacity"],
+
+                error_y=dict(
+                    type="data",
+                    symmetric=False,
+
+                    array=(
+                        subset["ic_sup"]
+                        - subset["estimation"]
+                    ),
+
+                    arrayminus=(
+                        subset["estimation"]
+                        - subset["ic_inf"]
+                    ),
+
+                    color=style["color"],
+                    thickness=1.2,
+                    width=4,
+                ),
+
+                customdata=list(
+                    zip(
+                        subset["ic_inf"],
+                        subset["ic_sup"],
+                        subset["effectif_brut"],
+                    )
+                ),
+
+                hovertemplate=(
+                    "<b>%{fullData.name}</b><br>"
+                    "%{x}<br><br>"
+                    "<b>%{y:.1f} %</b><br>"
+                    "IC 95 % : "
+                    "%{customdata[0]:.1f} – "
+                    "%{customdata[1]:.1f} %<br>"
+                    "Effectif brut : %{customdata[2]:,.0f}"
+                    "<extra></extra>"
+                ),
+            )
+        )
+
+
+    # ========================================================
+    # Mise en forme
+    # ========================================================
+
+    fig.update_layout(
+
+        dragmode=False,
+
+        title=dict(
+            text=(
+                "Avec l’âge, le diabète déclaré augmente "
+                "plus fortement chez les hommes"
+            ),
+
+            x=0,
+            xanchor="left",
+
+            font=dict(
+                family="Outfit, Arial, sans-serif",
+                size=18,
+                color=COLOR_NAVY,
+            ),
+        ),
+
+        font=dict(
+            family="Outfit, Arial, sans-serif",
+            color=COLOR_TEXT,
+            size=13,
+        ),
+
+        plot_bgcolor=PLOT_BACKGROUND,
+        paper_bgcolor=PLOT_BACKGROUND,
+
+        height=500,
+
+        margin=dict(
+            l=70,
+            r=30,
+            t=130,
+            b=100,
+        ),
+
+        hovermode="closest",
+
+        hoverlabel=dict(
+            bgcolor="white",
+            bordercolor="#D5DEE8",
+
+            font=dict(
+                family="Outfit, Arial, sans-serif",
+                color=COLOR_TEXT,
+            ),
+        ),
+
+        legend=dict(
+
+            orientation="h",
+
+            yanchor="bottom",
+            y=1.02,
+
+            xanchor="left",
+            x=0,
+
+            title=None,
+
+            font=dict(
+                size=12,
+                color=COLOR_TEXT,
+            ),
+
+            bgcolor="rgba(0,0,0,0)",
+
+            itemclick=False,
+            itemdoubleclick=False,
+        ),
+    )
+
+
+    # ========================================================
+    # Axe X
+    # ========================================================
+
+    fig.update_xaxes(
+
+        fixedrange=True,
+
+        title=dict(
+            text="Classe d'âge",
+
+            font=dict(
+                size=13,
+                color=COLOR_MUTED,
+            ),
+
+            standoff=18,
+        ),
+
+        categoryorder="array",
+        categoryarray=ordre_age,
+
+        showgrid=False,
+
+        showline=True,
+        linecolor="#D5DEE8",
+        linewidth=1,
+
+        tickfont=dict(
+            color=COLOR_TEXT,
+            size=11,
+        ),
+
+        ticks="",
+    )
+
+
+    # ========================================================
+    # Axe Y
+    # ========================================================
+
+    max_value = data_plot["ic_sup"].max(
+        skipna=True
+    )
+
+    y_max = math.ceil(
+        max_value / 5
+    ) * 5
+
+
+    fig.update_yaxes(
+
+        fixedrange=True,
+
+        title=dict(
+            text="Population déclarant un diabète (%)",
+
+            font=dict(
+                size=13,
+                color=COLOR_MUTED,
+            ),
+
+            standoff=12,
+        ),
+
+        range=[
+            0,
+            y_max,
+        ],
+
+        dtick=5,
+
+        ticksuffix=" %",
+
+        showgrid=True,
+        gridcolor=COLOR_GRID,
+        gridwidth=1,
+
+        zeroline=False,
+        showline=False,
+
+        tickfont=dict(
+            color=COLOR_TEXT,
+            size=12,
+        ),
+
+        ticks="",
+    )
+    
+    return fig
+
+
 def create_fdep_health_chart(regions, relations, indicateur):
     """
     Visualise la relation entre la défavorisation territoriale
@@ -784,7 +1162,7 @@ def create_fdep_health_chart(regions, relations, indicateur):
                 "Les limitations progressent avec la défavorisation, "
                 "mais de façon moins régulière"
             ),
-            "color": COLOR_RASPBERRY,
+            "color": COLOR_LIMITATION,
         },
 
         "diabete": {
@@ -795,7 +1173,7 @@ def create_fdep_health_chart(regions, relations, indicateur):
                 "Le diabète déclaré est plus fréquent "
                 "dans les régions plus défavorisées"
             ),
-            "color": COLOR_ORANGE,
+            "color": COLOR_DIABETE,
         },
     }
 
@@ -1263,7 +1641,7 @@ def create_apl_comparison_chart(relations):
             marker=dict(
                 size=12,
                 symbol="circle",
-                color=COLOR_HEALTH,
+                color=COLOR_APL,
                 line=dict(
                     color="white",
                     width=1.5,
@@ -1305,7 +1683,7 @@ def create_apl_comparison_chart(relations):
             marker=dict(
                 size=12,
                 symbol="diamond",
-                color=COLOR_RASPBERRY,
+                color=COLOR_FDEP,
                 line=dict(
                     color="white",
                     width=1.5,

@@ -1,0 +1,13 @@
+dimension,dimension_label,groupe,estimation,ic_inf,ic_sup,effectif_brut
+finance,Situation financière,À l'aise,4.5,3.7,5.4,4854
+finance,Situation financière,C'est juste,8.1,7.4,8.7,12007
+finance,Situation financière,Difficultés financières,9.3,8.3,10.4,5589
+finance,Situation financière,Ça va,6.2,5.7,6.7,12490
+diplome,Niveau de diplôme,Bac,5,4.5,5.6,8332
+diplome,Niveau de diplôme,Aucun diplôme ou inférieur au Bac,11.5,10.8,12.3,11885
+diplome,Niveau de diplôme,Supérieur au Bac,3.3,2.9,3.6,14723
+pcs,Catégorie socioprofessionnelle,"Agriculteurs, artisans, commerçants, chefs d’entreprise",7.5,6.3,8.9,2545
+pcs,Catégorie socioprofessionnelle,Cadres et professions intellectuelles supérieures,4.5,4,5.2,6858
+pcs,Catégorie socioprofessionnelle,Employés,7.4,6.7,8.1,8779
+pcs,Catégorie socioprofessionnelle,Ouvriers,11,9.9,12.1,5357
+pcs,Catégorie socioprofessionnelle,Professions intermédiaires,5.9,5.3,6.5,9057

@@ -1,8 +1,8 @@
 # Odissé Dataviz Challenge 2026 - Inégalités sociales et territoriales de santé
 
 **Équipe :** Chloé Martin  
-**Mail de contact :** [chloe_martin45@outlook.com](mailto:chloe_martin45@outlook.com) 
-**Défi :** Défi 3 — Inégalités sociales et territoriales de santé
+**Mail de contact :** mailto:chloe_martin45@outlook.com   
+**Défi :** Défi 3 — Inégalités sociales et territoriales de santé  
 
 ## Notre question
 
@@ -15,7 +15,11 @@ La visualisation propose un parcours en trois étapes :
 
 ## Notre visualisation
 
-**Lien vers l’application :** [à compléter]
+**Lien vers l’application :** https://odisse-dataviz-challenge26-sante.onrender.com
+
+L’application est hébergée gratuitement via Render. Un léger temps de chargement peut être nécessaire lors de la première ouverture après une période d’inactivité. 
+
+La version mobile est fonctionnelle, mais l’affichage est plus confortable sur ordinateur.
 
 La production prend la forme d’une **application web interactive développée avec Dash et Plotly**.
 
