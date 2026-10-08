@@ -290,8 +290,4 @@ L’application est ensuite accessible à l’adresse indiquée dans le terminal
 
 ## Licence
 
-Le code source de ce projet est publié sous **licence MIT**.
-
-Les contenus textuels et visuels produits dans le cadre du projet sont mis à disposition sous **Creative Commons CC-BY 4.0**.
-
-Les données réutilisées conservent les licences définies par leurs producteurs, notamment la **Licence Ouverte 2.0** pour les données issues d’Odissé.
+Le code source de ce projet est publié sous **licence MIT**. 
