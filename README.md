@@ -1,7 +1,7 @@
 # Odissé Dataviz Challenge 2026 - Inégalités sociales et territoriales de santé
 
 **Équipe :** Chloé Martin  
-**Mail de contact :** mailto:chloe_martin45@outlook.com   
+**Mail de contact :** [chloe_martin45@outlook.com](mailto:chloe_martin45@outlook.com)  
 **Défi :** Défi 3 — Inégalités sociales et territoriales de santé  
 
 ## Notre question
@@ -50,6 +50,9 @@ L’objectif n’est pas d’établir un classement des régions, mais de montre
 | Santé publique France — Odissé | French European Deprivation Index — F-EDI 2021 | https://odisse.santepubliquefrance.fr/explore/assets/french-european-deprivation-index-f-edi-2021-par-commune/ |
 | Observatoire des territoires | Accessibilité potentielle localisée (APL) aux médecins généralistes — 2023 | https://www.observatoire-des-territoires.gouv.fr/accessibilite-potentielle-localisee-apl-aux-medecins-generalistes |
 | Insee | Populations communales 2023 | https://www.insee.fr/fr/statistiques/8680726 |
+| IGN / Insee — via Grégoire David | Contours géographiques des communes françaises — GeoJSON (2018) | https://github.com/gregoiredavid/france-geojson |
+
+Les contours géographiques des communes françaises, issus du dépôt France GeoJSON de Grégoire David, sont utilisés pour les représentations cartographiques. Leur millésime peut différer de celui des données statistiques mobilisées.
 
 **Source de contexte pour l’introduction :** les chiffres nationaux mentionnés au début de l’application, notamment les 68 % d’adultes déclarant une bonne ou très bonne santé et les 26 % déclarant une limitation dans leurs activités habituelles depuis au moins six mois, proviennent de la publication *Santé générale — Baromètre de Santé publique France 2024* :  
 https://www.santepubliquefrance.fr/sites/default/files/rdd/document/907125_spf00006377.pdf
@@ -291,3 +294,7 @@ L’application est ensuite accessible à l’adresse indiquée dans le terminal
 ## Licence
 
 Le code source de ce projet est publié sous **licence MIT**. 
+
+Les contenus textuels et les visualisations originales sont mis à disposition sous **licence Creative Commons CC BY 4.0**.
+
+Les données réutilisées conservent les licences de leurs producteurs respectifs, notamment la **Licence Ouverte** pour les données issues d'Odissé et les contours géographiques IGN/INSEE diffusés via le projet [France GeoJSON](https://github.com/gregoiredavid/france-geojson).
