@@ -1,0 +1,206 @@
+---
+title: "Exploration des relations entre démographie, défavorisation et santé"
+subtitle: "Analyse exploratoire des 13 régions métropolitaines"
+format: html
+---
+
+```{r}
+# Packages
+library(tidyverse)
+library(car)
+
+# Chemins
+processed_dir <- "../data/processed"
+
+# Importation des données consolidées
+analyse_regions_v2 <- read_csv(
+  file.path(processed_dir, "analyse_regions_v2.csv"),
+  col_types = cols(
+    code_region = col_character(),
+    .default = col_guess()
+  )
+)
+
+# Contrôle
+stopifnot(
+  nrow(analyse_regions_v2) == 13,
+  !anyNA(analyse_regions_v2$part_pop_60_79)
+)
+````
+
+# Analyse des associations entre âge et santé
+
+```{r}
+variables_sante <- c(
+  "diabete_declare",
+  "limitation_activite",
+  "sante_percue"
+)
+```
+
+```{r}
+correlations_age <- map_dfr(
+  variables_sante,
+  function(variable) {
+    
+    test <- cor.test(
+      analyse_regions_v2$part_pop_60_79,
+      analyse_regions_v2[[variable]],
+      method = "pearson"
+    )
+    
+    tibble(
+      indicateur = variable,
+      correlation = unname(test$estimate),
+      p_value = test$p.value
+    )
+  }
+)
+```
+
+
+```{r}
+print(correlations_age)
+```
+
+
+# Graphique âge et diabète
+
+```{r}
+ggplot(
+  analyse_regions_v2,
+  aes(
+    x = part_pop_60_79,
+    y = diabete_declare
+  )
+) +
+  geom_point(
+    size = 3,
+    color = "#114B8A"
+  ) +
+  geom_smooth(
+    method = "lm",
+    se = TRUE,
+    color = "#CA1C60"
+  ) +
+  labs(
+    title = "Le vieillissement régional est-il associé au diabète ?",
+    subtitle = "Analyse exploratoire des 13 régions métropolitaines",
+    x = "Part des 60–79 ans parmi les 18–79 ans (%)",
+    y = "Diabète déclaré (%)",
+    caption = paste(
+      "Sources : Insee RP 2023,",
+      "Baromètre Santé publique France 2024"
+    )
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+# Modèles exploratoires - démographie et défavorisation
+
+## Diabète : modèle initial
+
+```{r}
+modele_diabete_fdep <- lm(
+  diabete_declare ~ fdep_pondere,
+  data = analyse_regions_v2
+)
+```
+
+## Diabète : modèle enrichi
+
+```{r}
+modele_diabete_age_fdep <- lm(
+  diabete_declare ~ fdep_pondere + part_pop_60_79,
+  data = analyse_regions_v2
+)
+```
+
+## Limitation : modèle initial
+
+```{r}
+modele_limitation_age <- lm(
+  limitation_activite ~ part_pop_60_79,
+  data = analyse_regions_v2
+)
+```
+
+## Limitation : modèle enrichi
+
+```{r}
+modele_limitation_age_fdep <- lm(
+  limitation_activite ~ part_pop_60_79 + fdep_pondere,
+  data = analyse_regions_v2
+)
+```
+
+## Affichage des résultats
+
+```{r}
+summary(modele_diabete_fdep)
+summary(modele_diabete_age_fdep)
+```
+
+```{r}
+summary(modele_limitation_age)
+summary(modele_limitation_age_fdep)
+```
+
+
+# Relation entre structure démographique et défavorisation
+
+```{r}
+cor.test(
+  analyse_regions_v2$part_pop_60_79,
+  analyse_regions_v2$fdep_pondere,
+  method = "pearson"
+)
+```
+
+# Vérification de la multicolinéarité
+
+```{r}
+vif(modele_diabete_age_fdep)
+vif(modele_limitation_age_fdep)
+```
+
+
+# Influence des observations
+
+```{r}
+influence_diabete <- analyse_regions_v2 %>%
+  mutate(
+    distance_cook = cooks.distance(modele_diabete_age_fdep),
+    levier = hatvalues(modele_diabete_age_fdep)
+  ) %>%
+  select(
+    region,
+    distance_cook,
+    levier
+  ) %>%
+  arrange(desc(distance_cook))
+
+print(influence_diabete, n = 13)
+```
+
+
+```{r}
+diabete_age_sexe <- read_csv(
+  file.path(processed_dir, "diabete_age_sexe.csv"),
+  show_col_types = FALSE
+)
+```
+
+```{r}
+diabete_age_sexe %>%
+  select(
+    Sexe,
+    `Classe d'âge`,
+    Estimation,
+    ic_inf,
+    ic_sup
+  ) %>%
+  arrange(`Classe d'âge`, Sexe) %>%
+  print(n = Inf)
+```
+
